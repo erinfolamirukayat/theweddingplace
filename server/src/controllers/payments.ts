@@ -8,7 +8,7 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
 
 // Initialize payment
-export const initiatePayment = async (req: Request, res: Response) => {
+export const initiatePayment = async (req: Request, res: Response): Promise<void> => {
     try {
         const { registry_item_id, name, email, amount, message } = req.body;
 
@@ -22,14 +22,16 @@ export const initiatePayment = async (req: Request, res: Response) => {
         );
 
         if (registryItemResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Registry item not found' });
+            res.status(404).json({ error: 'Registry item not found' });
+            return;
         }
 
         const registryItem = registryItemResult.rows[0];
         const remainingAmount = registryItem.price - registryItem.contributions_received;
 
         if (amount > remainingAmount) {
-            return res.status(400).json({ error: 'Amount exceeds remaining balance' });
+            res.status(400).json({ error: 'Amount exceeds remaining balance' });
+            return;
         }
 
         // Initialize Paystack transaction
@@ -60,7 +62,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
 };
 
 // Verify payment
-export const verifyPayment = async (req: Request, res: Response) => {
+export const verifyPayment = async (req: Request, res: Response): Promise<void> => {
     try {
         const { reference } = req.query;
 
@@ -120,7 +122,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
 };
 
 // Get payment history
-export const getPaymentHistory = async (req: Request, res: Response) => {
+export const getPaymentHistory = async (req: Request, res: Response): Promise<void> => {
     try {
         const { registryItemId } = req.params;
         
