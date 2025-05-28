@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { getConfig } from '../config';
+const API_BASE = getConfig().apiUrl;
 import { getToken } from './authApi';
 
 // Helper for handling responses
