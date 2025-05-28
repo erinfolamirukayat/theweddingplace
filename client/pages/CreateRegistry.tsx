@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarIcon, HeartIcon, SaveIcon, ImageIcon, XIcon, AlertCircleIcon } from 'lucide-react';
 import { createRegistry as apiCreateRegistry, addRegistryPicture } from '../utils/api';
 import { useNotification } from '../components/Layout';
+import { getConfig } from '../config';
 
 const MAX_UPLOADS = 10;
 const MAX_TOTAL = 20;
@@ -118,7 +119,7 @@ const CreateRegistry = () => {
         if (pic instanceof File) {
           const formDataFile = new FormData();
           formDataFile.append('image', pic);
-          const res = await fetch('http://localhost:5000/api/upload/image', {
+          const res = await fetch(`${getConfig().apiUrl}/upload/image`, {
             method: 'POST',
             body: formDataFile,
           });

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getRegistryByShareUrl, getRegistryPictures } from '../utils/api';
 import { Dialog } from '@headlessui/react';
+import { getConfig } from '../config';
 
 interface Product {
   id: number;
@@ -50,12 +51,12 @@ const ShareRegistry = () => {
       const pics = await getRegistryPictures(reg.id);
       setPictures(pics.map((pic: any) => pic.image_url));
       // Fetch registry items
-      const itemsRes = await fetch(`http://localhost:5000/api/registries/${reg.id}/items`);
+      const itemsRes = await fetch(`${getConfig().apiUrl}/registries/${reg.id}/items`);
       if (!itemsRes.ok) throw new Error('Failed to fetch items');
       const itemsData = await itemsRes.json();
       setItems(itemsData.filter((item: RegistryItem) => !item.is_fully_funded));
       // Fetch products
-      const prodsRes = await fetch('http://localhost:5000/api/products');
+      const prodsRes = await fetch(`${getConfig().apiUrl}/products`);
       const prods = await prodsRes.json();
       setProducts(prods);
     } catch (err: any) {

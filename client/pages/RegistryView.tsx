@@ -5,6 +5,7 @@ import { getRegistryById as apiGetRegistryById, getProducts, getRegistryPictures
 import { Dialog } from '@headlessui/react';
 import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useNotification } from '../components/Layout';
+import { getConfig } from '../config';
 
 const RegistryView = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,7 +51,7 @@ const RegistryView = () => {
     setItemsError(null);
     try {
       // Fetch registry items from backend
-      const res = await fetch(`http://localhost:5000/api/registries/${registryId}/items`);
+      const res = await fetch(`${getConfig().apiUrl}/registries/${registryId}/items`);
       if (!res.ok) throw new Error('Failed to fetch items');
       const data = await res.json();
       setItems(data);
@@ -93,7 +94,7 @@ const RegistryView = () => {
     const formData = new FormData();
     formData.append('image', selectedFile);
     try {
-      const res = await fetch('http://localhost:5000/api/upload/image', {
+      const res = await fetch(`${getConfig().apiUrl}/upload/image`, {
         method: 'POST',
         body: formData,
       });
@@ -195,7 +196,7 @@ const RegistryView = () => {
                     setAddLoading(true);
                     setAddError(null);
                     try {
-                      const res = await fetch(`http://localhost:5000/api/registries/${registry.id}/items`, {
+                      const res = await fetch(`${getConfig().apiUrl}/registries/${registry.id}/items`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ product_id: selectedProductId, quantity }),

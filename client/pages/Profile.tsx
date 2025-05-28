@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../components/Layout';
+import { getConfig } from '../config';
 
 const Profile = () => {
   const { user, token } = useAuth();
@@ -16,7 +17,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (user && token) {
-      fetch(`http://localhost:5000/api/auth/users/me`, {
+      fetch(`${getConfig().apiUrl}/auth/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then(res => res.json())
@@ -41,7 +42,7 @@ const Profile = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/users/me`, {
+      const res = await fetch(`${getConfig().apiUrl}/auth/users/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

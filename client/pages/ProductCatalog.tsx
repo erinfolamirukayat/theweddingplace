@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SearchIcon } from 'lucide-react';
 import { getProducts } from '../utils/api';
 import { Dialog } from '@headlessui/react';
+import { getConfig } from '../config';
 
 interface Product {
   id: number;
@@ -51,7 +52,7 @@ const ProductCatalog = () => {
 
   const fetchRegistryItems = async (regId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/registries/${regId}/items`);
+      const response = await fetch(`${getConfig().apiUrl}/registries/${regId}/items`);
       if (!response.ok) throw new Error('Failed to fetch registry items');
       const items = await response.json();
       setAddedItems(new Set(items.map((item: any) => item.product_id)));
@@ -76,7 +77,7 @@ const ProductCatalog = () => {
     setAddingToRegistry(selectedProduct.id);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5000/api/registries/${latestRegistryId}/items`, {
+      const response = await fetch(`${getConfig().apiUrl}/registries/${latestRegistryId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_id: selectedProduct.id, quantity }),

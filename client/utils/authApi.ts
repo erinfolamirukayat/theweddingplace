@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:5000/api/auth';
+import { getConfig } from '../config';
+const API_BASE = `${getConfig().apiUrl}/auth`;
 
 export async function register(email: string, password: string, first_name: string, last_name: string, how_heard: string) {
   const res = await fetch(`${API_BASE}/register`, {
