@@ -17,7 +17,10 @@ CREATE TABLE registries (
     wedding_date DATE NOT NULL,
     story TEXT,
     share_url VARCHAR(255) UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    wedding_city VARCHAR(255),
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    phone VARCHAR(30)
 );
 
 -- Create registry_items table
@@ -51,21 +54,12 @@ CREATE TABLE registry_pictures (
 );
 
 -- Create users table
-DROP TABLE IF EXISTS users;
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Migration: Add new registration fields to users table
-ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(30);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS how_heard VARCHAR(255);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS wedding_city VARCHAR(255);
-
--- Migration: Add wedding_city to registries table
-ALTER TABLE registries ADD COLUMN IF NOT EXISTS wedding_city VARCHAR(255); 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    how_heard VARCHAR(255),
+); 
