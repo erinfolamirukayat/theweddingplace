@@ -6,10 +6,14 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'public/_redirects',
+          src: 'public/_redirects', // <-- updated path
           dest: '.' // copy to dist root
         }
       ]
     })
-  ]
+  ],
+  build: {
+    outDir: '../dist', // adjust if your build output is elsewhere
+    emptyOutDir: true
+  }
 });
