@@ -3,7 +3,7 @@ const config = {
     apiUrl: 'http://localhost:5000/api'
   },
   production: {
-    apiUrl: 'https://theweddingplace.onrender.com/api'
+    apiUrl: 'https://api.blissandgifts.co/api'
   }
 };
 
