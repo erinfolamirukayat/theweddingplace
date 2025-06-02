@@ -4,6 +4,7 @@ import { SearchIcon } from 'lucide-react';
 import { getProducts } from '../utils/api';
 import { Dialog } from '@headlessui/react';
 import { getConfig } from '../config';
+import { useAuth } from '../context/AuthContext';
 
 interface Product {
   id: number;
@@ -31,6 +32,7 @@ const ProductCatalog = () => {
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchProducts();
@@ -62,6 +64,10 @@ const ProductCatalog = () => {
   };
 
   const handleAddToRegistry = (product: Product) => {
+    if (!user) {
+      navigate('/login', { state: { from: '/catalog' } });
+      return;
+    }
     setSelectedProduct(product);
     setQuantity(1);
     setShowQuantityModal(true);

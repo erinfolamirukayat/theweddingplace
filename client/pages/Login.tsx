@@ -12,7 +12,7 @@ const Login = () => {
   const location = useLocation();
 
   // If redirected, show a message
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as any)?.from || '/';
   const showDeniedMsg = Boolean((location.state as any)?.from);
 
   const handleSubmit = async (e: React.FormEvent) => {
