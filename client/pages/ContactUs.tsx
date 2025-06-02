@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const WHATSAPP_NUMBER = '2348012345678'; // Replace with your WhatsApp number
-const EMAIL_ADDRESS = 'support@afriwed.com'; // Replace with your support email
+const EMAIL_ADDRESS = 'support@blissgift.com'; // Replace with your support email
 
 const ContactUs = () => {
   const [form, setForm] = useState({ name: '', contact: '', message: '' });

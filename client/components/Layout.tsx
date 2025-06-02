@@ -37,13 +37,13 @@ const Layout = () => {
         <footer className="bg-[#2C1810] text-white py-8 mt-12">
           <div className="container mx-auto px-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">AfriWed Registry</h3>
+              <h3 className="text-lg font-semibold mb-2">BlissGift Registry</h3>
               <p className="text-sm opacity-75">
                 Celebrating African Unions with Meaningful Gifts
               </p>
               <div className="mt-4 space-y-1">
                 <div>WhatsApp: <a href="https://wa.me/2348012345678" className="underline text-[#B8860B]" target="_blank" rel="noopener noreferrer">+234 801 234 5678</a></div>
-                <div>Email: <a href="mailto:support@afriwed.com" className="underline text-[#B8860B]">support@afriwed.com</a></div>
+                <div>Email: <a href="mailto:support@blissgift.com" className="underline text-[#B8860B]">support@blissgift.com</a></div>
               </div>
             </div>
           </div>
