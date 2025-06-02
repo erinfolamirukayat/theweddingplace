@@ -33,6 +33,8 @@ const ProductCatalog = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { user } = useAuth();
+  const PRODUCTS_PER_PAGE = 30;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchProducts();
@@ -107,6 +109,12 @@ const ProductCatalog = () => {
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
@@ -145,7 +153,7 @@ const ProductCatalog = () => {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-        {filteredProducts.map((product) => (
+        {paginatedProducts.map((product) => (
           <div key={product.id} className="group">
             <div className="relative w-full h-64">
               <img
@@ -186,6 +194,27 @@ const ProductCatalog = () => {
       {filteredProducts.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">No products found matching your search.</p>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-8 space-x-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
 
