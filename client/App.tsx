@@ -27,6 +27,7 @@ export function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="dashboard" element={<Dashboard />} />
           </Route>
+          <Route path="catalog" element={<ProductCatalog />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/share/:shareUrl" element={<ShareRegistry />} />
           <Route path="/login" element={<Login />} />
