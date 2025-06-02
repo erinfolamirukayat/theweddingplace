@@ -37,7 +37,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center">
             <div className="h-8 w-8 text-[#B8860B]" />
             <span className="ml-2 text-xl font-bold text-[#2C1810]">
-              AfriWed Registry
+              BlissGifts
             </span>
           </Link>
           <nav className="flex space-x-4 items-center">
