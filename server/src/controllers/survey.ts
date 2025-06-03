@@ -23,7 +23,8 @@ export const submitSurvey = async (req: Request, res: Response): Promise<void> =
 
         // Validation for required fields
         if (!name || !email || !age_range || !relationship_status || !wedding_planning_status || !registry_usefulness || !would_use_platform || !preferred_shopping_method || !open_to_conversation) {
-            return res.status(400).json({ error: 'Please fill in all required fields.' });
+            res.status(400).json({ error: 'Please fill in all required fields.' });
+            return;
         }
 
         const query = `INSERT INTO survey_responses (
