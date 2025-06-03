@@ -13,7 +13,6 @@ const Login = () => {
 
   // If redirected, show a message
   const from = (location.state as any)?.from || '/';
-  const showDeniedMsg = Boolean((location.state as any)?.from);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +31,6 @@ const Login = () => {
   return (
     <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-      {showDeniedMsg && (
-        <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded text-center">
-          Please log in to access that page.
-        </div>
-      )}
       <form onSubmit={handleSubmit}>
         <label className="block mb-2 font-medium">Email</label>
         <input
