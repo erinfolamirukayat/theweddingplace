@@ -62,4 +62,25 @@ CREATE TABLE users (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     how_heard VARCHAR(255),
+);
+
+-- Create survey_responses table
+CREATE TABLE survey_responses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255),
+    age_range VARCHAR(50),
+    relationship_status VARCHAR(50),
+    wedding_planning_status VARCHAR(50),
+    received_unwanted_gifts VARCHAR(50),
+    known_registry_platforms TEXT,
+    registry_usefulness VARCHAR(50),
+    would_use_platform VARCHAR(50),
+    desired_gifts TEXT,
+    preferred_shopping_method VARCHAR(50),
+    other_shopping_method TEXT,
+    desired_features TEXT,
+    open_to_conversation VARCHAR(50),
+    contact_info TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ); 

@@ -43,4 +43,24 @@ export interface RegistryPicture {
     registry_id: number;
     image_url: string;
     created_at: Date;
+}
+
+export interface SurveyResponse {
+    id: number;
+    name?: string;
+    email?: string;
+    age_range?: string;
+    relationship_status?: string;
+    wedding_planning_status?: string;
+    received_unwanted_gifts?: string;
+    known_registry_platforms?: string;
+    registry_usefulness?: string;
+    would_use_platform?: string;
+    desired_gifts?: string;
+    preferred_shopping_method?: string;
+    other_shopping_method?: string;
+    desired_features?: string;
+    open_to_conversation?: string;
+    contact_info?: string;
+    created_at: Date;
 } 

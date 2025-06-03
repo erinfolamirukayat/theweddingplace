@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 import HowItWorks from './pages/HowItWorks';
 import Contact from './pages/ContactUs';
+import Survey from './pages/Survey';
 export function App() {
   return <AuthProvider>
     <BrowserRouter>
@@ -33,7 +34,7 @@ export function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />
         </Route>
-        
+        <Route path="/survey" element={<Survey />} />
       </Routes>
     </BrowserRouter>
   </AuthProvider>;
