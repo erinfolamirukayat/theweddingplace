@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getConfig } from '../config';
 
 const BANNER_IMAGE =
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80'; // Couple image from Unsplash
@@ -43,6 +44,7 @@ const Survey = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const totalPages = 4;
   const progress = (currentPage / totalPages) * 100;
@@ -55,22 +57,61 @@ const Survey = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
-      const res = await fetch('/api/survey', {
+      console.log('Submitting survey data:', form);
+      const response = await fetch(`${getConfig().apiUrl}/survey`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Failed to submit survey');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Survey submission failed:', errorData);
+        throw new Error(errorData.error || 'Failed to submit survey');
+      }
+
+      const data = await response.json();
+      console.log('Survey submission response:', data);
       setSubmitted(true);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err) {
+      console.error('Survey submission error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to submit survey');
     } finally {
       setLoading(false);
     }
   };
 
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const nextPage = () => {
+    let missing: string[] = [];
+    if (currentPage === 1) {
+      if (!form.name) missing.push('name');
+      if (!form.email) missing.push('email');
+      if (!form.age_range) missing.push('age_range');
+      if (!form.relationship_status) missing.push('relationship_status');
+      if (!form.wedding_planning_status) missing.push('wedding_planning_status');
+    }
+    if (currentPage === 3) {
+      if (!form.registry_usefulness) missing.push('registry_usefulness');
+      if (!form.would_use_platform) missing.push('would_use_platform');
+      if (!form.preferred_shopping_method) missing.push('preferred_shopping_method');
+    }
+    if (currentPage === 4) {
+      if (!form.open_to_conversation) missing.push('open_to_conversation');
+    }
+    if (missing.length > 0) {
+      setError('Please fill in all required fields.');
+      setMissingFields(missing);
+      return;
+    }
+    setError('');
+    setMissingFields([]);
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
   const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   const renderPage = () => {
@@ -80,34 +121,34 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">About You</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">What is your name?</label>
+              <label className="block text-sm font-medium text-gray-700">What is your name?<span className="text-red-600">*</span></label>
               <input
                 type="text"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('name') ? 'border-red-500' : ''}`}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email address</label>
+              <label className="block text-sm font-medium text-gray-700">Email address<span className="text-red-600">*</span></label>
               <input
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('email') ? 'border-red-500' : ''}`}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Age range</label>
+              <label className="block text-sm font-medium text-gray-700">Age range<span className="text-red-600">*</span></label>
               <select
                 name="age_range"
                 value={form.age_range}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('age_range') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select age range</option>
@@ -120,12 +161,12 @@ const Survey = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Are you currently in a relationship?</label>
+              <label className="block text-sm font-medium text-gray-700">Are you currently in a relationship?<span className="text-red-600">*</span></label>
               <select
                 name="relationship_status"
                 value={form.relationship_status}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('relationship_status') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -135,12 +176,12 @@ const Survey = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Are you engaged or planning to get married in the next 2 years?</label>
+              <label className="block text-sm font-medium text-gray-700">Are you engaged or planning to get married in the next 2 years?<span className="text-red-600">*</span></label>
               <select
                 name="wedding_planning_status"
                 value={form.wedding_planning_status}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('wedding_planning_status') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -157,12 +198,12 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Gift-Giving Experience</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Have you ever received wedding gifts that you didn't really need or want?</label>
+              <label className="block text-sm font-medium text-gray-700">Have you ever received wedding gifts that you didn't really need or want?<span className="text-red-600">*</span></label>
               <select
                 name="received_unwanted_gifts"
                 value={form.received_unwanted_gifts}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('received_unwanted_gifts') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -178,7 +219,7 @@ const Survey = () => {
                 value={form.known_registry_platforms}
                 onChange={handleChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('known_registry_platforms') ? 'border-red-500' : ''}`}
                 placeholder="Please list any platforms you know of..."
               />
             </div>
@@ -190,12 +231,12 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Interest in BlissGifts</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">If you were getting married, how useful would a wedding registry be to you?</label>
+              <label className="block text-sm font-medium text-gray-700">If you were getting married, how useful would a wedding registry be to you?<span className="text-red-600">*</span></label>
               <select
                 name="registry_usefulness"
                 value={form.registry_usefulness}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('registry_usefulness') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -206,12 +247,12 @@ const Survey = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Would you use a Nigerian wedding registry platform that allows you to select your dream home items?</label>
+              <label className="block text-sm font-medium text-gray-700">Would you use a Nigerian wedding registry platform that allows you to select your dream home items?<span className="text-red-600">*</span></label>
               <select
                 name="would_use_platform"
                 value={form.would_use_platform}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('would_use_platform') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -221,23 +262,23 @@ const Survey = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">What kind of gifts would you want to add to your wedding registry?</label>
+              <label className="block text-sm font-medium text-gray-700">What kind of gifts would you want to add to your wedding registry?<span className="text-red-600">*</span></label>
               <textarea
                 name="desired_gifts"
                 value={form.desired_gifts}
                 onChange={handleChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('desired_gifts') ? 'border-red-500' : ''}`}
                 placeholder="e.g., kitchen appliances, furniture, cash gifts, etc."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">How would you prefer your guests to shop from your registry?</label>
+              <label className="block text-sm font-medium text-gray-700">How would you prefer your guests to shop from your registry?<span className="text-red-600">*</span></label>
               <select
                 name="preferred_shopping_method"
                 value={form.preferred_shopping_method}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('preferred_shopping_method') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -249,24 +290,24 @@ const Survey = () => {
             </div>
             {form.preferred_shopping_method === 'Other' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Please specify:</label>
+                <label className="block text-sm font-medium text-gray-700">Please specify:<span className="text-red-600">*</span></label>
                 <input
                   type="text"
                   name="other_shopping_method"
                   value={form.other_shopping_method}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('other_shopping_method') ? 'border-red-500' : ''}`}
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700">What features would make you more likely to use a platform like this?</label>
+              <label className="block text-sm font-medium text-gray-700">What features would make you more likely to use a platform like this?<span className="text-red-600">*</span></label>
               <textarea
                 name="desired_features"
                 value={form.desired_features}
                 onChange={handleChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('desired_features') ? 'border-red-500' : ''}`}
                 placeholder="Please share your thoughts..."
               />
             </div>
@@ -278,12 +319,12 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Let's Talk</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Would you be open to a short (20-minute) online conversation to help us understand your needs better?</label>
+              <label className="block text-sm font-medium text-gray-700">Would you be open to a short (20-minute) online conversation to help us understand your needs better?<span className="text-red-600">*</span></label>
               <select
                 name="open_to_conversation"
                 value={form.open_to_conversation}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('open_to_conversation') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
@@ -294,13 +335,13 @@ const Survey = () => {
             </div>
             {(form.open_to_conversation === 'Yes' || form.open_to_conversation === 'Maybe') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Please drop your WhatsApp number or Instagram handle (or both):</label>
+                <label className="block text-sm font-medium text-gray-700">Please drop your WhatsApp number or Instagram handle (or both):<span className="text-red-600">*</span></label>
                 <input
                   type="text"
                   name="contact_info"
                   value={form.contact_info}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('contact_info') ? 'border-red-500' : ''}`}
                   placeholder="e.g., +234 123 456 7890 or @username"
                 />
               </div>
@@ -356,7 +397,7 @@ const Survey = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {renderPage()}
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
             <div className="flex justify-between mt-8">
               {currentPage > 1 && (
                 <button
