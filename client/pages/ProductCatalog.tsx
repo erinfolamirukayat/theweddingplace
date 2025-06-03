@@ -120,9 +120,9 @@ const ProductCatalog = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
       {/* Search Bar */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <SearchIcon className="h-5 w-5 text-gray-400" />
@@ -130,7 +130,7 @@ const ProductCatalog = () => {
           <input
             type="text"
             placeholder="Search products..."
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#B8860B] focus:border-[#B8860B] sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#B8860B] focus:border-[#B8860B] text-sm sm:text-base"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -139,41 +139,41 @@ const ProductCatalog = () => {
 
       {/* Success Message */}
       {successMessage && (
-        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md text-sm sm:text-base">
           {successMessage}
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
           {error}
         </div>
       )}
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
         {paginatedProducts.map((product) => (
-          <div key={product.id} className="group">
-            <div className="relative w-full h-64">
+          <div key={product.id} className="group bg-white rounded-lg shadow p-3 sm:p-4 flex flex-col">
+            <div className="relative w-full h-44 sm:h-64">
               <img
                 src={product.image_url}
                 alt={product.name}
                 className="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
               />
             </div>
-            <div className="mt-4 flex justify-between">
+            <div className="mt-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
               <div>
-                <h3 className="text-sm text-gray-700">{product.name}</h3>
-                <p className="mt-1 text-sm text-gray-500">{product.category}</p>
+                <h3 className="text-base sm:text-sm text-gray-700 font-semibold">{product.name}</h3>
+                <p className="mt-1 text-xs sm:text-sm text-gray-500">{product.category}</p>
               </div>
-              <p className="text-sm font-medium text-gray-900">₦{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-base sm:text-sm font-medium text-gray-900">₦{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
-            <p className="mt-1 text-sm text-gray-500 line-clamp-2">{product.description}</p>
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 line-clamp-2">{product.description}</p>
             <button
               onClick={() => handleAddToRegistry(product)}
               disabled={addingToRegistry === product.id || addedItems.has(product.id)}
-              className={`mt-4 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white 
+              className={`mt-4 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-base sm:text-sm font-medium rounded-md shadow-sm text-white 
                 ${addingToRegistry === product.id || addedItems.has(product.id)
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-[#B8860B] hover:bg-[#8B6508]'
@@ -199,19 +199,19 @@ const ProductCatalog = () => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-8 space-x-4">
+        <div className="flex flex-col xs:flex-row justify-center items-center mt-8 space-y-2 xs:space-y-0 xs:space-x-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 w-full xs:w-auto"
           >
             Previous
           </button>
-          <span>Page {currentPage} of {totalPages}</span>
+          <span className="text-sm sm:text-base">Page {currentPage} of {totalPages}</span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 w-full xs:w-auto"
           >
             Next
           </button>

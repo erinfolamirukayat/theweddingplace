@@ -355,40 +355,40 @@ const Survey = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 px-2 sm:px-0">
       {/* Header */}
-      <header className="text-center py-8 bg-white shadow">
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#B8860B] tracking-tight">BlissGifts</h1>
+      <header className="text-center py-6 sm:py-8 bg-white shadow">
+        <h1 className="text-2xl sm:text-4xl font-bold text-[#B8860B] tracking-tight">BlissGifts</h1>
       </header>
       {/* Banner */}
       <div
-        className="w-full h-64 sm:h-80 bg-cover bg-center flex items-center justify-center relative"
+        className="w-full h-40 sm:h-64 sm:h-80 bg-cover bg-center flex items-center justify-center relative"
         style={{ backgroundImage: `url(${BANNER_IMAGE})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40" />
         <div className="relative z-10 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow mb-2">
+          <h2 className="text-lg sm:text-3xl font-bold text-white drop-shadow mb-2">
             Help Shape the Future of Wedding Gifts
           </h2>
-          <p className="text-lg text-white drop-shadow">
+          <p className="text-base sm:text-lg text-white drop-shadow">
             Share your thoughts and help us create a better gift-giving experience
           </p>
         </div>
       </div>
       {/* Progress Bar */}
-      <div className="max-w-xl mx-auto mt-8 px-4">
+      <div className="max-w-xl mx-auto mt-6 sm:mt-8 px-2 sm:px-4">
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div
             className="bg-[#B8860B] h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        <p className="text-sm text-gray-600 mt-2 text-center">
+        <p className="text-xs sm:text-sm text-gray-600 mt-2 text-center">
           Page {currentPage} of {totalPages}
         </p>
       </div>
       {/* Survey Form */}
-      <div className="max-w-xl mx-auto mt-8 bg-white rounded-lg shadow-lg p-8">
+      <div className="max-w-xl mx-auto mt-6 sm:mt-8 bg-white rounded-lg shadow-lg p-4 sm:p-8">
         {submitted ? (
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-[#2C1810] mb-2">Thank you!</h3>
@@ -398,12 +398,12 @@ const Survey = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {renderPage()}
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-col sm:flex-row justify-between gap-2 mt-6 sm:mt-8">
               {currentPage > 1 && (
                 <button
                   type="button"
                   onClick={prevPage}
-                  className="px-6 py-2 border border-[#B8860B] text-[#B8860B] rounded-md hover:bg-[#B8860B] hover:text-white transition-colors"
+                  className="w-full sm:w-auto px-6 py-2 border border-[#B8860B] text-[#B8860B] rounded-md hover:bg-[#B8860B] hover:text-white transition-colors"
                 >
                   Previous
                 </button>
@@ -412,14 +412,14 @@ const Survey = () => {
                 <button
                   type="button"
                   onClick={nextPage}
-                  className="ml-auto px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
+                  className="w-full sm:w-auto px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
                 >
                   Next
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="ml-auto px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
+                  className="w-full sm:w-auto px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
                   disabled={loading}
                 >
                   {loading ? 'Submitting...' : 'Submit Survey'}

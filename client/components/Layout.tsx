@@ -31,19 +31,19 @@ const Layout = () => {
       <Notification />
       <div className="min-h-screen bg-[#FFF8F3]">
         <Navbar />
-        <main className="container mx-auto px-4 py-6">
+        <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
           <Outlet />
         </main>
-        <footer className="bg-[#2C1810] text-white py-8 mt-12">
-          <div className="container mx-auto px-4">
+        <footer className="bg-[#2C1810] text-white py-6 sm:py-8 mt-8 sm:mt-12">
+          <div className="container mx-auto px-2 sm:px-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">BlissGift Registry</h3>
-              <p className="text-sm opacity-75">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">BlissGift Registry</h3>
+              <p className="text-xs sm:text-sm opacity-75">
                 Celebrating African Unions with Meaningful Gifts
               </p>
-              <div className="mt-4 space-y-1">
-                <div>WhatsApp: <a href="https://wa.me/2348012345678" className="underline text-[#B8860B]" target="_blank" rel="noopener noreferrer">+234 801 234 5678</a></div>
-                <div>Email: <a href="mailto:support@blissgift.com" className="underline text-[#B8860B]">support@blissgift.com</a></div>
+              <div className="mt-4 flex flex-col gap-1 items-center justify-center sm:space-y-1">
+                <div className="text-xs sm:text-sm">WhatsApp: <a href="https://wa.me/2348012345678" className="underline text-[#B8860B]" target="_blank" rel="noopener noreferrer">+234 801 234 5678</a></div>
+                <div className="text-xs sm:text-sm">Email: <a href="mailto:support@blissgift.com" className="underline text-[#B8860B]">support@blissgift.com</a></div>
               </div>
             </div>
           </div>
