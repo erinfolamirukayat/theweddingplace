@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HeartIcon, ShareIcon } from 'lucide-react';
 
 const BANNER_IMAGE =
-  'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds3.jpg'; // Couple image from Unsplash
-
+  'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds5.png'; // Couple image from Unsplash
 const Home = () => {
   const navigate = useNavigate();
   const handleStartRegistry = () => {
@@ -177,9 +176,9 @@ const Home = () => {
       {/* Banner */}
       <div
         className="w-full min-h-56 sm:min-h-80 md:min-h-[28rem] bg-cover bg-center flex items-center justify-center relative rounded-b-lg overflow-hidden mb-8 py-8 sm:py-16"
-        style={{ backgroundImage: `url(${BANNER_IMAGE})` }}
+        style={{ backgroundImage: `url(${BANNER_IMAGE})`, backgroundPosition: 'center 20%' }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        <div className="absolute inset-0 bg-black bg-opacity-20" />
         <div className="relative z-10 text-center px-4 flex flex-col items-center w-full gap-4">
           <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow">
             The Nigerian Wedding Registry That Makes Gift-Giving Easy
