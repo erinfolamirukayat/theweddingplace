@@ -99,10 +99,10 @@ const Home = () => {
     setTestimonialIdx((i) => (i + 1) % testimonials.length);
   };
 
-  return <div className="max-w-6xl mx-auto px-2 sm:px-4">
+  return <div className="max-w-6xl mx-auto px-2 sm:px-4 mt-4">
       {/* Banner */}
       <div
-        className="w-full h-56 sm:h-80 md:h-[28rem] bg-cover bg-center flex items-center justify-center relative rounded-b-lg overflow-hidden mb-8 mt-4 py-4 sm:mt-8 sm:py-8"
+        className="w-full min-h-56 sm:min-h-80 md:min-h-[28rem] bg-cover bg-center flex items-center justify-center relative rounded-b-lg overflow-hidden mb-8 py-8 sm:py-16"
         style={{ backgroundImage: `url(${BANNER_IMAGE})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40" />
