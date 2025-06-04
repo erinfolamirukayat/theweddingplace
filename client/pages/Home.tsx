@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HeartIcon, ShareIcon } from 'lucide-react';
 
 const BANNER_IMAGE =
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80'; // Couple image from Unsplash
+  'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds3.jpg'; // Couple image from Unsplash
 
 const Home = () => {
   const navigate = useNavigate();
