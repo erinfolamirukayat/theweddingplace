@@ -21,8 +21,8 @@ export const submitSurvey = async (req: Request, res: Response): Promise<void> =
             contact_info
         } = req.body;
 
-        // Validation for required fields
-        if (!name || !email || !age_range || !relationship_status || !wedding_planning_status || !registry_usefulness || !would_use_platform || !preferred_shopping_method || !open_to_conversation) {
+        // Validation for required fields (make email, known_registry_platforms, desired_gifts, desired_features optional)
+        if (!name || !age_range || !relationship_status || !wedding_planning_status || !registry_usefulness || !would_use_platform || !preferred_shopping_method || !open_to_conversation) {
             res.status(400).json({ error: 'Please fill in all required fields.' });
             return;
         }

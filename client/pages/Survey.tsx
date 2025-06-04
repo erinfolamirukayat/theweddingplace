@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getConfig } from '../config';
 
 const BANNER_IMAGE =
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80'; // Couple image from Unsplash
+  'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds5.png'; // Couple image from Unsplash
 
 type FormData = {
   name: string;
@@ -89,7 +89,6 @@ const Survey = () => {
     let missing: string[] = [];
     if (currentPage === 1) {
       if (!form.name) missing.push('name');
-      if (!form.email) missing.push('email');
       if (!form.age_range) missing.push('age_range');
       if (!form.relationship_status) missing.push('relationship_status');
       if (!form.wedding_planning_status) missing.push('wedding_planning_status');
@@ -119,6 +118,18 @@ const Survey = () => {
       case 1:
         return (
           <div className="space-y-6">
+            <div className="bg-[#FFFBDE] border-l-4 border-[#129990] p-4 rounded mb-4">
+              <div className="font-bold text-[#129990] text-lg mb-1">BlissGifts is an online wedding gift registry designed specifically for Nigerian couples.</div>
+              <div className="mb-2 text-[#2C1810] font-medium">Why is this important?</div>
+              <div className="text-[#2C1810] mb-2">Because right now, most Nigerian couples receive random wedding gifts — sometimes duplicates, sometimes things they don't need — and then have to carry everything home from the venue. 😩</div>
+              <ul className="list-none pl-0 text-[#2C1810] space-y-1">
+                <li>✅ Couples can choose exactly what they need (TV, cash, fridge, etc.)</li>
+                <li>✅ Guests buy straight from the couple's list — no guesswork</li>
+                <li>✅ No bulky items to move from the venue</li>
+                <li>✅ Everything is delivered or sent directly to the couple</li>
+                <li>✅ It's simple, beautiful, and stress-free!</li>
+              </ul>
+            </div>
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">About You</h2>
             <div>
               <label className="block text-sm font-medium text-gray-700">What is your name?<span className="text-red-600">*</span></label>
@@ -132,14 +143,13 @@ const Survey = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email address<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">Email address </label>
               <input
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('email') ? 'border-red-500' : ''}`}
-                required
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
               />
             </div>
             <div>
@@ -219,7 +229,7 @@ const Survey = () => {
                 value={form.known_registry_platforms}
                 onChange={handleChange}
                 rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('known_registry_platforms') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
                 placeholder="Please list any platforms you know of..."
               />
             </div>
@@ -262,13 +272,13 @@ const Survey = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">What kind of gifts would you want to add to your wedding registry?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">What kind of gifts would you want to add to your wedding registry?</label>
               <textarea
                 name="desired_gifts"
                 value={form.desired_gifts}
                 onChange={handleChange}
                 rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('desired_gifts') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
                 placeholder="e.g., kitchen appliances, furniture, cash gifts, etc."
               />
             </div>
@@ -301,13 +311,13 @@ const Survey = () => {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700">What features would make you more likely to use a platform like this?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">What features would make you more likely to use a platform like this?</label>
               <textarea
                 name="desired_features"
                 value={form.desired_features}
                 onChange={handleChange}
                 rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('desired_features') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
                 placeholder="Please share your thoughts..."
               />
             </div>
@@ -363,7 +373,7 @@ const Survey = () => {
       {/* Banner */}
       <div
         className="w-full h-40 sm:h-64 sm:h-80 bg-cover bg-center flex items-center justify-center relative"
-        style={{ backgroundImage: `url(${BANNER_IMAGE})` }}
+        style={{ backgroundImage: `url(${BANNER_IMAGE})`, backgroundPosition: 'center 20%' }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40" />
         <div className="relative z-10 text-center">
