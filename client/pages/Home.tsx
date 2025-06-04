@@ -99,6 +99,80 @@ const Home = () => {
     setTestimonialIdx((i) => (i + 1) % testimonials.length);
   };
 
+  // Featured Items Carousel Data
+  const featuredProducts = [
+    {
+      id: 1,
+      name: "Better Homes 16-Piece Dinner Set",
+      price: "₦40,000",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Better_Homes_16-Piece_Dinner_Set.jpg?",
+    },
+    {
+      id: 3,
+      name: "Solid Stoneware Dinner Plate Set 16pcs",
+      price: "₦58,900",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images//Solid_Stoneware_Dinner_Plate_Set_16pcs.jpg",
+    },
+    {
+      id: 6,
+      name: "SILVER CREST 2L Industrial 8500W Food Crusher Blender With 2 Jar",
+      price: "₦27,280",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/SILVER_CREST_2L_Industrial_8500W_Food_Crusher_Blender_With_2_Jar.jpg?",
+    },
+    {
+      id: 7,
+      name: "TINMO Airfryer 10L Volume, 8L Storage Capacity",
+      price: "₦58,356",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/TINMO_Airfryer_10L_Volume,_8L_Storage_Capacity,_Model_(OLM-KZB006)_1400W+_12_Months_Warranty.jpg?",
+    },
+    {
+      id: 12,
+      name: "Black White Center Table-Coffee Table Home Furniture",
+      price: "₦42,000",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Black_White_Center_Table-Coffee_Table_Home_Furniture.jpg?",
+    },
+    {
+      id: 15,
+      name: "Nexus 32 Inches FHD TV (H620B(SA) - Black + 2 Years Warranty",
+      price: "₦136,000",
+      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Nexus_32_Inches_FHD_TV_(H620B(SA)_-_Black_+_2_Years_Warranty.jpg?",
+    },
+  ];
+  const [featuredIdx, setFeaturedIdx] = useState(0);
+  const featuredAutoRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Featured carousel auto-advance
+  useEffect(() => {
+    if (featuredAutoRef.current) clearInterval(featuredAutoRef.current);
+    featuredAutoRef.current = setInterval(() => {
+      setFeaturedIdx((i) => (i + 1) % featuredProducts.length);
+    }, 5000);
+    return () => {
+      if (featuredAutoRef.current) clearInterval(featuredAutoRef.current);
+    };
+  }, [featuredProducts.length]);
+
+  // Get 3 featured products in view
+  const getVisibleFeatured = () => {
+    let start = featuredIdx;
+    let end = start + 3;
+    if (end <= featuredProducts.length) {
+      return featuredProducts.slice(start, end);
+    } else {
+      return [
+        ...featuredProducts.slice(start, featuredProducts.length),
+        ...featuredProducts.slice(0, end - featuredProducts.length),
+      ];
+    }
+  };
+  const visibleFeatured = getVisibleFeatured();
+  const prevFeatured = () => {
+    setFeaturedIdx((i) => (i - 1 + featuredProducts.length) % featuredProducts.length);
+  };
+  const nextFeatured = () => {
+    setFeaturedIdx((i) => (i + 1) % featuredProducts.length);
+  };
+
   return <div className="max-w-6xl mx-auto px-2 sm:px-4 mt-4">
       {/* Banner */}
       <div
@@ -182,50 +256,39 @@ const Home = () => {
         </ul>
       </section>
 
-      {/* Featured Items Section */}
-      <div className="mt-10 sm:mt-16 bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-4 sm:p-8">
+      {/* Featured Items Carousel Section */}
+      <section className="mt-10 sm:mt-16">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden p-4 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-[#2C1810] mb-3 sm:mb-4 text-center">
             Featured Items
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            {/* Sample featured items */}
-            <div className="bg-[#FFF8F3] rounded-lg overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1604771240470-124b6144b410?auto=format&fit=crop&q=80" alt="Traditional Cookware" className="w-full h-40 sm:h-48 object-cover" />
-              <div className="p-3 sm:p-4">
-                <h3 className="font-semibold text-[#2C1810] text-base sm:text-lg">
-                  Traditional Clay Cooking Set
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">
-                  Starting from ₦50,000
-                </p>
-              </div>
+          <div className="relative">
+            <div className="flex transition-transform duration-500" style={{ transform: `translateX(0)` }}>
+              {visibleFeatured.map((item, idx) => (
+                <div key={item.id} className="flex-1 min-w-0 max-w-full px-2">
+                  <div className="bg-[#FFF8F3] rounded-lg overflow-hidden h-full flex flex-col">
+                    <img src={item.image_url} alt={item.name} className="w-full h-40 sm:h-48 object-cover" />
+                    <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+                      <h3 className="font-semibold text-[#2C1810] text-base sm:text-lg mb-1">{item.name}</h3>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1">{item.price}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="bg-[#FFF8F3] rounded-lg overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1629624927838-3b39b7fdd00c?auto=format&fit=crop&q=80" alt="Ankara Bedding" className="w-full h-40 sm:h-48 object-cover" />
-              <div className="p-3 sm:p-4">
-                <h3 className="font-semibold text-[#2C1810] text-base sm:text-lg">
-                  Ankara Print Bedding Set
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">
-                  Starting from ₦75,000
-                </p>
-              </div>
+            <div className="flex justify-center gap-4 mt-4">
+              <button onClick={prevFeatured} aria-label="Previous featured" className="px-3 py-1 rounded bg-[#E5E7EB] hover:bg-[#B8860B] hover:text-white text-[#2C1810] font-bold transition-colors">&#8592;</button>
+              <button onClick={nextFeatured} aria-label="Next featured" className="px-3 py-1 rounded bg-[#E5E7EB] hover:bg-[#B8860B] hover:text-white text-[#2C1810] font-bold transition-colors">&#8594;</button>
             </div>
-            <div className="bg-[#FFF8F3] rounded-lg overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&q=80" alt="Dining Set" className="w-full h-40 sm:h-48 object-cover" />
-              <div className="p-3 sm:p-4">
-                <h3 className="font-semibold text-[#2C1810] text-base sm:text-lg">
-                  Modern African Dining Set
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">
-                  Starting from ₦100,000
-                </p>
-              </div>
+            <div className="mt-2 flex justify-center gap-1">
+              {featuredProducts.map((_, i) => (
+                <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === featuredIdx ? 'bg-[#B8860B]' : 'bg-gray-300'}`}></span>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
       {/* Testimonial Carousel Section */}
       <section className="max-w-6xl mx-auto my-12">
         <div className="bg-[#FFF8F3] rounded-lg shadow-md px-2 sm:px-6 py-10 sm:py-12 relative">
