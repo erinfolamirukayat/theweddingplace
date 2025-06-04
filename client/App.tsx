@@ -15,9 +15,12 @@ import Dashboard from './pages/Dashboard';
 import HowItWorks from './pages/HowItWorks';
 import Contact from './pages/ContactUs';
 import Survey from './pages/Survey';
+import ScrollToTop from './components/ScrollToTop';
+
 export function App() {
   return <AuthProvider>
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
