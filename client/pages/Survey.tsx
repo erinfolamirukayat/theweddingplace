@@ -345,7 +345,7 @@ const Survey = () => {
             </div>
             {(form.open_to_conversation === 'Yes' || form.open_to_conversation === 'Maybe') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Please drop your WhatsApp number or Instagram handle (or both):<span className="text-red-600">*</span></label>
+                <label className="block text-sm font-medium text-gray-700">Please drop your WhatsApp number:<span className="text-red-600">*</span></label>
                 <input
                   type="text"
                   name="contact_info"
