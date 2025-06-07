@@ -6,39 +6,33 @@ export const submitSurvey = async (req: Request, res: Response): Promise<void> =
         const {
             name,
             email,
-            age_range,
             relationship_status,
-            wedding_planning_status,
-            received_unwanted_gifts,
-            known_registry_platforms,
-            registry_usefulness,
-            would_use_platform,
-            desired_gifts,
-            preferred_shopping_method,
-            other_shopping_method,
-            desired_features,
-            open_to_conversation,
-            contact_info
+            given_gift,
+            received_unwanted_gift,
+            gift_ease,
+            would_use_registry,
+            share_link_method,
+            culture_show_gift,
+            culture_associate_gift,
+            open_to_conversation
         } = req.body;
 
-        // Validation for required fields (make email, known_registry_platforms, desired_gifts, desired_features optional)
-        if (!name || !age_range || !relationship_status || !wedding_planning_status || !registry_usefulness || !would_use_platform || !preferred_shopping_method || !open_to_conversation) {
+        // Validation for required fields
+        if (!name || !relationship_status || !given_gift || !received_unwanted_gift || !gift_ease || !would_use_registry || !share_link_method || !culture_show_gift || !open_to_conversation) {
             res.status(400).json({ error: 'Please fill in all required fields.' });
             return;
         }
 
+        const shareLinkMethodStr = Array.isArray(share_link_method)
+            ? share_link_method.join(', ')
+            : share_link_method;
+
         const query = `INSERT INTO survey_responses (
-            name, email, age_range, relationship_status, wedding_planning_status,
-            received_unwanted_gifts, known_registry_platforms, registry_usefulness,
-            would_use_platform, desired_gifts, preferred_shopping_method,
-            other_shopping_method, desired_features, open_to_conversation, contact_info
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`;
+            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, share_link_method, culture_show_gift, culture_associate_gift, open_to_conversation
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
 
         const values = [
-            name, email, age_range, relationship_status, wedding_planning_status,
-            received_unwanted_gifts, known_registry_platforms, registry_usefulness,
-            would_use_platform, desired_gifts, preferred_shopping_method,
-            other_shopping_method, desired_features, open_to_conversation, contact_info
+            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, shareLinkMethodStr, culture_show_gift, culture_associate_gift, open_to_conversation
         ];
 
         const result = await pool.query(query, values);

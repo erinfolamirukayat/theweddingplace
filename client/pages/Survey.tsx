@@ -7,19 +7,16 @@ const BANNER_IMAGE =
 type FormData = {
   name: string;
   email: string;
-  age_range: string;
   relationship_status: string;
-  wedding_planning_status: string;
-  received_unwanted_gifts: string;
-  known_registry_platforms: string;
-  registry_usefulness: string;
-  would_use_platform: string;
-  desired_gifts: string;
-  preferred_shopping_method: string;
-  other_shopping_method: string;
-  desired_features: string;
+  given_gift: string;
+  received_unwanted_gift: string;
+  gift_ease: string;
+  would_use_registry: string;
+  share_link_method: string[];
+  culture_show_gift: string;
+  culture_associate_gift: string;
   open_to_conversation: string;
-  contact_info: string;
+  phone_number?: string;
 };
 
 const Survey = () => {
@@ -27,19 +24,16 @@ const Survey = () => {
   const [form, setForm] = useState<FormData>({
     name: '',
     email: '',
-    age_range: '',
     relationship_status: '',
-    wedding_planning_status: '',
-    received_unwanted_gifts: '',
-    known_registry_platforms: '',
-    registry_usefulness: '',
-    would_use_platform: '',
-    desired_gifts: '',
-    preferred_shopping_method: '',
-    other_shopping_method: '',
-    desired_features: '',
+    given_gift: '',
+    received_unwanted_gift: '',
+    gift_ease: '',
+    would_use_registry: '',
+    share_link_method: [],
+    culture_show_gift: '',
+    culture_associate_gift: '',
     open_to_conversation: '',
-    contact_info: '',
+    phone_number: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -50,7 +44,21 @@ const Survey = () => {
   const progress = (currentPage / totalPages) * 100;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+    if (name === 'share_link_method' && type === 'checkbox') {
+      const input = e.target as HTMLInputElement;
+      const checked = input.checked;
+      setForm((prev) => {
+        const arr = Array.isArray(prev.share_link_method) ? prev.share_link_method : [];
+        if (checked) {
+          return { ...prev, share_link_method: [...arr, value] };
+        } else {
+          return { ...prev, share_link_method: arr.filter((v) => v !== value) };
+        }
+      });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,17 +97,21 @@ const Survey = () => {
     let missing: string[] = [];
     if (currentPage === 1) {
       if (!form.name) missing.push('name');
-      if (!form.age_range) missing.push('age_range');
       if (!form.relationship_status) missing.push('relationship_status');
-      if (!form.wedding_planning_status) missing.push('wedding_planning_status');
+    }
+    if (currentPage === 2) {
+      if (!form.given_gift) missing.push('given_gift');
+      if (!form.received_unwanted_gift) missing.push('received_unwanted_gift');
+      if (!form.gift_ease) missing.push('gift_ease');
     }
     if (currentPage === 3) {
-      if (!form.registry_usefulness) missing.push('registry_usefulness');
-      if (!form.would_use_platform) missing.push('would_use_platform');
-      if (!form.preferred_shopping_method) missing.push('preferred_shopping_method');
+      if (!form.would_use_registry) missing.push('would_use_registry');
+      if (form.would_use_registry === 'Yes' && form.share_link_method.length === 0) missing.push('share_link_method');
+      if (!form.culture_show_gift) missing.push('culture_show_gift');
     }
     if (currentPage === 4) {
       if (!form.open_to_conversation) missing.push('open_to_conversation');
+      if (form.open_to_conversation === 'Yes' && !form.phone_number) missing.push('phone_number');
     }
     if (missing.length > 0) {
       setError('Please fill in all required fields.');
@@ -132,7 +144,7 @@ const Survey = () => {
             </div>
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">About You</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">What is your name?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">Name<span className="text-red-600">*</span></label>
               <input
                 type="text"
                 name="name"
@@ -143,35 +155,17 @@ const Survey = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email address </label>
+              <label className="block text-sm font-medium text-gray-700">Email address</label>
               <input
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Age range<span className="text-red-600">*</span></label>
-              <select
-                name="age_range"
-                value={form.age_range}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('age_range') ? 'border-red-500' : ''}`}
-                required
-              >
-                <option value="">Select age range</option>
-                <option value="Under 20">Under 20</option>
-                <option value="20-25">20-25</option>
-                <option value="26-30">26-30</option>
-                <option value="31-35">31-35</option>
-                <option value="36-40">36-40</option>
-                <option value="40+">40+</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Are you currently in a relationship?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">Please tell us your relationship status?<span className="text-red-600">*</span></label>
               <select
                 name="relationship_status"
                 value={form.relationship_status}
@@ -180,24 +174,12 @@ const Survey = () => {
                 required
               >
                 <option value="">Select option</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="It's complicated">It's complicated</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Are you engaged or planning to get married in the next 2 years?<span className="text-red-600">*</span></label>
-              <select
-                name="wedding_planning_status"
-                value={form.wedding_planning_status}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('wedding_planning_status') ? 'border-red-500' : ''}`}
-                required
-              >
-                <option value="">Select option</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-                <option value="Maybe">Maybe</option>
+                <option value="Married">Married</option>
+                <option value="Single">Single</option>
+                <option value="In a relationship ready to marry in 2 years">In a relationship ready to marry in 2 years</option>
+                <option value="In a relationship not ready to marry">In a relationship not ready to marry</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Not willing to disclose">Not willing to disclose</option>
               </select>
             </div>
           </div>
@@ -208,30 +190,49 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Gift-Giving Experience</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Have you ever received wedding gifts that you didn't really need or want?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">Have you ever given a wedding gift to anyone in Nigeria?<span className="text-red-600">*</span></label>
               <select
-                name="received_unwanted_gifts"
-                value={form.received_unwanted_gifts}
+                name="given_gift"
+                value={form.given_gift}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('received_unwanted_gifts') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('given_gift') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
-                <option value="Yes">Yes</option>
+                <option value="Yes, I bought a physical gift">Yes, I bought a physical gift</option>
+                <option value="Yes, I gave cash gift">Yes, I gave cash gift</option>
+                <option value="Yes, both physical and cash gifts">Yes, both physical and cash gifts</option>
                 <option value="No">No</option>
-                <option value="I haven't had a wedding yet">I haven't had a wedding yet</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Do you know of any existing platforms in Nigeria that help couples create a wedding registry?</label>
-              <textarea
-                name="known_registry_platforms"
-                value={form.known_registry_platforms}
+              <label className="block text-sm font-medium text-gray-700">Have you ever received a wedding gift that you did not need or want?<span className="text-red-600">*</span></label>
+              <select
+                name="received_unwanted_gift"
+                value={form.received_unwanted_gift}
                 onChange={handleChange}
-                rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
-                placeholder="Please list any platforms you know of..."
-              />
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('received_unwanted_gift') ? 'border-red-500' : ''}`}
+                required
+              >
+                <option value="">Select option</option>
+                <option value="Yes">Yes, not a good experience</option>
+                <option value="No">No, I haven't received any unwanted gifts</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">As someone who has given/or would give wedding gifts to people, which of the following is the easiest for you?<span className="text-red-600">*</span></label>
+              <select
+                name="gift_ease"
+                value={form.gift_ease}
+                onChange={handleChange}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('gift_ease') ? 'border-red-500' : ''}`}
+                required
+              >
+                <option value="">Select option</option>
+                <option value="Giving cash gift">Giving cash gift</option>
+                <option value="Buying and giving physical gifts">Buying and giving physical gifts</option>
+                <option value="Ask the couple for what they prefer">Ask the couple for what they prefer</option>
+              </select>
             </div>
           </div>
         );
@@ -239,87 +240,85 @@ const Survey = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Interest in BlissGifts</h2>
+            <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Registry & Culture</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">If you were getting married, how useful would a wedding registry be to you?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">If you were getting married, would you choose to use a wedding registry platform that lets you select the items you need?<span className="text-red-600">*</span></label>
               <select
-                name="registry_usefulness"
-                value={form.registry_usefulness}
+                name="would_use_registry"
+                value={form.would_use_registry}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('registry_usefulness') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('would_use_registry') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
-                <option value="Extremely useful">Extremely useful</option>
-                <option value="Somewhat useful">Somewhat useful</option>
-                <option value="Not very useful">Not very useful</option>
-                <option value="Not useful at all">Not useful at all</option>
+                <option value="Yes">Yes, definitely</option>
+                <option value="No">No, I'd rather not</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Would you use a Nigerian wedding registry platform that allows you to select your dream home items?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">If you choose to use an online gift registry, how would you share the link with loved ones? (Select all that apply)<span className="text-red-600">*</span></label>
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="share_link_method"
+                    value="As part of my wedding invitation message"
+                    checked={form.share_link_method.includes('As part of my wedding invitation message')}
+                    onChange={handleChange}
+                    className="form-checkbox h-4 w-4 text-[#B8860B]"
+                  />
+                  <span className="ml-2">As part of my wedding invitation message</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="share_link_method"
+                    value="Printed as a QR code on my invitation card"
+                    checked={form.share_link_method.includes('Printed as a QR code on my invitation card')}
+                    onChange={handleChange}
+                    className="form-checkbox h-4 w-4 text-[#B8860B]"
+                  />
+                  <span className="ml-2">Printed as a QR code on my invitation card</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="share_link_method"
+                    value="On the whatsapp groups I belong to"
+                    checked={form.share_link_method.includes('On the whatsapp groups I belong to')}
+                    onChange={handleChange}
+                    className="form-checkbox h-4 w-4 text-[#B8860B]"
+                  />
+                  <span className="ml-2">On the whatsapp groups I belong to</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Do you have a culture that necessitates wedding guests to show their gifts at the wedding venue to access certain things at the wedding?<span className="text-red-600">*</span></label>
               <select
-                name="would_use_platform"
-                value={form.would_use_platform}
+                name="culture_show_gift"
+                value={form.culture_show_gift}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('would_use_platform') ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('culture_show_gift') ? 'border-red-500' : ''}`}
                 required
               >
                 <option value="">Select option</option>
-                <option value="Yes, definitely">Yes, definitely</option>
-                <option value="Maybe">Maybe</option>
+                <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">What kind of gifts would you want to add to your wedding registry?</label>
-              <textarea
-                name="desired_gifts"
-                value={form.desired_gifts}
-                onChange={handleChange}
-                rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
-                placeholder="e.g., kitchen appliances, furniture, cash gifts, etc."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">How would you prefer your guests to shop from your registry?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">If you picked yes above, will it be sufficient to provide a means to associate a wedding guest with the gift they paid for or the amount they contributed towards a gift?</label>
               <select
-                name="preferred_shopping_method"
-                value={form.preferred_shopping_method}
+                name="culture_associate_gift"
+                value={form.culture_associate_gift}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('preferred_shopping_method') ? 'border-red-500' : ''}`}
-                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
               >
                 <option value="">Select option</option>
-                <option value="Via a link shared with them">Via a link shared with them</option>
-                <option value="Embedded in your wedding website">Embedded in your wedding website</option>
-                <option value="WhatsApp broadcast or DM">WhatsApp broadcast or DM</option>
-                <option value="Other">Other</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
               </select>
-            </div>
-            {form.preferred_shopping_method === 'Other' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Please specify:<span className="text-red-600">*</span></label>
-                <input
-                  type="text"
-                  name="other_shopping_method"
-                  value={form.other_shopping_method}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('other_shopping_method') ? 'border-red-500' : ''}`}
-                />
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">What features would make you more likely to use a platform like this?</label>
-              <textarea
-                name="desired_features"
-                value={form.desired_features}
-                onChange={handleChange}
-                rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]`}
-                placeholder="Please share your thoughts..."
-              />
             </div>
           </div>
         );
@@ -339,20 +338,20 @@ const Survey = () => {
               >
                 <option value="">Select option</option>
                 <option value="Yes">Yes</option>
-                <option value="Maybe">Maybe</option>
                 <option value="No">No</option>
               </select>
             </div>
-            {(form.open_to_conversation === 'Yes' || form.open_to_conversation === 'Maybe') && (
+            {form.open_to_conversation === 'Yes' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Please drop your WhatsApp number:<span className="text-red-600">*</span></label>
+                <label className="block text-sm font-medium text-gray-700">Phone number<span className="text-red-600">*</span></label>
                 <input
                   type="text"
-                  name="contact_info"
-                  value={form.contact_info}
+                  name="phone_number"
+                  value={form.phone_number}
                   onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('contact_info') ? 'border-red-500' : ''}`}
-                  placeholder="e.g., +234 123 456 7890 or @username"
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B] ${missingFields.includes('phone_number') ? 'border-red-500' : ''}`}
+                  placeholder="e.g., +234 123 456 7890"
+                  required
                 />
               </div>
             )}
