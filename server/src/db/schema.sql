@@ -76,7 +76,8 @@ CREATE TABLE survey_responses (
     would_use_registry VARCHAR(10) NOT NULL,
     share_link_method TEXT NOT NULL,
     culture_show_gift VARCHAR(10) NOT NULL,
-    culture_associate_gift VARCHAR(10) NOT NULL,
+    culture_associate_gift VARCHAR(10),
     open_to_conversation VARCHAR(10) NOT NULL,
+    phone_number VARCHAR(30),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ); 
