@@ -35,53 +35,43 @@ const Navbar = () => {
   // Nav links as a function for reuse
   const navLinks = (
     <>
-      <Link to="/" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-        <HomeIcon className="h-4 w-4 mr-1" />
-        Home
+      <Link to="/" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+        <HomeIcon className="h-4 w-4 mr-1" /> Home
       </Link>
-      <Link to="/how-it-works" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/how-it-works' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>How it works</Link>
+      <Link to="/how-it-works" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/how-it-works' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>How it works</Link>
       {user && (
-        <Link to="/dashboard" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/dashboard' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-          Dashboard
-        </Link>
+        <Link to="/dashboard" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/dashboard' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>Dashboard</Link>
       )}
       {user && registryId ? (
-        <Link to={`/registry/${registryId}`} onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname.startsWith('/registry') ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-          <HeartIcon className="h-4 w-4 mr-1" />
-          My Registry
+        <Link to={`/registry/${registryId}`} onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname.startsWith('/registry') ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+          <HeartIcon className="h-4 w-4 mr-1" /> My Registry
         </Link>
       ) : user ? (
-        <Link to="/create-registry" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/create-registry' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-          <HeartIcon className="h-4 w-4 mr-1" />
-          Create Registry
+        <Link to="/create-registry" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/create-registry' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+          <HeartIcon className="h-4 w-4 mr-1" /> Create Registry
         </Link>
       ) : null}
-      <Link to="/catalog" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname.startsWith('/catalog') ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-        <GiftIcon className="h-4 w-4 mr-1" />
-        Browse Products
+      <Link to="/catalog" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname.startsWith('/catalog') ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+        <GiftIcon className="h-4 w-4 mr-1" /> Browse Products
       </Link>
       {user && (
-        <Link to="/profile" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/profile' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-          <UserPlusIcon className="h-4 w-4 mr-1" />
-          My Profile
+        <Link to="/profile" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/profile' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+          <UserPlusIcon className="h-4 w-4 mr-1" /> My Profile
         </Link>
       )}
-      <Link to="/contact" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/contact' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>Contact Us</Link>
+      <Link to="/contact" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/contact' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>Contact Us</Link>
       {user && (
-        <button onClick={handleLogout} className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-[#FFF8F3] text-[#B8860B] hover:bg-[#B8860B] hover:text-white transition w-full text-left">
-          <LogOutIcon className="h-4 w-4 mr-1" />
-          Logout
+        <button onClick={handleLogout} className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-[#FFF8F3] text-[#B8860B] hover:bg-[#B8860B] hover:text-white transition text-left whitespace-nowrap">
+          <LogOutIcon className="h-4 w-4 mr-1" /> Logout
         </button>
       )}
       {!user && (
         <>
-          <Link to="/login" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/login' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-            <LogInIcon className="h-4 w-4 mr-1" />
-            Login
+          <Link to="/login" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/login' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+            <LogInIcon className="h-4 w-4 mr-1" /> Login
           </Link>
-          <Link to="/register" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === '/register' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
-            <UserPlusIcon className="h-4 w-4 mr-1" />
-            Register
+          <Link to="/register" onClick={() => setMenuOpen(false)} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap ${location.pathname === '/register' ? 'bg-[#FFF8F3] text-[#B8860B]' : 'text-gray-600 hover:bg-[#FFF8F3] hover:text-[#B8860B]'}`}>
+            <UserPlusIcon className="h-4 w-4 mr-1" /> Register
           </Link>
         </>
       )}
@@ -99,7 +89,7 @@ const Navbar = () => {
             </span>
           </Link>
           {/* Desktop nav */}
-          <nav className="hidden md:flex space-x-4 items-center">
+          <nav className="hidden md:flex space-x-4 items-center flex-nowrap">
             {navLinks}
           </nav>
           {/* Hamburger for mobile */}
