@@ -32,6 +32,7 @@ export interface Contributor {
     id: number;
     registry_item_id: number;
     name: string;
+    email: string;
     amount: number;
     message?: string;
     payment_reference: string;

@@ -39,9 +39,11 @@ CREATE TABLE contributors (
     id SERIAL PRIMARY KEY,
     registry_item_id INTEGER REFERENCES registry_items(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL, 
     amount DECIMAL(10,2) NOT NULL,
     message TEXT,
     payment_reference VARCHAR(255) UNIQUE,
+    status VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -79,5 +81,9 @@ CREATE TABLE survey_responses (
     culture_associate_gift VARCHAR(10),
     open_to_conversation VARCHAR(10) NOT NULL,
     phone_number VARCHAR(30),
+    additional_comments TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-); 
+);
+
+-- Add status column to contributors table
+ALTER TABLE contributors ADD COLUMN status VARCHAR(20); 

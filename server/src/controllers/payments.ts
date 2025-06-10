@@ -34,6 +34,14 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
             return;
         }
 
+        // Insert a new contribution with status 'initiated'
+        const contributionResult = await pool.query(
+            `INSERT INTO contributors (registry_item_id, name, email, amount, message, status) 
+             VALUES ($1, $2, $3, $4, $5, 'initiated') 
+             RETURNING *`,
+            [registry_item_id, name, email, amount, message]
+        );
+
         // Initialize Paystack transaction
         const response = await axios.post(
             `${PAYSTACK_BASE_URL}/transaction/initialize`,
@@ -44,6 +52,7 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
                 metadata: {
                     registry_item_id,
                     name,
+                    email,
                     message
                 }
             },
@@ -80,15 +89,15 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
 
         if (status === 'success') {
             const { metadata, amount } = data;
-            const { registry_item_id, name, message } = metadata;
+            const { registry_item_id, name, email, message } = metadata;
 
             // Record contribution
             const result = await pool.query(
                 `INSERT INTO contributors 
-                (registry_item_id, name, amount, message, payment_reference) 
-                VALUES ($1, $2, $3, $4, $5) 
+                (registry_item_id, name, email, amount, message, payment_reference, status) 
+                VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
                 RETURNING *`,
-                [registry_item_id, name, amount / 100, message, reference]
+                [registry_item_id, name, email, amount / 100, message, reference]
             );
 
             // Update registry item contributions

@@ -15,7 +15,8 @@ export const submitSurvey = async (req: Request, res: Response): Promise<void> =
             culture_show_gift,
             culture_associate_gift,
             open_to_conversation,
-            phone_number
+            phone_number,
+            additional_comments
         } = req.body;
 
         // Validation for required fields
@@ -29,12 +30,14 @@ export const submitSurvey = async (req: Request, res: Response): Promise<void> =
             : share_link_method;
 
         const phoneNumberValue = phone_number && phone_number.trim() !== '' ? phone_number : null;
+        const additionalCommentsValue = additional_comments && additional_comments.trim() !== '' ? additional_comments : null;
+
         const query = `INSERT INTO survey_responses (
-            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, share_link_method, culture_show_gift, culture_associate_gift, open_to_conversation, phone_number
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`;
+            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, share_link_method, culture_show_gift, culture_associate_gift, open_to_conversation, phone_number, additional_comments
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`;
 
         const values = [
-            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, shareLinkMethodStr, culture_show_gift, culture_associate_gift, open_to_conversation, phoneNumberValue
+            name, email, relationship_status, given_gift, received_unwanted_gift, gift_ease, would_use_registry, shareLinkMethodStr, culture_show_gift, culture_associate_gift, open_to_conversation, phoneNumberValue, additionalCommentsValue
         ];
 
         const result = await pool.query(query, values);

@@ -16,6 +16,7 @@ import HowItWorks from './pages/HowItWorks';
 import Contact from './pages/ContactUs';
 import Survey from './pages/Survey';
 import ScrollToTop from './components/ScrollToTop';
+import ContributePage from './pages/ContributePage';
 
 export function App() {
   return <AuthProvider>
@@ -33,6 +34,7 @@ export function App() {
           <Route path="catalog" element={<ProductCatalog />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/share/:shareUrl" element={<ShareRegistry />} />
+          <Route path="/share/:shareUrl/contribute/:itemId" element={<ContributePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />

@@ -17,6 +17,7 @@ type FormData = {
   culture_associate_gift: string;
   open_to_conversation: string;
   phone_number?: string;
+  additional_comments?: string;
 };
 
 const Survey = () => {
@@ -34,6 +35,7 @@ const Survey = () => {
     culture_associate_gift: '',
     open_to_conversation: '',
     phone_number: '',
+    additional_comments: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -215,8 +217,8 @@ const Survey = () => {
                 required
               >
                 <option value="">Select option</option>
-                <option value="Yes">Yes, not a good experience</option>
-                <option value="No">No, I haven't received any unwanted gifts</option>
+                <option value="Yes">Yes, I have</option>
+                <option value="No">No, I haven't</option>
               </select>
             </div>
             <div>
@@ -328,7 +330,7 @@ const Survey = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-[#2C1810] mb-4">Let's Talk</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Would you be open to a short (20-minute) online conversation to help us understand your needs better?<span className="text-red-600">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">We would appreciate more input from you. Would you be open to a short (20-minute) conversation to help us understand your needs better?<span className="text-red-600">*</span></label>
               <select
                 name="open_to_conversation"
                 value={form.open_to_conversation}
@@ -355,6 +357,16 @@ const Survey = () => {
                 />
               </div>
             )}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Additional Comments (Optional)</label>
+              <textarea
+                className="w-full border rounded px-3 py-2"
+                value={form.additional_comments}
+                onChange={e => setForm({ ...form, additional_comments: e.target.value })}
+                rows={4}
+                placeholder="Do you have any other thoughts or suggestions about wedding gift registries?"
+              />
+            </div>
           </div>
         );
 

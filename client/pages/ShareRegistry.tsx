@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getRegistryByShareUrl, getRegistryPictures } from '../utils/api';
 import { Dialog } from '@headlessui/react';
 import { getConfig } from '../config';
@@ -31,9 +31,7 @@ const ShareRegistry = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPicturesModal, setShowPicturesModal] = useState(false);
-  const [showContributeModal, setShowContributeModal] = useState(false);
-  const [contributeItem, setContributeItem] = useState<RegistryItem | null>(null);
-  const [contributeAmount, setContributeAmount] = useState(1000);
+  const navigate = useNavigate();
   const MIN_CONTRIB = 1000;
 
   useEffect(() => {
@@ -67,21 +65,7 @@ const ShareRegistry = () => {
   };
 
   const handleContributeClick = (item: RegistryItem, product: Product) => {
-    setContributeItem(item);
-    const total = product.price * item.quantity;
-    const remaining = Math.max(total - item.contributions_received, MIN_CONTRIB);
-    setContributeAmount(remaining); // Default to 100% of remaining
-    setShowContributeModal(true);
-  };
-
-  const handleAmountChange = (value: number, min: number, max: number) => {
-    setContributeAmount(Math.max(min, Math.min(max, value)));
-  };
-
-  const handleContribute = () => {
-    // Placeholder for backend integration
-    alert(`Contributed ₦${contributeAmount} to item ${contributeItem?.id}`);
-    setShowContributeModal(false);
+    navigate(`/share/${shareUrl}/contribute/${item.id}`);
   };
 
   if (loading) {
@@ -179,67 +163,6 @@ const ShareRegistry = () => {
           </div>
         )}
       </div>
-      {/* Contribute Modal */}
-      <Dialog open={showContributeModal} onClose={() => setShowContributeModal(false)} className="fixed z-10 inset-0 overflow-y-auto">
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="fixed inset-0 bg-black opacity-30" />
-          <Dialog.Panel className="relative bg-white rounded-lg shadow-lg max-w-sm w-full mx-auto p-6 z-20">
-            <Dialog.Title className="text-lg font-semibold mb-4">Contribute to Gift</Dialog.Title>
-            {contributeItem && (() => {
-              const product = products.find(p => p.id === contributeItem.product_id);
-              if (!product) return null;
-              const total = product.price * contributeItem.quantity;
-              const min = MIN_CONTRIB;
-              const max = total - contributeItem.contributions_received;
-              const percent = Math.round((contributeAmount / total) * 100);
-              return (
-                <div>
-                  <div className="mb-2 font-medium text-gray-900">{product.name}</div>
-                  <div className="mb-2 text-gray-600 text-sm">Total: ₦{total.toLocaleString()}</div>
-                  <div className="mb-2 text-gray-600 text-sm">Already contributed: ₦{contributeItem.contributions_received.toLocaleString()}</div>
-                  <div className="mb-2 text-gray-600 text-sm">Amount remaining: ₦{(total - contributeItem.contributions_received).toLocaleString()}</div>
-                  <label className="block mb-2 text-sm font-medium">Contribution Amount</label>
-                  <div className="flex items-center gap-2 mb-2">
-                    <input
-                      type="number"
-                      min={min}
-                      max={max}
-                      value={contributeAmount}
-                      onChange={e => handleAmountChange(Number(e.target.value), min, max)}
-                      className="w-32 border rounded px-3 py-2"
-                    />
-                    <span className="text-gray-600">₦</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={min}
-                    max={max}
-                    value={contributeAmount}
-                    onChange={e => handleAmountChange(Number(e.target.value), min, max)}
-                    className="w-full mb-2"
-                  />
-                  <div className="mb-4 text-sm text-gray-700">You are contributing <span className="font-semibold">₦{contributeAmount.toLocaleString()}</span> ({percent}%)</div>
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setShowContributeModal(false)}
-                      className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleContribute}
-                      className="px-4 py-2 rounded bg-[#B8860B] text-white hover:bg-[#8B6508]"
-                      disabled={contributeAmount < min || contributeAmount > max}
-                    >
-                      Contribute
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-          </Dialog.Panel>
-        </div>
-      </Dialog>
     </div>
   );
 };
