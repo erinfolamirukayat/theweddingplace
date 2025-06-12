@@ -113,4 +113,9 @@ export async function removeRegistryPicture(registryId: string, imageUrl: string
     method: 'DELETE',
   });
   return handleResponse(res);
+}
+
+export async function getRegistryItem(shareUrl: string, itemId: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/registries/share/${shareUrl}/items/${itemId}`);
+  return handleResponse(res);
 } 

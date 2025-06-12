@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HeartIcon, ShareIcon } from 'lucide-react';
+import { getRegistries } from '../utils/api';
 
 const BANNER_IMAGE =
   'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds5.png'; // Couple image from Unsplash
@@ -49,7 +50,7 @@ const Home = () => {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const testimonialsPerView = 1; // default for mobile
   const [perView, setPerView] = useState(testimonialsPerView);
-  const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Responsive testimonials per view
   useEffect(() => {
@@ -138,7 +139,7 @@ const Home = () => {
     },
   ];
   const [featuredIdx, setFeaturedIdx] = useState(0);
-  const featuredAutoRef = useRef<NodeJS.Timeout | null>(null);
+  const featuredAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Featured carousel auto-advance
   useEffect(() => {
@@ -171,6 +172,21 @@ const Home = () => {
   const nextFeatured = () => {
     setFeaturedIdx((i) => (i + 1) % featuredProducts.length);
   };
+
+  const [registries, setRegistries] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchRegistries = async () => {
+        try {
+            const data = await getRegistries();
+            setRegistries(data);
+        } catch (error) {
+            console.error('Error fetching registries:', error);
+        }
+    };
+
+    fetchRegistries();
+  }, []);
 
   return <div className="max-w-6xl mx-auto px-2 sm:px-4 mt-4">
       {/* Banner */}

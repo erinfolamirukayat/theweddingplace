@@ -17,6 +17,7 @@ import Contact from './pages/ContactUs';
 import Survey from './pages/Survey';
 import ScrollToTop from './components/ScrollToTop';
 import ContributePage from './pages/ContributePage';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 export function App() {
   return <AuthProvider>
@@ -40,6 +41,7 @@ export function App() {
           <Route path="/contact" element={<Contact />} />
         </Route>
         <Route path="/survey" element={<Survey />} />
+        <Route path="/payment/verify" element={<PaymentSuccess />} />
       </Routes>
     </BrowserRouter>
   </AuthProvider>;

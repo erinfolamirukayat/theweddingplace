@@ -1,19 +1,26 @@
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import type { UserConfig } from 'vite';
 
-export default defineConfig({
+const config: UserConfig = {
   plugins: [
     viteStaticCopy({
       targets: [
         {
-          src: 'public/_redirects', // <-- updated path
-          dest: '.' // copy to dist root
+          src: 'public/_redirects',
+          dest: '.'
         }
       ]
     })
   ],
   build: {
-    outDir: 'dist', // adjust if your build output is elsewhere
+    outDir: 'dist',
     emptyOutDir: true
+  },
+  server: {
+    port: 5173,
+    host: true
   }
-});
+};
+
+export default defineConfig(config);

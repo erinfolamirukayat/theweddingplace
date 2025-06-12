@@ -231,4 +231,42 @@ export const getMyRegistries = async (req: Request, res: Response): Promise<void
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
+};
+
+export const getRegistryItemByShareUrl = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { shareUrl, itemId } = req.params;
+
+        // First get the registry by share URL
+        const registryResult = await pool.query(
+            'SELECT * FROM registries WHERE share_url = $1',
+            [shareUrl]
+        );
+
+        if (registryResult.rows.length === 0) {
+            res.status(404).json({ error: 'Registry not found' });
+            return;
+        }
+
+        const registry = registryResult.rows[0];
+
+        // Then get the item with its product details
+        const itemResult = await pool.query(
+            `SELECT ri.*, p.name, p.description, p.price, p.image_url
+             FROM registry_items ri
+             JOIN products p ON ri.product_id = p.id
+             WHERE ri.id = $1 AND ri.registry_id = $2`,
+            [itemId, registry.id]
+        );
+
+        if (itemResult.rows.length === 0) {
+            res.status(404).json({ error: 'Item not found' });
+            return;
+        }
+
+        res.json(itemResult.rows[0]);
+    } catch (error) {
+        console.error('Error getting registry item:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }; 

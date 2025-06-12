@@ -12,7 +12,8 @@ import {
     addRegistryPicture,
     removeRegistryPicture,
     getRegistryByShareUrl,
-    getMyRegistries
+    getMyRegistries,
+    getRegistryItemByShareUrl
 } from '../controllers/registries';
 import { authenticateJWT } from '../middleware/auth';
 
@@ -38,5 +39,8 @@ router.delete('/:id/pictures/:pictureId', removeRegistryPicture);
 
 // New route to get a registry by share_url
 router.get('/share/:shareUrl', getRegistryByShareUrl);
+
+// Add this route with the other registry routes
+router.get('/share/:shareUrl/items/:itemId', getRegistryItemByShareUrl);
 
 export default router; 
