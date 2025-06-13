@@ -6,6 +6,7 @@ import routes from "./routes";
 import authRoutes from "./routes/auth";
 import path from "path";
 import uploadRoutes from "./routes/upload";
+import paymentsRouter from "./routes/payments";
 
 // Load environment variables
 dotenv.config();
@@ -52,6 +53,7 @@ app.use("/api", routes);
 app.use("/api/auth", authRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/upload", uploadRoutes);
+app.use('/api/payments', paymentsRouter);
 
 // Basic route
 app.get("/", (req, res) => {

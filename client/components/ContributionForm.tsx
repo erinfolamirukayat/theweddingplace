@@ -70,8 +70,8 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         }
     };
 
-    const handlePaymentSuccess = (reference: string) => {
-        navigate(`/payment/verify?reference=${reference}`);
+    const handlePaymentSuccess = (response: { reference: string }) => {
+        navigate(`/payment/verify?reference=${response.reference}`);
     };
 
     const handlePaymentClose = () => {

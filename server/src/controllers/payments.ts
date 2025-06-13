@@ -60,7 +60,17 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        // Verify payment with Paystack
+        // Check if the payment already exists in the database
+        const existing = await pool.query(
+            'SELECT * FROM contributors WHERE payment_reference = $1',
+            [reference]
+        );
+        if (existing.rows.length > 0) {
+            res.json({ status: 'success', data: existing.rows[0] });
+            return;
+        }
+
+        // If not, verify with Paystack and insert as before
         const paystackService = PaystackService.getInstance();
         const response = await paystackService.verifyTransaction(reference as string);
 
@@ -70,36 +80,47 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
             const { metadata, amount } = data;
             const { registry_item_id, name, email, message } = metadata;
 
-            // Record contribution
-            const result = await pool.query(
-                `INSERT INTO contributors 
-                (registry_item_id, name, email, amount, message, payment_reference, status) 
-                VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
-                RETURNING *`,
-                [registry_item_id, name, email, amount / 100, message, reference]
-            );
+            try {
+                const result = await pool.query(
+                    `INSERT INTO contributors 
+                    (registry_item_id, name, email, amount, message, payment_reference, status) 
+                    VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
+                    RETURNING *`,
+                    [registry_item_id, name, email, amount / 100, message, reference]
+                );
 
-            // Update registry item contributions
-            await pool.query(
-                `UPDATE registry_items 
-                SET contributions_received = contributions_received + $1,
-                    is_fully_funded = CASE 
-                        WHEN contributions_received + $1 >= (
-                            SELECT price 
-                            FROM products 
-                            WHERE id = (
-                                SELECT product_id 
-                                FROM registry_items 
-                                WHERE id = $2
-                            )
-                        ) THEN true 
-                        ELSE false 
-                    END
-                WHERE id = $2`,
-                [amount / 100, registry_item_id]
-            );
+                await pool.query(
+                    `UPDATE registry_items 
+                    SET contributions_received = contributions_received + $1,
+                        is_fully_funded = CASE 
+                            WHEN contributions_received + $1 >= (
+                                SELECT price 
+                                FROM products 
+                                WHERE id = (
+                                    SELECT product_id 
+                                    FROM registry_items 
+                                    WHERE id = $2
+                                )
+                            ) THEN true 
+                            ELSE false 
+                        END
+                    WHERE id = $2`,
+                    [amount / 100, registry_item_id]
+                );
 
-            res.json({ status: 'success', data: result.rows[0] });
+                res.json({ status: 'success', data: result.rows[0] });
+            } catch (err: any) {
+                // If unique violation, fetch and return the existing record
+                if (err.code === '23505') { // Postgres unique violation
+                    const existing = await pool.query(
+                        'SELECT * FROM contributors WHERE payment_reference = $1',
+                        [reference]
+                    );
+                    res.json({ status: 'success', data: existing.rows[0] });
+                } else {
+                    throw err;
+                }
+            }
         } else {
             res.status(400).json({ error: 'Payment verification failed' });
         }

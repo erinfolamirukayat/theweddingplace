@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { usePaystackPayment } from 'react-paystack';
 import { getConfig } from '../config';
 
@@ -11,7 +11,7 @@ interface PaystackButtonProps {
         email: string;
         message?: string;
     };
-    onSuccess: (reference: string) => void;
+    onSuccess: (response: { reference: string }) => void;
     onClose: () => void;
 }
 
@@ -34,7 +34,14 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
             registry_item_id: metadata.registry_item_id,
             name: metadata.name,
             email: metadata.email,
-            message: metadata.message
+            message: metadata.message,
+            custom_fields: [
+                {
+                    display_name: "Registry Item",
+                    variable_name: "registry_item_id",
+                    value: metadata.registry_item_id
+                }
+            ]
         },
         currency: 'NGN'
     };
@@ -70,11 +77,13 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         }
 
         try {
-            initializePayment(onSuccess, onClose);
-        } catch (error) {
+            initializePayment({
+                onSuccess,
+                onClose
+            });
+        } catch (error: any) {
             console.error('Payment initialization failed:', error);
-            if (error && typeof error === 'object' && 'issues' in error) {
-                // @ts-ignore
+            if (error && error.issues) {
                 console.error('Paystack issues:', error.issues);
             }
             alert('Failed to initialize payment. Please try again.');
