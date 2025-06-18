@@ -36,6 +36,7 @@ const ShareRegistry = () => {
 
   useEffect(() => {
     if (shareUrl) {
+      console.log('Fetching registry', shareUrl);
       fetchRegistryByShareUrl(shareUrl);
     }
   }, [shareUrl]);

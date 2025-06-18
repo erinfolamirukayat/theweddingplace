@@ -75,8 +75,8 @@ const RegistryView = () => {
   };
 
   const handleShare = () => {
-    if (registry?.share_url) {
-      const shareLink = `${window.location.origin}/share/${registry.share_url}`;
+    if (registry?.share_slug) {
+      const shareLink = `${window.location.origin}/share/${registry.share_slug}`;
       navigator.clipboard.writeText(shareLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

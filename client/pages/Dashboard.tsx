@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getMyRegistries } from '../utils/api';
 
 const Dashboard = () => {
+  const [registries, setRegistries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
     totalItems: 0,
     fullyContributed: 0,
@@ -22,6 +25,12 @@ const Dashboard = () => {
   const [accountDetails, setAccountDetails] = useState({ bank: '', accountNumber: '', name: '' });
   const [provideLater, setProvideLater] = useState(false);
 
+  useEffect(() => {
+    getMyRegistries()
+      .then(setRegistries)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto py-6 sm:py-8 px-2 sm:px-4">
       {/* Section 1: Registry Summary */}
@@ -38,7 +47,23 @@ const Dashboard = () => {
 
       {/* Section 2: Quick Links */}
       <section className="bg-white rounded shadow p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 items-center justify-between mb-6 sm:mb-8">
-        <Link to="/registry/1" className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]">View Registry</Link>
+        {loading ? (
+          <div>Loading...</div>
+        ) : registries.length > 0 ? (
+          <Link
+            to={`/registry/${registries[0].id}`}
+            className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]"
+          >
+            View Registry
+          </Link>
+        ) : (
+          <Link
+            to="/create-registry"
+            className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]"
+          >
+            Create Registry
+          </Link>
+        )}
         <Link to="/catalog" className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]">Browse Products</Link>
         <Link to="/profile" className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]">My Profile</Link>
       </section>

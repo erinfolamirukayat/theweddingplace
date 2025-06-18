@@ -2,6 +2,28 @@ import { Request, Response } from 'express';
 import { pool } from '../index';
 import { Registry, RegistryItem, RegistryPicture } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+
+function generateUniqueId(length: number = 4): string {
+  return crypto.randomBytes(length).toString('hex');
+}
+
+function generateSlug(coupleNames: string): string {
+  let base = coupleNames
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, '-');
+  const unique = generateUniqueId(2);
+  return `${base}-${unique}`;
+}
+
+function slugify(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
 
 // Get all registries
 export const getAllRegistries = async (req: Request, res: Response): Promise<void> => {
@@ -35,20 +57,27 @@ export const getRegistryById = async (req: Request, res: Response): Promise<void
 // Create a new registry
 export const createRegistry = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { couple_names, wedding_date, story, photo_url, phone, wedding_city } = req.body;
-        const share_url = uuidv4();
+        const { couple_names, ...rest } = req.body;
+        let baseSlug = slugify(couple_names);
+        let slug = baseSlug + generateUniqueId(2);
+        // Ensure uniqueness
+        let exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);
+        while (exists.rows.length > 0) {
+            slug = baseSlug + generateUniqueId(3);
+            exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);
+        }
         const user_id = (req as any).user?.userId; // from JWT
 
         const result = await pool.query(
-            'INSERT INTO registries (couple_names, wedding_date, story, share_url, user_id, phone, wedding_city) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [couple_names, wedding_date, story, share_url, user_id, phone, wedding_city]
+            'INSERT INTO registries (couple_names, wedding_date, story, share_slug, user_id, phone, wedding_city) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [couple_names, rest.wedding_date, rest.story, slug, user_id, rest.phone, rest.wedding_city]
         );
         const registry = result.rows[0];
 
-        if (photo_url) {
+        if (rest.photo_url) {
             await pool.query(
                 'INSERT INTO registry_pictures (registry_id, image_url) VALUES ($1, $2)',
-                [registry.id, photo_url]
+                [registry.id, rest.photo_url]
             );
         }
 
@@ -210,15 +239,17 @@ export const removeRegistryPicture = async (req: Request, res: Response): Promis
 
 // Get registry by share_url
 export const getRegistryByShareUrl = async (req: Request, res: Response): Promise<void> => {
-    const { shareUrl } = req.params;
     try {
-        const result = await pool.query('SELECT * FROM registries WHERE share_url = $1', [shareUrl]);
+        const { shareSlug } = req.params;
+        console.log('shareUrl param:', shareSlug);
+        const result = await pool.query('SELECT * FROM registries WHERE share_slug = $1', [shareSlug]);
         if (result.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
         }
         res.json(result.rows[0]);
     } catch (error) {
+        console.error('Error fetching registry by slug:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -235,12 +266,12 @@ export const getMyRegistries = async (req: Request, res: Response): Promise<void
 
 export const getRegistryItemByShareUrl = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { shareUrl, itemId } = req.params;
+        const { shareSlug, itemId } = req.params;
 
-        // First get the registry by share URL
+        // First get the registry by share_slug
         const registryResult = await pool.query(
-            'SELECT * FROM registries WHERE share_url = $1',
-            [shareUrl]
+            'SELECT * FROM registries WHERE share_slug = $1',
+            [shareSlug]
         );
 
         if (registryResult.rows.length === 0) {
@@ -269,4 +300,19 @@ export const getRegistryItemByShareUrl = async (req: Request, res: Response): Pr
         console.error('Error getting registry item:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+};
+
+export const getRegistryByShareSlug = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { share_slug } = req.params;
+    const result = await pool.query('SELECT * FROM registries WHERE share_slug = $1', [share_slug]);
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Registry not found' });
+      return;
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error getting registry by share_slug:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }; 

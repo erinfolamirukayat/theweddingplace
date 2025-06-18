@@ -1,5 +1,4 @@
-import React from 'react';
-import { usePaystackPayment } from 'react-paystack';
+import React, { useEffect } from 'react';
 import { getConfig } from '../config';
 
 interface PaystackButtonProps {
@@ -15,6 +14,12 @@ interface PaystackButtonProps {
     onClose: () => void;
 }
 
+declare global {
+    interface Window {
+        PaystackPop: any;
+    }
+}
+
 const PaystackButton: React.FC<PaystackButtonProps> = ({
     email,
     amount,
@@ -22,40 +27,28 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
     onSuccess,
     onClose
 }) => {
-    // Log the Paystack public key for debugging
-    console.log('Paystack Public Key:', getConfig().paystackPublicKey);
+    useEffect(() => {
+        // Load Paystack script
+        const script = document.createElement('script');
+        script.src = 'https://js.paystack.co/v1/inline.js';
+        script.async = true;
+        document.body.appendChild(script);
 
-    const config = {
-        reference: (new Date()).getTime().toString(),
-        email,
-        amount: Math.round(amount * 100), // Convert to kobo and ensure it's an integer
-        publicKey: getConfig().paystackPublicKey,
-        metadata: {
-            registry_item_id: metadata.registry_item_id,
-            name: metadata.name,
-            email: metadata.email,
-            message: metadata.message,
-            custom_fields: [
-                {
-                    display_name: "Registry Item",
-                    variable_name: "registry_item_id",
-                    value: metadata.registry_item_id
-                }
-            ]
-        },
-        currency: 'NGN'
-    };
-
-    const initializePayment = usePaystackPayment(config);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Log the configuration for debugging
-        console.log('Paystack Config:', {
-            ...config,
-            publicKey: '***' // Hide the public key in logs
+        // Enhanced debugging logs
+        console.log('Initializing Paystack payment with config:', {
+            email,
+            amount,
+            metadata,
+            publicKey: getConfig().paystackPublicKey || 'NOT_SET'
         });
 
         // Validate required parameters
@@ -75,17 +68,42 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
             alert('Invalid registry item');
             return;
         }
+        if (!getConfig().paystackPublicKey) {
+            alert('Payment configuration error: Paystack public key not found');
+            return;
+        }
 
         try {
-            initializePayment({
-                onSuccess,
-                onClose
+            const handler = window.PaystackPop?.setup({
+                key: getConfig().paystackPublicKey,
+                email,
+                amount: Math.round(amount * 100), // Convert to kobo
+                currency: 'NGN',
+                ref: (new Date()).getTime().toString(),
+                metadata: {
+                    registry_item_id: metadata.registry_item_id,
+                    name: metadata.name,
+                    email: metadata.email,
+                    message: metadata.message,
+                    custom_fields: [
+                        {
+                            display_name: "Registry Item",
+                            variable_name: "registry_item_id",
+                            value: metadata.registry_item_id
+                        }
+                    ]
+                },
+                callback: (response: { reference: string }) => {
+                    onSuccess(response);
+                },
+                onClose: () => {
+                    onClose();
+                }
             });
+
+            handler.openIframe();
         } catch (error: any) {
             console.error('Payment initialization failed:', error);
-            if (error && error.issues) {
-                console.error('Paystack issues:', error.issues);
-            }
             alert('Failed to initialize payment. Please try again.');
         }
     };

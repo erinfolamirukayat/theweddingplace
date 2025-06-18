@@ -55,8 +55,9 @@ export async function getMyRegistries(): Promise<any[]> {
   return handleResponse(res);
 }
 
-export async function getRegistryByShareUrl(shareUrl: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/share/${shareUrl}`);
+export async function getRegistryByShareUrl(shareSlug: string): Promise<any> {
+  console.log('API_BASE:', API_BASE);
+  const res = await fetch(`${API_BASE}/registries/share/${shareSlug}`);
   return handleResponse(res);
 }
 

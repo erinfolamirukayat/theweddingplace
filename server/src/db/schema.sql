@@ -20,7 +20,8 @@ CREATE TABLE registries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     wedding_city VARCHAR(255),
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    phone VARCHAR(30)
+    phone VARCHAR(30),
+    share_slug VARCHAR(100) UNIQUE
 );
 
 -- Create registry_items table
@@ -86,4 +87,7 @@ CREATE TABLE survey_responses (
 );
 
 -- Add status column to contributors table
-ALTER TABLE contributors ADD COLUMN status VARCHAR(20); 
+ALTER TABLE contributors ADD COLUMN status VARCHAR(20);
+
+-- Add share_slug column to registries table
+ALTER TABLE registries ADD COLUMN share_slug VARCHAR(100) UNIQUE; 

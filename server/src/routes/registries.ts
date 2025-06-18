@@ -19,6 +19,12 @@ import { authenticateJWT } from '../middleware/auth';
 
 const router = express.Router();
 
+// New route to get a registry by share_slug
+router.get('/share/:shareSlug', getRegistryByShareUrl);
+
+// Add this route with the other registry routes
+router.get('/share/:shareSlug/items/:itemId', getRegistryItemByShareUrl);
+
 // Registry CRUD operations
 router.get('/', getAllRegistries);
 router.get('/my', authenticateJWT, getMyRegistries);
@@ -36,11 +42,5 @@ router.delete('/:id/items/:itemId', removeRegistryItem);
 router.get('/:id/pictures', getRegistryPictures);
 router.post('/:id/pictures', addRegistryPicture);
 router.delete('/:id/pictures/:pictureId', removeRegistryPicture);
-
-// New route to get a registry by share_url
-router.get('/share/:shareUrl', getRegistryByShareUrl);
-
-// Add this route with the other registry routes
-router.get('/share/:shareUrl/items/:itemId', getRegistryItemByShareUrl);
 
 export default router; 

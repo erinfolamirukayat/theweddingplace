@@ -25,9 +25,18 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         message: ''
     });
     const [error, setError] = useState('');
+    const [touchedFields, setTouchedFields] = useState({
+        name: false,
+        email: false,
+        amount: false
+    });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        setTouchedFields(prev => ({
+            ...prev,
+            [name]: true
+        }));
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -35,6 +44,10 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
     };
 
     const handleAmountChange = (value: number | string, fromSlider = false) => {
+        setTouchedFields(prev => ({
+            ...prev,
+            amount: true
+        }));
         let numValue: number;
         if (typeof value === 'string') {
             if (value === '') {
@@ -90,6 +103,13 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
             amount >= MIN_CONTRIB &&
             amount <= remainingAmount
         );
+    };
+
+    const shouldShowValidation = () => {
+        // Show validation if all required fields have been touched
+        return (touchedFields.name && touchedFields.email && touchedFields.amount) ||
+               // Or if at least one field is touched and user attempts to proceed (paymentData is accessed)
+               (Object.values(touchedFields).some(touched => touched) && !isFormValid() && !paymentData);
     };
 
     // Add function to prepare payment data
@@ -219,7 +239,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                             Pay with Paystack
                         </button>
                     )}
-                    {!isFormValid() && (
+                    {!isFormValid() && shouldShowValidation() && (
                         <p className="mt-2 text-sm text-red-600">
                             Please fill in all required fields and ensure the amount is between ₦{MIN_CONTRIB.toLocaleString()} and ₦{remainingAmount.toLocaleString()}
                         </p>
