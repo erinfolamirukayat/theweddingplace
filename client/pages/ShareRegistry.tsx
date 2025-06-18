@@ -53,7 +53,7 @@ const ShareRegistry = () => {
       const itemsRes = await fetch(`${getConfig().apiUrl}/registries/${reg.id}/items`);
       if (!itemsRes.ok) throw new Error('Failed to fetch items');
       const itemsData = await itemsRes.json();
-      setItems(itemsData.filter((item: RegistryItem) => !item.is_fully_funded));
+      setItems(itemsData); // Store all items without filtering
       // Fetch products
       const prodsRes = await fetch(`${getConfig().apiUrl}/products`);
       const prods = await prodsRes.json();
@@ -69,18 +69,71 @@ const ShareRegistry = () => {
     navigate(`/share/${shareUrl}/contribute/${item.id}`);
   };
 
+  // Separate items into two categories
+  const openItems = items.filter(item => !item.is_fully_funded);
+  const fullyFundedItems = items.filter(item => item.is_fully_funded);
+
+  const renderItem = (item: RegistryItem, isFullyFunded: boolean) => {
+    const product = products.find(p => p.id === item.product_id);
+    if (!product) return null;
+    const total = product.price * item.quantity;
+    const remaining = Math.max(total - item.contributions_received, 0);
+    const progress = (item.contributions_received / total) * 100;
+
+    return (
+      <div key={item.id} className="border border-gray-200 rounded-lg p-4 flex items-center space-x-4">
+        <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+        <div className="flex-grow">
+          <h3 className="font-semibold text-[#2C1810]">{product.name}</h3>
+          <p className="text-sm text-gray-600 mt-1">{product.description}</p>
+          <div className="mt-2 text-sm">
+            <span className="font-semibold">Quantity:</span>{' '}
+            <span className="font-semibold">{item.quantity}</span>
+          </div>
+          <div className="mt-2">
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>Progress</span>
+              <span>₦{item.contributions_received.toLocaleString()} of ₦{total.toLocaleString()}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`rounded-full h-2 ${isFullyFunded ? 'bg-green-500' : 'bg-[#B8860B]'}`}
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
+            </div>
+          </div>
+          {!isFullyFunded && remaining > 0 && (
+            <button
+              className="ml-4 mt-3 px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]"
+              onClick={() => handleContributeClick(item, product)}
+            >
+              Contribute
+            </button>
+          )}
+          {isFullyFunded && (
+            <div className="ml-4 mt-3 px-4 py-2 bg-gray-100 text-gray-500 rounded-md inline-block">
+              Fully Funded
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
-  if (error) {
-    return <div className="flex justify-center items-center h-64 text-red-600">{error}</div>;
-  }
-  if (!registry) {
-    return <div className="flex justify-center items-center h-64">Registry not found</div>;
+
+  if (error || !registry) {
+    return (
+      <div className="text-center text-red-600 p-4">
+        {error || 'Failed to load registry'}
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h1 className="text-2xl font-bold text-[#2C1810] mb-2">{registry.couple_names}'s Registry</h1>
         <p className="text-gray-600 mb-2">Wedding Date: {new Date(registry.wedding_date).toLocaleDateString()}</p>
@@ -121,49 +174,24 @@ const ShareRegistry = () => {
           </div>
         </div>
       </Dialog>
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold text-[#2C1810] mb-4">Registry Items (Open for Contribution)</h2>
-        {items.length === 0 ? (
+        {openItems.length === 0 ? (
           <div className="text-center text-gray-500">All items have been fully funded!</div>
         ) : (
           <div className="grid gap-6">
-            {items.map(item => {
-              const product = products.find(p => p.id === item.product_id);
-              if (!product) return null;
-              const total = product.price * item.quantity;
-              const remaining = Math.max(total - item.contributions_received, 0);
-              const progress = item.contributions_received / total * 100;
-              return (
-                <div key={item.id} className="border border-gray-200 rounded-lg p-4 flex items-center space-x-4">
-                  <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-[#2C1810]">{product.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-                    <div className="mt-2 text-sm"><span className="font-semibold">Quantity:</span> <span className="font-semibold">{item.quantity}</span></div>
-                    <div className="mt-2">
-                      <div className="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Progress</span>
-                        <span>₦{item.contributions_received.toLocaleString()} of ₦{total.toLocaleString()}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-[#B8860B] rounded-full h-2" style={{ width: `${Math.min(progress, 100)}%` }} />
-                      </div>
-                    </div>
-                    {remaining > 0 && (
-                      <button
-                        className="ml-4 mt-3 px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]"
-                        onClick={() => handleContributeClick(item, product)}
-                      >
-                        Contribute
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {openItems.map(item => renderItem(item, false))}
           </div>
         )}
       </div>
+      {fullyFundedItems.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-[#2C1810] mb-4">Fully Funded Items</h2>
+          <div className="grid gap-6">
+            {fullyFundedItems.map(item => renderItem(item, true))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

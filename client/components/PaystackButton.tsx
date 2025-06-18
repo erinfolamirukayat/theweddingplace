@@ -34,6 +34,17 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         script.async = true;
         document.body.appendChild(script);
 
+        // Check if Paystack key is configured
+        const paystackKey = getConfig().paystackPublicKey;
+        if (!paystackKey) {
+            console.error(
+                'Paystack public key not found. This usually means:\n' +
+                '1. In development: Missing VITE_PAYSTACK_PUBLIC_KEY in .env file\n' +
+                '2. In production: Missing environment variable in Netlify dashboard\n' +
+                'Please check the configuration and deploy again.'
+            );
+        }
+
         return () => {
             document.body.removeChild(script);
         };
@@ -43,12 +54,16 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         e.preventDefault();
         e.stopPropagation();
 
+        const paystackKey = getConfig().paystackPublicKey;
+
         // Enhanced debugging logs
-        console.log('Initializing Paystack payment with config:', {
+        console.log('Payment Configuration Status:', {
             email,
             amount,
             metadata,
-            publicKey: getConfig().paystackPublicKey || 'NOT_SET'
+            environment: window.location.hostname === 'localhost' ? 'development' : 'production',
+            paystackKeyConfigured: !!paystackKey,
+            hostname: window.location.hostname
         });
 
         // Validate required parameters
@@ -68,14 +83,17 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
             alert('Invalid registry item');
             return;
         }
-        if (!getConfig().paystackPublicKey) {
-            alert('Payment configuration error: Paystack public key not found');
+        if (!paystackKey) {
+            alert(
+                'Payment configuration error: Paystack public key not found.\n\n' +
+                'If you are seeing this in production, please contact support.'
+            );
             return;
         }
 
         try {
             const handler = window.PaystackPop?.setup({
-                key: getConfig().paystackPublicKey,
+                key: paystackKey,
                 email,
                 amount: Math.round(amount * 100), // Convert to kobo
                 currency: 'NGN',
