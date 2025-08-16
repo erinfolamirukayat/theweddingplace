@@ -74,10 +74,9 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
         const paystackService = PaystackService.getInstance();
         const response = await paystackService.verifyTransaction(reference as string);
 
-        const { status, data } = response;
-
-        if (status === 'success') {
-            const { metadata, amount } = data;
+        // The top-level `status` from Paystack is a boolean. The transaction status is in `data.status`.
+        if (response.status && response.data.status === 'success') {
+            const { metadata, amount } = response.data;
             const { registry_item_id, name, email, message } = metadata;
 
             try {
@@ -86,7 +85,7 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
                     (registry_item_id, name, email, amount, message, payment_reference, status) 
                     VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
                     RETURNING *`,
-                    [registry_item_id, name, email, amount / 100, message, reference]
+                    [registry_item_id, name, email, amount / 100, message, response.data.reference]
                 );
 
                 await pool.query(
@@ -122,7 +121,7 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
                 }
             }
         } else {
-            res.status(400).json({ error: 'Payment verification failed' });
+            res.status(400).json({ error: `Payment verification failed: ${response.message}` });
         }
     } catch (error) {
         console.error('Error verifying payment:', error);
