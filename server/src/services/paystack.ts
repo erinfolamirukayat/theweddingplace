@@ -1,6 +1,30 @@
 import axios from 'axios';
 import { PAYSTACK_CONFIG } from '../config/paystack';
 
+interface InitializeTransactionResponse {
+    status: boolean;
+    message: string;
+    data: {
+        authorization_url: string;
+        access_code: string;
+        reference: string;
+    };
+}
+
+interface VerifyTransactionResponse {
+    status: boolean;
+    message: string;
+    data: {
+        id: number;
+        status: 'success' | 'failed' | 'abandoned';
+        reference: string;
+        amount: number;
+        customer: {
+            email: string;
+        };
+        metadata: any;
+    };
+}
 export class PaystackService {
     private static instance: PaystackService;
     private readonly headers: { Authorization: string };
@@ -30,7 +54,7 @@ export class PaystackService {
             email: string;
             message?: string;
         };
-    }) {
+    }): Promise<InitializeTransactionResponse> {
         try {
             const response = await axios.post(
                 `${PAYSTACK_CONFIG.baseUrl}/transaction/initialize`,
@@ -44,12 +68,16 @@ export class PaystackService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error initializing Paystack transaction:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Error initializing Paystack transaction:', error.response?.data || error.message);
+            } else {
+                console.error('An unexpected error occurred:', error);
+            }
             throw error;
         }
     }
 
-    async verifyTransaction(reference: string) {
+    async verifyTransaction(reference: string): Promise<VerifyTransactionResponse> {
         try {
             const response = await axios.get(
                 `${PAYSTACK_CONFIG.baseUrl}/transaction/verify/${reference}`,
@@ -57,7 +85,11 @@ export class PaystackService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error verifying Paystack transaction:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Error verifying Paystack transaction:', error.response?.data || error.message);
+            } else {
+                console.error('An unexpected error occurred:', error);
+            }
             throw error;
         }
     }
