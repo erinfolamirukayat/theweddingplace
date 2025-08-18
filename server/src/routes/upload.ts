@@ -1,31 +1,34 @@
-import express from 'express';
+import { Router, Request } from 'express';
 import multer from 'multer';
-import path from 'path';
+import { uploadImage, uploadImageFromUrl } from '../controllers/upload';
 
-const router = express.Router();
+const router = Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  }
+// Configure multer for in-memory storage, which is required by the Supabase controller.
+// The controller will handle the file buffer directly.
+const storage = multer.memoryStorage();
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WEBP are allowed.'));
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1024 * 1024 * 5 // 5 MB limit
+    },
+    fileFilter: fileFilter
 });
-const upload = multer({ storage });
+// Route for direct file uploads. The 'upload.single('image')' middleware
+// processes the file and makes it available as `req.file` in the controller.
+router.post('/image', upload.single('image'), uploadImage);
 
-router.post('/image', upload.single('image'), (req, res) => {
-  console.log('Upload request received:', req.body);
-  if (!req.file) {
-    console.error('No file uploaded');
-    res.status(400).json({ error: 'No file uploaded' });
-    return;
-  }
-  // Return the URL to the uploaded file
-  const url = `/uploads/${req.file.filename}`;
-  console.log('File uploaded successfully:', url);
-  res.json({ url });
-});
+// Route for uploading from a URL, which is handled by the controller.
+router.post('/image-from-url', uploadImageFromUrl);
 
 export default router; 

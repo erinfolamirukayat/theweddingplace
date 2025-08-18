@@ -5,8 +5,7 @@ import { createRegistry as apiCreateRegistry, addRegistryPicture } from '../util
 import { useNotification } from '../components/Layout';
 import { getConfig } from '../config';
 
-const MAX_UPLOADS = 10;
-const MAX_TOTAL = 20;
+const MAX_IMAGES = 10;
 
 const CreateRegistry = () => {
   const navigate = useNavigate();
@@ -15,7 +14,6 @@ const CreateRegistry = () => {
     couple_names: '',
     wedding_date: '',
     story: '',
-    pictures: [] as (string | File)[], // can be URLs or File objects
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageUrl, setImageUrl] = useState('');
@@ -26,6 +24,10 @@ const CreateRegistry = () => {
     phone: '',
     wedding_city: '',
   });
+
+  const [imageSourceType, setImageSourceType] = useState<'none' | 'file' | 'url'>('none');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -56,13 +58,13 @@ const CreateRegistry = () => {
       setErrors(prev => ({ ...prev, imageUrl: 'Please enter an image URL' }));
       return;
     }
-    if (formData.pictures.length >= MAX_TOTAL) {
-      setErrors(prev => ({ ...prev, imageUrl: `Maximum ${MAX_TOTAL} images allowed` }));
+    if (imageUrls.length >= MAX_IMAGES) {
+      setErrors(prev => ({ ...prev, imageUrl: `Maximum ${MAX_IMAGES} images allowed` }));
       return;
     }
     try {
       new URL(imageUrl);
-      setFormData(prev => ({ ...prev, pictures: [...prev.pictures, imageUrl] }));
+      setImageUrls(prev => [...prev, imageUrl]);
       setImageUrl('');
       setErrors(prev => {
         const updated = { ...prev };
@@ -74,27 +76,28 @@ const CreateRegistry = () => {
     }
   };
 
-  const handleRemoveImage = (index: number) => {
-    setFormData(prev => ({ ...prev, pictures: prev.pictures.filter((_, i) => i !== index) }));
+  const handleRemoveUrl = (index: number) => {
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const files = Array.from(e.target.files);
-    const currentUploads = formData.pictures.filter(p => p instanceof File).length;
-    const currentTotal = formData.pictures.length;
-    const availableUploads = Math.min(MAX_UPLOADS - currentUploads, MAX_TOTAL - currentTotal);
-    const filesToAdd = files.slice(0, availableUploads);
-    if (filesToAdd.length === 0) {
-      setErrors(prev => ({ ...prev, file: `You can upload up to ${MAX_UPLOADS} files and ${MAX_TOTAL} total images.` }));
-      return;
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const totalFiles = imageFiles.length + files.length;
+      if (totalFiles > MAX_IMAGES) {
+        setErrors(prev => ({ ...prev, file: `You can only upload a maximum of ${MAX_IMAGES} files.` }));
+        // Optionally, only take enough files to reach the limit
+        const remainingSlots = MAX_IMAGES - imageFiles.length;
+        setImageFiles(prev => [...prev, ...files.slice(0, remainingSlots)]);
+      } else {
+        setImageFiles(prev => [...prev, ...files]);
+        setErrors(prev => ({ ...prev, file: '' }));
+      }
     }
-    setFormData(prev => ({ ...prev, pictures: [...prev.pictures, ...filesToAdd] }));
-    setErrors(prev => {
-      const updated = { ...prev };
-      delete updated.file;
-      return updated;
-    });
   };
 
   const validateForm = () => {
@@ -114,23 +117,41 @@ const CreateRegistry = () => {
     setUploading(true);
     try {
       // Upload files and collect URLs
-      const uploadedUrls: string[] = [];
-      for (const pic of formData.pictures) {
-        if (pic instanceof File) {
+      let finalImageUrls: string[] = [];
+
+      if (imageSourceType === 'file') {
+        for (const file of imageFiles) {
           const formDataFile = new FormData();
-          formDataFile.append('image', pic);
+          formDataFile.append('image', file);
           const res = await fetch(`${getConfig().apiUrl}/upload/image`, {
             method: 'POST',
             body: formDataFile,
           });
           if (!res.ok) {
             const errorData = await res.json();
-            throw new Error(errorData.error || 'Failed to upload image');
+            throw new Error(errorData.error || `Failed to upload ${file.name}`);
           }
           const data = await res.json();
-          uploadedUrls.push(data.url);
-        } else {
-          uploadedUrls.push(pic);
+          finalImageUrls.push(data.url);
+        }
+      } else if (imageSourceType === 'url') {
+        // For each user-provided URL, ask the backend to fetch it and store it in our Supabase bucket.
+        for (const imageUrl of imageUrls) {
+          const res = await fetch(`${getConfig().apiUrl}/upload/image-from-url`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: imageUrl }),
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || `Failed to process image from URL: ${imageUrl}`);
+          }
+
+          const data = await res.json();
+          finalImageUrls.push(data.url);
         }
       }
       // Create the registry first (without pictures)
@@ -142,7 +163,7 @@ const CreateRegistry = () => {
         wedding_city: userFields.wedding_city,
       });
       // Add each picture to the registry
-      for (const url of uploadedUrls) {
+      for (const url of finalImageUrls) {
         await addRegistryPicture(registry.id, url);
       }
       localStorage.setItem('afriwed_registry_id', registry.id);
@@ -208,37 +229,77 @@ const CreateRegistry = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Wedding Pictures (up to 10 uploads, 20 total)</label>
-            <div className="flex items-center space-x-2 mt-2">
+            <label className="block text-sm font-medium text-gray-700">Wedding Pictures</label>
+            <select
+              value={imageSourceType}
+              onChange={(e) => setImageSourceType(e.target.value as 'none' | 'file' | 'url')}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+            >
+              <option value="none">I'll add pictures later</option>
+              <option value="file">Upload from my device</option>
+              <option value="url">Add from web links (e.g., Google Drive)</option>
+            </select>
+          </div>
+
+          {imageSourceType === 'file' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mt-4">Upload Files (up to {MAX_IMAGES})</label>
               <input
                 type="file"
                 accept="image/*"
                 multiple
                 onChange={handleFileChange}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                disabled={formData.pictures.filter(p => p instanceof File).length >= MAX_UPLOADS || formData.pictures.length >= MAX_TOTAL}
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#B8860B] file:text-white hover:file:bg-[#8B6508]"
+                disabled={imageFiles.length >= MAX_IMAGES}
               />
+              {errors.file && <p className="mt-1 text-sm text-red-600">{errors.file}</p>}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {imageFiles.map((file, idx) => (
+                  <div key={idx} className="relative w-20 h-20">
+                    <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover rounded-md" />
+                    <button type="button" onClick={() => handleRemoveFile(idx)} className="absolute top-0 right-0 bg-white rounded-full p-1 shadow">
+                      <XIcon className="h-4 w-4 text-red-500" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]" placeholder="Paste image URL and click +" disabled={formData.pictures.length >= MAX_TOTAL} />
-              <button type="button" onClick={handleAddImageUrl} className="inline-flex items-center px-2 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]" disabled={formData.pictures.length >= MAX_TOTAL}>
-                <ImageIcon className="h-4 w-4" />
-                <span className="ml-1">+</span>
-              </button>
+          )}
+
+          {imageSourceType === 'url' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mt-4">Add Image URLs (up to {MAX_IMAGES})</label>
+              <div className="flex items-center space-x-2 mt-1">
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                  placeholder="Paste image URL and click Add"
+                  disabled={imageUrls.length >= MAX_IMAGES}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddImageUrl}
+                  className="inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] disabled:bg-gray-400"
+                  disabled={!imageUrl || imageUrls.length >= MAX_IMAGES}
+                >
+                  Add
+                </button>
+              </div>
+              {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl}</p>}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {imageUrls.map((url, idx) => (
+                  <div key={idx} className="relative w-20 h-20">
+                    <img src={url} alt="Preview" className="w-full h-full object-cover rounded-md" />
+                    <button type="button" onClick={() => handleRemoveUrl(idx)} className="absolute top-0 right-0 bg-white rounded-full p-1 shadow">
+                      <XIcon className="h-4 w-4 text-red-500" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-            {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl}</p>}
-            {errors.file && <p className="mt-1 text-sm text-red-600">{errors.file}</p>}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.pictures.map((pic, idx) => (
-                <div key={idx} className="relative w-20 h-20">
-                  <img src={pic instanceof File ? URL.createObjectURL(pic) : pic} alt="Wedding" className="w-full h-full object-cover rounded-md" />
-                  <button type="button" onClick={() => handleRemoveImage(idx)} className="absolute top-0 right-0 bg-white rounded-full p-1 shadow">
-                    <XIcon className="h-4 w-4 text-red-500" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
           <div>
             <label htmlFor="story" className="block text-sm font-medium text-gray-700">
               Our Story (optional)

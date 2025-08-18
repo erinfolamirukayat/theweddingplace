@@ -3,6 +3,44 @@ import { pool } from '../index';
 import { PaystackService } from '../services/paystack';
 import crypto from 'crypto';
 
+/**
+ * A private helper function to process a successful contribution.
+ * This centralizes the database logic for both webhook and direct verification.
+ * @param reference - The Paystack payment reference.
+ * @param amountInKobo - The amount paid, in the smallest currency unit (kobo).
+ * @param metadata - The metadata object from the transaction.
+ * @returns The newly created contributor record.
+ */
+const _processSuccessfulContribution = async (
+    reference: string,
+    amountInKobo: number,
+    metadata: { registry_item_id: string; name: string; email: string; message?: string }
+) => {
+    const { registry_item_id, name, email, message } = metadata;
+    const amount = amountInKobo / 100; // Convert back to major currency unit (Naira)
+
+    const result = await pool.query(
+        `INSERT INTO contributors 
+        (registry_item_id, name, email, amount, message, payment_reference, status) 
+        VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
+        ON CONFLICT (payment_reference) DO NOTHING
+        RETURNING *`,
+        [registry_item_id, name, email, amount, message, reference]
+    );
+
+    // Only update the contributions if the insert was successful
+    if (result.rows.length > 0) {
+        await pool.query(
+            `UPDATE registry_items 
+            SET contributions_received = contributions_received + $1,
+                is_fully_funded = (contributions_received + $1) >= price
+            WHERE id = $2`,
+            [amount, registry_item_id]
+        );
+    }
+    return result.rows[0];
+};
+
 // Initialize payment
 export const initiatePayment = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -76,49 +114,17 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
 
         // The top-level `status` from Paystack is a boolean. The transaction status is in `data.status`.
         if (response.status && response.data.status === 'success') {
-            const { metadata, amount } = response.data;
-            const { registry_item_id, name, email, message } = metadata;
-
             try {
-                const result = await pool.query(
-                    `INSERT INTO contributors 
-                    (registry_item_id, name, email, amount, message, payment_reference, status) 
-                    VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
-                    RETURNING *`,
-                    [registry_item_id, name, email, amount / 100, message, response.data.reference]
+                const contribution = await _processSuccessfulContribution(
+                    response.data.reference,
+                    response.data.amount,
+                    response.data.metadata
                 );
-
-                await pool.query(
-                    `UPDATE registry_items 
-                    SET contributions_received = contributions_received + $1,
-                        is_fully_funded = CASE 
-                            WHEN contributions_received + $1 >= (
-                                SELECT price 
-                                FROM products 
-                                WHERE id = (
-                                    SELECT product_id 
-                                    FROM registry_items 
-                                    WHERE id = $2
-                                )
-                            ) THEN true 
-                            ELSE false 
-                        END
-                    WHERE id = $2`,
-                    [amount / 100, registry_item_id]
-                );
-
-                res.json({ status: 'success', data: result.rows[0] });
-            } catch (err: any) {
-                // If unique violation, fetch and return the existing record
-                if (err.code === '23505') { // Postgres unique violation
-                    const existing = await pool.query(
-                        'SELECT * FROM contributors WHERE payment_reference = $1',
-                        [reference]
-                    );
-                    res.json({ status: 'success', data: existing.rows[0] });
-                } else {
-                    throw err;
-                }
+                res.json({ status: 'success', data: contribution });
+            } catch (dbError) {
+                console.error('Error processing contribution in verifyPayment:', dbError);
+                // Even if processing fails, the payment was successful. Avoid sending 500 if possible.
+                res.status(200).json({ status: 'success', message: 'Payment verified but failed to update registry. Please contact support.' });
             }
         } else {
             res.status(400).json({ error: `Payment verification failed: ${response.message}` });
@@ -166,42 +172,15 @@ export const handlePaystackWebhook = async (req: Request, res: Response): Promis
         // Handle the event
         switch (event.event) {
             case 'charge.success':
-                const { reference, metadata, amount } = event.data;
-                const { registry_item_id, name, email, message } = metadata;
-
-                // Record contribution
                 try {
-                    const result = await pool.query(
-                        `INSERT INTO contributors 
-                        (registry_item_id, name, email, amount, message, payment_reference, status) 
-                        VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
-                        RETURNING *`,
-                        [registry_item_id, name, email, amount / 100, message, reference]
+                    await _processSuccessfulContribution(
+                        event.data.reference,
+                        event.data.amount,
+                        event.data.metadata
                     );
-
-                    // Update registry item contributions
-                    await pool.query(
-                        `UPDATE registry_items 
-                        SET contributions_received = contributions_received + $1,
-                            is_fully_funded = CASE 
-                                WHEN contributions_received + $1 >= (
-                                    SELECT price 
-                                    FROM products 
-                                    WHERE id = (
-                                        SELECT product_id 
-                                        FROM registry_items 
-                                        WHERE id = $2
-                                    )
-                                ) THEN true 
-                                ELSE false 
-                            END
-                        WHERE id = $2`,
-                        [amount / 100, registry_item_id]
-                    );
-
-                    res.json({ status: 'success' });
+                    res.status(200).json({ status: 'received' });
                 } catch (dbError) {
-                    console.error('DB Insert Error:', dbError);
+                    console.error('Webhook DB Insert Error:', dbError);
                     res.status(500).json({ error: 'Internal server error' });
                 }
                 break;
@@ -215,11 +194,11 @@ export const handlePaystackWebhook = async (req: Request, res: Response): Promis
                     WHERE payment_reference = $1`,
                     [failedRef]
                 );
-                res.json({ status: 'success' });
+                res.status(200).json({ status: 'received' });
                 break;
 
             default:
-                res.json({ status: 'success' });
+                res.status(200).json({ status: 'received' });
         }
     } catch (error) {
         console.error('Error handling webhook:', error);
