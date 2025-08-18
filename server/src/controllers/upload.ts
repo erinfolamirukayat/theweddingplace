@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { supabase, BUCKET_NAME } from '../config/supabase';
+import { StorageError } from '@supabase/storage-js';
 import axios from 'axios';
 
 /**
@@ -7,9 +8,10 @@ import axios from 'axios';
  * This controller expects to be used with a middleware like 'multer' that
  * populates `req.file` with the uploaded file's buffer and metadata.
  */
-export const uploadImage = async (req: Request, res: Response) => {
+export const uploadImage = async (req: Request, res: Response): Promise<void> => {
     if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded.' });
+        res.status(400).json({ error: 'No file uploaded.' });
+        return;
     }
 
     try {
@@ -33,9 +35,15 @@ export const uploadImage = async (req: Request, res: Response) => {
             .getPublicUrl(data.path);
 
         res.status(201).json({ url: urlData.publicUrl });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error uploading image to Supabase:', error);
-        res.status(500).json({ error: error.message || 'Failed to upload image.' });
+        if (error instanceof StorageError) {
+            res.status(500).json({ error: `Supabase storage error: ${error.message}` });
+            return;
+        }
+        res.status(500).json({
+            error: 'An unexpected error occurred during image upload.',
+        });
     }
 };
 
@@ -43,11 +51,12 @@ export const uploadImage = async (req: Request, res: Response) => {
  * Fetches an image from a provided URL, uploads it to Supabase Storage,
  * and returns the new, permanent URL.
  */
-export const uploadImageFromUrl = async (req: Request, res: Response) => {
+export const uploadImageFromUrl = async (req: Request, res: Response): Promise<void> => {
     const { url } = req.body;
 
     if (!url) {
-        return res.status(400).json({ error: 'URL is required.' });
+        res.status(400).json({ error: 'URL is required.' });
+        return;
     }
 
     try {
@@ -78,11 +87,20 @@ export const uploadImageFromUrl = async (req: Request, res: Response) => {
 
         // 4. Return the new, permanent Supabase URL to the client
         res.status(201).json({ url: urlData.publicUrl });
-    } catch (error: any) {
-        console.error('Failed to process image from URL:', error.message);
+    } catch (error: unknown) {
+        console.error('Failed to process image from URL:', error);
         if (axios.isAxiosError(error)) {
-            return res.status(400).json({ error: `Could not fetch image from the provided URL. Reason: ${error.message}` });
+            res.status(400).json({
+                error: `Could not fetch image from the provided URL. Reason: ${error.message}`,
+            });
+            return;
         }
-        res.status(500).json({ error: 'Failed to process image from URL.' });
+        if (error instanceof StorageError) {
+            res.status(500).json({
+                error: `Supabase storage error: ${error.message}`,
+            });
+            return;
+        }
+        res.status(500).json({ error: 'An unexpected error occurred while processing the image from the URL.' });
     }
 };

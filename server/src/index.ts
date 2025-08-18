@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { Pool } from "pg";
 import routes from "./routes";
 import authRoutes from "./routes/auth";
-import path from "path";
 import uploadRoutes from "./routes/upload";
 import paymentsRouter from "./routes/payments";
 import multer from "multer";
@@ -52,24 +51,21 @@ pool.connect((err, client, release) => {
 // Use routes
 app.use("/api", routes);
 app.use("/api/auth", authRoutes);
-// The line below is commented out because files are now uploaded to Supabase Storage
-// and served from their CDN, not from a local '/uploads' directory.
-// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/upload", uploadRoutes);
 app.use('/api/payments', paymentsRouter);
 
 // Global error handler for multer errors. This should be placed after the routes.
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err instanceof multer.MulterError) {
     // A Multer error occurred when uploading (e.g., file too large).
-    return res.status(400).json({ error: `File upload error: ${err.message}` });
+    res.status(400).json({ error: `File upload error: ${err.message}` });
   } else if (err) {
     // An error from our custom file filter or another middleware.
-    return res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message });
+  } else {
+    // Pass on to the next error handler if it's not a multer error.
+    next(err);
   }
-
-  // Pass on to the next error handler if it's not a multer error.
-  next(err);
 });
 
 // Basic route

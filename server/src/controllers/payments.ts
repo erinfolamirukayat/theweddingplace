@@ -30,11 +30,14 @@ const _processSuccessfulContribution = async (
 
     // Only update the contributions if the insert was successful
     if (result.rows.length > 0) {
+        // Correctly join with the products table to get the price for the is_fully_funded check
         await pool.query(
-            `UPDATE registry_items 
-            SET contributions_received = contributions_received + $1,
-                is_fully_funded = (contributions_received + $1) >= price
-            WHERE id = $2`,
+            `UPDATE registry_items ri
+            SET 
+                contributions_received = ri.contributions_received + $1,
+                is_fully_funded = (ri.contributions_received + $1) >= p.price
+            FROM products p
+            WHERE ri.id = $2 AND ri.product_id = p.id`,
             [amount, registry_item_id]
         );
     }
@@ -61,6 +64,12 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
         }
 
         const registryItem = registryItemResult.rows[0];
+
+        if (registryItem.is_fully_funded) {
+            res.status(400).json({ error: 'This gift has already been fully funded.' });
+            return;
+        }
+
         const remainingAmount = registryItem.price - registryItem.contributions_received;
 
         if (amount > remainingAmount) {
