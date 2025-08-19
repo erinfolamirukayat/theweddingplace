@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { supabase, BUCKET_NAME } from '../config/supabase';
-import { StorageError } from '@supabase/storage-js';
 import axios from 'axios';
 
 /**
@@ -37,8 +36,10 @@ export const uploadImage = async (req: Request, res: Response): Promise<void> =>
         res.status(201).json({ url: urlData.publicUrl });
     } catch (error: unknown) {
         console.error('Error uploading image to Supabase:', error);
-        if (error instanceof StorageError) {
-            res.status(500).json({ error: `Supabase storage error: ${error.message}` });
+        // Type guard to check for a Supabase StorageError-like object
+        if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'StorageError' && 'message' in error) {
+            const storageError = error as { message: string }; // Safely cast after ensuring 'message' property exists
+            res.status(500).json({ error: `Supabase storage error: ${storageError.message}` });
             return;
         }
         res.status(500).json({
@@ -95,7 +96,9 @@ export const uploadImageFromUrl = async (req: Request, res: Response): Promise<v
             });
             return;
         }
-        if (error instanceof StorageError) {
+        // Type guard to check for a Supabase StorageError-like object
+        if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'StorageError' && 'message' in error) {
+            const storageError = error as { message: string }; // Safely cast after ensuring 'message' property exists
             res.status(500).json({
                 error: `Supabase storage error: ${error.message}`,
             });

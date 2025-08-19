@@ -15,29 +15,26 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL ? [process.env.FRONTEND_URL, 'http://localhost:5173'] : 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',');
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+);
 app.use(express.json());
 
 // Database configuration
-export const pool = new Pool(
-  process.env.DATABASE_URL
+const dbConfig = process.env.DATABASE_URL
     ? {
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
+          connectionString: process.env.DATABASE_URL,
+          ssl: { rejectUnauthorized: false }, // Required for services like Neon, Render, etc.
       }
-    : {
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        database: process.env.DB_NAME,
-        password: process.env.DB_PASSWORD,
-        port: parseInt(process.env.DB_PORT || "5432"),
-      }
-);
+    : { database: process.env.DB_NAME }; // Simplified local config
+
+export const pool = new Pool(dbConfig);
 
 // Test database connection
 pool.connect((err, client, release) => {
