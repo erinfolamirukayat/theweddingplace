@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const Login = () => {
   const { login } = useAuth();
@@ -43,11 +43,16 @@ const Login = () => {
         <label className="block mb-2 font-medium">Password</label>
         <input
           type="password"
-          className="w-full border rounded px-3 py-2 mb-4"
+          className="w-full border rounded px-3 py-2 mb-2"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
         />
+        <div className="text-right mb-4">
+          <Link to="/forgot-password" className="text-sm text-[#B8860B] hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         {error && <div className="text-red-600 mb-2">{error}</div>}
         <button
           type="submit"
@@ -59,7 +64,7 @@ const Login = () => {
       </form>
       <div className="mt-4 text-center">
         <span className="text-gray-600">Don't have an account?</span>
-        <a href="/register" className="ml-2 text-[#B8860B] hover:underline">Sign up</a>
+        <Link to="/register" className="ml-2 text-[#B8860B] hover:underline">Sign up</Link>
       </div>
     </div>
   );

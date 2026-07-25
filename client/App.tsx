@@ -18,6 +18,8 @@ import Survey from './pages/Survey';
 import ScrollToTop from './components/ScrollToTop';
 import ContributePage from './pages/ContributePage';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 export function App() {
   return <AuthProvider>
@@ -38,6 +40,8 @@ export function App() {
           <Route path="/share/:shareUrl/contribute/:itemId" element={<ContributePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/contact" element={<Contact />} />
         </Route>
         <Route path="/survey" element={<Survey />} />
