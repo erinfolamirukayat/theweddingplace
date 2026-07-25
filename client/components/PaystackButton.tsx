@@ -27,11 +27,24 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
     onSuccess,
     onClose
 }) => {
+    const [scriptLoaded, setScriptLoaded] = React.useState(!!window.PaystackPop);
+
     useEffect(() => {
+        if (window.PaystackPop) {
+            setScriptLoaded(true);
+            return;
+        }
+
         // Load Paystack script
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
+        script.onload = () => {
+            setScriptLoaded(true);
+        };
+        script.onerror = () => {
+            console.error('Failed to load Paystack inline script');
+        };
         document.body.appendChild(script);
 
         // Check if Paystack key is configured
@@ -46,7 +59,9 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         }
 
         return () => {
-            document.body.removeChild(script);
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
         };
     }, []);
 
@@ -130,9 +145,14 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         <button
             type="button"
             onClick={handleClick}
-            className="w-full px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
+            disabled={!scriptLoaded}
+            className={`w-full px-6 py-2 text-white rounded-md transition-colors ${
+                scriptLoaded 
+                    ? 'bg-[#B8860B] hover:bg-[#8B6508]' 
+                    : 'bg-gray-400 cursor-not-allowed'
+            }`}
         >
-            Pay with Paystack
+            {scriptLoaded ? 'Pay with Paystack' : 'Loading payment gateway...'}
         </button>
     );
 };

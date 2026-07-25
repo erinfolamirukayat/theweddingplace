@@ -3,7 +3,7 @@ export const getConfig = () => {
   return {
     apiUrl: env === 'development'
       ? 'http://localhost:5000/api'
-      : 'https://api.blissandgifts.co/api',
+      : 'https://theweddingplace.onrender.com/api',
     paystackPublicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
   };
 };

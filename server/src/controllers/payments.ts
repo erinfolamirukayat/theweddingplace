@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../index';
 import { PaystackService } from '../services/paystack';
+import { sendContributionNotification } from '../utils/email'; // Import the email utility
 import crypto from 'crypto';
 
 /**
@@ -18,6 +19,22 @@ const _processSuccessfulContribution = async (
 ) => {
     const { registry_item_id, name, email, message } = metadata;
     const amount = amountInKobo / 100; // Convert back to major currency unit (Naira)
+
+    // Fetch item and registry details for email notification
+    const itemDetailsResult = await pool.query(
+        `SELECT ri.id, p.name as item_name, r.couple_names as registry_name
+         FROM registry_items ri
+         JOIN products p ON ri.product_id = p.id
+         JOIN registries r ON ri.registry_id = r.id
+         WHERE ri.id = $1`,
+        [registry_item_id]
+    );
+
+    if (itemDetailsResult.rows.length === 0) {
+        console.error(`Could not find item or registry details for registry_item_id: ${registry_item_id}. Cannot send email.`);
+        // Continue processing the contribution, but skip email
+    }
+    const itemDetails = itemDetailsResult.rows[0];
 
     const result = await pool.query(
         `INSERT INTO contributors 
@@ -40,6 +57,23 @@ const _processSuccessfulContribution = async (
             WHERE ri.id = $2 AND ri.product_id = p.id`,
             [amount, registry_item_id]
         );
+    }
+    console.log('Before checking row');
+    // Send email notification after successful database update
+    if (result.rows.length > 0 && itemDetails) {
+        console.log('Attempting to send contribution notification email...');
+        try {
+            await sendContributionNotification({
+                itemName: itemDetails.item_name,
+                amount: amount,
+                contributorName: name,
+                contributorEmail: email,
+                registryName: itemDetails.registry_name,
+            });
+        } catch (emailError) {
+            console.error("Failed to send contribution notification email:", emailError);
+            console.error("Email send error details:", emailError); // More detailed error info
+        }
     }
     return result.rows[0];
 };
@@ -99,6 +133,7 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
 
 // Verify payment
 export const verifyPayment = async (req: Request, res: Response): Promise<void> => {
+    console.log('verifyPayment called');
     try {
         const { reference } = req.query;
 
@@ -106,29 +141,32 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
             res.status(400).json({ error: 'Payment reference is required' });
             return;
         }
-
+        console.log('verifyPayment 2');
         // Check if the payment already exists in the database
         const existing = await pool.query(
             'SELECT * FROM contributors WHERE payment_reference = $1',
             [reference]
         );
+        console.log('verifyPayment 3');
         if (existing.rows.length > 0) {
             res.json({ status: 'success', data: existing.rows[0] });
             return;
         }
-
+        console.log('verifyPayment 4');
         // If not, verify with Paystack and insert as before
         const paystackService = PaystackService.getInstance();
         const response = await paystackService.verifyTransaction(reference as string);
-
+        console.log('Before the if statement to call _processSuccessfulContribution');
         // The top-level `status` from Paystack is a boolean. The transaction status is in `data.status`.
         if (response.status && response.data.status === 'success') {
+            console.log('Inside the if statement');
             try {
                 const contribution = await _processSuccessfulContribution(
                     response.data.reference,
                     response.data.amount,
                     response.data.metadata
                 );
+                console.log('After calling _processSuccessfulContribution');
                 res.json({ status: 'success', data: contribution });
             } catch (dbError) {
                 console.error('Error processing contribution in verifyPayment:', dbError);

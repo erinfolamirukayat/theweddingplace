@@ -220,9 +220,10 @@ export const addRegistryPicture = async (req: Request, res: Response): Promise<v
 export const removeRegistryPicture = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id, pictureId } = req.params;
+        const imageUrl = decodeURIComponent(pictureId);
         const result = await pool.query(
-            'DELETE FROM registry_pictures WHERE id = $1 AND registry_id = $2 RETURNING *',
-            [pictureId, id]
+            'DELETE FROM registry_pictures WHERE image_url = $1 AND registry_id = $2 RETURNING *',
+            [imageUrl, id]
         );
         
         if (result.rows.length === 0) {

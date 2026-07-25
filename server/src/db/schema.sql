@@ -64,7 +64,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    how_heard VARCHAR(255),
+    how_heard VARCHAR(255)
 );
 
 -- Create survey_responses table

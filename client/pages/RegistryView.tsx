@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CalendarIcon, GiftIcon, HeartIcon, ShareIcon, PencilIcon } from 'lucide-react';
-import { getRegistryById as apiGetRegistryById, getProducts, getRegistryPictures, addRegistryPicture, removeRegistryPicture, updateRegistry as apiUpdateRegistry } from '../utils/api';
+import {
+  getRegistryById as apiGetRegistryById,
+  getProducts,
+  getRegistryPictures,
+  updateRegistry as apiUpdateRegistry,
+  getRegistryItems,
+} from '../utils/api';
 import { Dialog, Transition } from '@headlessui/react';
 import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useNotification } from '../components/Layout';
-import { getConfig } from '../config';
 
 interface Product {
   id: number;
@@ -67,10 +72,7 @@ const RegistryView = () => {
     setItemsLoading(true);
     setItemsError(null);
     try {
-      // Fetch registry items from backend
-      const res = await fetch(`${getConfig().apiUrl}/registries/${registryId}/items`);
-      if (!res.ok) throw new Error('Failed to fetch items');
-      const data = await res.json();
+      const data = await getRegistryItems(registryId);
       setItems(data);
       // Optionally fetch products for display
       const prods = await getProducts();
@@ -100,9 +102,47 @@ const RegistryView = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'user_photo_preset');
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dex3v19sz/image/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error('Failed to upload image to Cloudinary');
+        const data = await res.json();
+        
+        // Save image URL to backend
+        await addRegistryPicture(id!, data.secure_url);
+        setMessage('Picture uploaded successfully!');
+        
+        // Refresh pictures
+        fetchPictures();
+      } catch (err: any) {
+        setMessage(err.message || 'Failed to upload picture');
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const handleDeletePicture = async (url: string) => {
+    if (!window.confirm('Are you sure you want to delete this picture?')) return;
+    try {
+      await removeRegistryPicture(id!, url);
+      setMessage('Picture deleted successfully!');
+      fetchPictures();
+    } catch (err: any) {
+      setMessage(err.message || 'Failed to delete picture');
     }
   };
 
@@ -214,6 +254,58 @@ const RegistryView = () => {
               {copied ? 'Copied!' : 'Share Registry'}
             </button>
           </div>
+        </div>
+
+        {/* Wedding Pictures Gallery & Upload */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-[#2C1810]">Wedding Pictures</h2>
+            <div>
+              <label className={`inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] text-sm cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="h-4 w-4 mr-1" /> Upload Photo
+                  </>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                  disabled={uploading} 
+                  className="hidden" 
+                />
+              </label>
+            </div>
+          </div>
+          
+          {pictures.length === 0 ? (
+            <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-md">
+              <p className="text-gray-500">No wedding pictures uploaded yet.</p>
+              <p className="text-xs text-gray-400 mt-1">Upload photos to personalize your registry.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {pictures.map((url, index) => (
+                <div key={index} className="relative group rounded-md overflow-hidden border border-gray-200 h-48">
+                  <img src={url} alt={`Wedding ${index + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={() => handleDeletePicture(url)}
+                      className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-md transition-colors"
+                      title="Delete picture"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Edit Registry Modal */}

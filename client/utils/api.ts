@@ -1,122 +1,122 @@
 import { getConfig } from '../config';
-const API_BASE = getConfig().apiUrl;
-import { getToken } from './authApi';
 
-// Helper for handling responses
-async function handleResponse(res: Response) {
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || 'API Error');
+const API_URL = getConfig().apiUrl;
+
+/**
+ * A reusable, authenticated fetch wrapper.
+ * It automatically adds the Authorization header and handles 401 errors.
+ * @param endpoint The API endpoint to call (e.g., '/users/me').
+ * @param options The options for the fetch request.
+ */
+const authFetch = async (endpoint: string, options: RequestInit = {}) => {
+  console.log(`authFetch called for endpoint: ${endpoint}. Checking for token...`);
+  // Use 'afriwed_token' or your specific key for the auth token.
+  const token = localStorage.getItem('token');
+  console.log('Token found in authFetch:', localStorage.getItem('token'));
+
+  // If there's no token, don't even attempt the request.
+  // This prevents a 401 error on the server and an immediate logout loop.
+  if (!token) {
+    // This error will be caught by the calling function's try/catch block.
+    throw new Error('Unauthorized in authFetch: No token found');
   }
-  return res.json();
-}
 
-// Registries
-export async function createRegistry(data: {
-  couple_names: string;
-  wedding_date: string;
-  story?: string;
-  photo_url?: string;
-  phone: string;
-  wedding_city?: string;
-  first_name?: string;
-  last_name?: string;
-  how_heard?: string;
-}): Promise<any> {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/registries`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(data),
+  const headers = new Headers(options.headers || {});
+
+  // The browser will automatically set the Content-Type for FormData.
+  if (!(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
   });
-  return handleResponse(res);
-}
 
-export async function getRegistries(): Promise<any[]> {
-  const res = await fetch(`${API_BASE}/registries`);
-  return handleResponse(res);
-}
+  if (response.status === 401) {
+    // Token is invalid or expired. Log the user out.
+    localStorage.removeItem('token');
+    localStorage.removeItem('afriwed_registry_id');
+    window.location.href = '/login';
+    throw new Error('Unauthorized');
+  }
 
-export async function getRegistryById(id: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/${id}`);
-  return handleResponse(res);
-}
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
+    throw new Error(errorData.error || response.statusText);
+  }
 
-export async function getMyRegistries(): Promise<any[]> {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/registries/my`, {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    }
-  });
-  return handleResponse(res);
-}
+  // Handle responses with no content
+  if (response.status === 204) {
+    return null;
+  }
 
-export async function getRegistryByShareUrl(shareSlug: string): Promise<any> {
-  console.log('API_BASE:', API_BASE);
-  const res = await fetch(`${API_BASE}/registries/share/${shareSlug}`);
-  return handleResponse(res);
-}
+  return response.json();
+};
 
-export async function updateRegistry(id: string, data: {
-  couple_names: string;
-  wedding_date: string;
-  story?: string;
-  phone?: string;
-  wedding_city?: string;
-}): Promise<any> {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/registries/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
-}
+/**
+ * A reusable fetch wrapper for public endpoints.
+ * @param endpoint The API endpoint to call.
+ * @param options The options for the fetch request.
+ */
+const publicFetch = async (endpoint: string, options: RequestInit = {}) => {
+  const response = await fetch(`${API_URL}${endpoint}`, options);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
+    throw new Error(errorData.error || response.statusText);
+  }
+  return response.json();
+};
 
-// Products
-export async function getProducts(): Promise<any[]> {
-  const res = await fetch(`${API_BASE}/products`);
-  return handleResponse(res);
-}
+// --- Registry ---
+export const getRegistries = () => publicFetch('/registries');
+export const getMyRegistries = () => authFetch('/registries/mine');
+export const getRegistryById = (id: string) => publicFetch(`/registries/${id}`);
+export const getRegistryByShareUrl = (shareUrl: string) => publicFetch(`/registries/share/${shareUrl}`);
+export const createRegistry = (data: { couple_names: string; wedding_date: string; story: string; phone: string; wedding_city: string; }) => authFetch('/registries', {
+  method: 'POST',
+  body: JSON.stringify(data),
+});
+export const updateRegistry = (id: string, data: any) => authFetch(`/registries/${id}`, {
+  method: 'PUT',
+  body: JSON.stringify(data),
+});
 
-export async function addRegistryItem(registryId: string, productId: number, quantity: number = 1): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/${registryId}/items`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ product_id: productId, quantity }),
-  });
-  return handleResponse(res);
-}
+// --- Registry Pictures ---
+export const getRegistryPictures = (registryId: string) => publicFetch(`/registries/${registryId}/pictures`);
+export const addRegistryPicture = (registryId: string, imageUrl: string) => authFetch(`/registries/${registryId}/pictures`, {
+  method: 'POST',
+  body: JSON.stringify({ image_url: imageUrl }),
+});
+export const removeRegistryPicture = (registryId: string, imageUrl: string) => authFetch(`/registries/${registryId}/pictures`, {
+  method: 'DELETE',
+  body: JSON.stringify({ image_url: imageUrl }),
+});
 
-export async function getRegistryPictures(registryId: string): Promise<any[]> {
-  const res = await fetch(`${API_BASE}/registries/${registryId}/pictures`);
-  return handleResponse(res);
-}
+// --- Image Uploads ---
+export const uploadImageFile = (file: File) => {
+  const formData = new FormData();
+  formData.append('image', file);
+  return authFetch('/upload/image', { method: 'POST', body: formData });
+};
+export const uploadImageFromUrl = (url: string) => authFetch('/upload/image-from-url', { method: 'POST', body: JSON.stringify({ url }) });
 
-export async function addRegistryPicture(registryId: string, imageUrl: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/${registryId}/pictures`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image_url: imageUrl }),
-  });
-  return handleResponse(res);
-}
+// --- Products & Items ---
+export const getProducts = () => publicFetch('/products');
+export const getRegistryItems = (registryId: string) => publicFetch(`/registries/${registryId}/items`);
+export const getRegistryItemByShareUrl = (shareUrl: string, itemId: string) => publicFetch(`/registries/share/${shareUrl}/items/${itemId}`);
+export const addRegistryItem = (registryId: string, data: { product_id: number; quantity: number }) => authFetch(`/registries/${registryId}/items`, {
+  method: 'POST',
+  body: JSON.stringify(data),
+});
 
-export async function removeRegistryPicture(registryId: string, imageUrl: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/${registryId}/pictures/${encodeURIComponent(imageUrl)}`, {
-    method: 'DELETE',
-  });
-  return handleResponse(res);
-}
-
-export async function getRegistryItem(shareUrl: string, itemId: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/registries/share/${shareUrl}/items/${itemId}`);
-  return handleResponse(res);
-} 
+// --- User ---
+export const getMe = () => authFetch('/auth/users/me');
+export const updateMe = (data: { first_name: string; last_name: string; how_heard: string; }) => authFetch('/auth/users/me', {
+  method: 'PUT',
+  body: JSON.stringify(data),
+});

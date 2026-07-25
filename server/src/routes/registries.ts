@@ -27,7 +27,7 @@ router.get('/share/:shareSlug/items/:itemId', getRegistryItemByShareUrl);
 
 // Registry CRUD operations
 router.get('/', getAllRegistries);
-router.get('/my', authenticateJWT, getMyRegistries);
+router.get('/mine', authenticateJWT, getMyRegistries); // Specific route first
 router.get('/:id', getRegistryById);
 router.post('/', authenticateJWT, createRegistry);
 router.put('/:id', updateRegistry);

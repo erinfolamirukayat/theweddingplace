@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRegistryItem } from '../utils/api';
+import { getRegistryItemByShareUrl } from '../utils/api';
 import ContributionForm from '../components/ContributionForm';
 
 const ContributePage: React.FC = () => {
@@ -15,7 +15,7 @@ const ContributePage: React.FC = () => {
                 if (!shareUrl || !itemId) {
                     throw new Error('Share URL and Item ID are required');
                 }
-                const data = await getRegistryItem(shareUrl, itemId);
+                const data = await getRegistryItemByShareUrl(shareUrl, itemId);
                 setItem(data);
             } catch (err) {
                 setError('Failed to load item details');

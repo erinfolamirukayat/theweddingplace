@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CalendarIcon, HeartIcon, SaveIcon, ImageIcon, XIcon, AlertCircleIcon } from 'lucide-react';
-import { createRegistry as apiCreateRegistry, addRegistryPicture } from '../utils/api';
+import {
+  createRegistry as apiCreateRegistry,
+  addRegistryPicture,
+  uploadImageFile,
+  uploadImageFromUrl,
+} from '../utils/api';
 import { useNotification } from '../components/Layout';
-import { getConfig } from '../config';
 
 const MAX_IMAGES = 10;
 
@@ -118,39 +122,15 @@ const CreateRegistry = () => {
     try {
       // Upload files and collect URLs
       let finalImageUrls: string[] = [];
-
       if (imageSourceType === 'file') {
         for (const file of imageFiles) {
-          const formDataFile = new FormData();
-          formDataFile.append('image', file);
-          const res = await fetch(`${getConfig().apiUrl}/upload/image`, {
-            method: 'POST',
-            body: formDataFile,
-          });
-          if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || `Failed to upload ${file.name}`);
-          }
-          const data = await res.json();
+          const data = await uploadImageFile(file);
           finalImageUrls.push(data.url);
         }
       } else if (imageSourceType === 'url') {
         // For each user-provided URL, ask the backend to fetch it and store it in our Supabase bucket.
         for (const imageUrl of imageUrls) {
-          const res = await fetch(`${getConfig().apiUrl}/upload/image-from-url`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: imageUrl }),
-          });
-
-          if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || `Failed to process image from URL: ${imageUrl}`);
-          }
-
-          const data = await res.json();
+          const data = await uploadImageFromUrl(imageUrl);
           finalImageUrls.push(data.url);
         }
       }

@@ -22,13 +22,13 @@ export async function login(email: string, password: string) {
 }
 
 export function saveToken(token: string) {
-  localStorage.setItem('auth_token', token);
+  localStorage.setItem('token', token);
 }
 
 export function getToken(): string | null {
-  return localStorage.getItem('auth_token');
+  return localStorage.getItem('token');
 }
 
 export function clearToken() {
-  localStorage.removeItem('auth_token');
+  localStorage.removeItem('token');
 } 

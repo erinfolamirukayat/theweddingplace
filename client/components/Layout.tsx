@@ -2,32 +2,45 @@ import React, { createContext, useContext, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 
-export const NotificationContext = createContext<{
+interface NotificationState {
   message: string;
-  setMessage: (msg: string) => void;
+  type: 'success' | 'error';
+}
+
+export const NotificationContext = createContext<{
+  notification: NotificationState | null;
+  setNotification: (notification: NotificationState | null) => void;
 } | undefined>(undefined);
 
 export const useNotification = () => {
   const ctx = useContext(NotificationContext);
   if (!ctx) throw new Error('useNotification must be used within NotificationContext');
-  return ctx;
+  return {
+    setMessage: (message: string, type: 'success' | 'error' = 'success') => {
+      ctx.setNotification({ message, type });
+      setTimeout(() => ctx.setNotification(null), 5000);
+    },
+  };
 };
 
 const Notification: React.FC = () => {
   const ctx = useContext(NotificationContext);
-  if (!ctx || !ctx.message) return null;
+  if (!ctx || !ctx.notification) return null;
+
+  const bgColor = ctx.notification.type === 'success' ? 'bg-green-600' : 'bg-red-600';
+
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded shadow z-50">
-      {ctx.message}
-      <button className="ml-4 text-white font-bold" onClick={() => ctx.setMessage('')}>×</button>
+    <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded shadow z-50`}>
+      {ctx.notification.message}
+      <button className="ml-4 text-white font-bold" onClick={() => ctx.setNotification(null)}>×</button>
     </div>
   );
 };
 
 const Layout = () => {
-  const [message, setMessage] = useState('');
+  const [notification, setNotification] = useState<NotificationState | null>(null);
   return (
-    <NotificationContext.Provider value={{ message, setMessage }}>
+    <NotificationContext.Provider value={{ notification, setNotification }}>
       <Notification />
       <div className="min-h-screen bg-[#FFF8F3]">
         <Navbar />

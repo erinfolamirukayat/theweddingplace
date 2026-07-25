@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../components/Layout';
-import { getConfig } from '../config';
+import { getMe, updateMe } from '../utils/api';
 
 const Profile = () => {
-  const { user, token } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { setMessage } = useNotification();
   const [form, setForm] = useState({
     first_name: '',
@@ -12,25 +12,33 @@ const Profile = () => {
     email: '',
     how_heard: '',
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && token) {
-      fetch(`${getConfig().apiUrl}/auth/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => {
+    // Don't fetch data until authentication is resolved and we have a user.
+    if (authLoading || !user) {
+      if (!authLoading) setLoading(false); // Stop loading if auth is done but no user
+      return;
+    }
+
+      setError(null);
+      getMe()
+        .then((data: any) => {
           setForm({
             first_name: data.first_name || '',
             last_name: data.last_name || '',
             email: data.email || '',
             how_heard: data.how_heard || '',
           });
+        })
+        .catch((err) => {
+          setError(err.message || 'Failed to load profile data.');
+        })
+        .finally(() => {
+          setLoading(false);
         });
-    }
-  }, [user, token]);
+  }, [user, authLoading]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,19 +50,11 @@ const Profile = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${getConfig().apiUrl}/auth/users/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          first_name: form.first_name,
-          last_name: form.last_name,
-          how_heard: form.how_heard,
-        }),
+      await updateMe({
+        first_name: form.first_name,
+        last_name: form.last_name,
+        how_heard: form.how_heard,
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
       setMessage('Profile updated successfully!');
     } catch (err: any) {
       setError(err.message || 'Update failed');

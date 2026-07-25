@@ -201,7 +201,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                         You can change the amount to contribute by entering a new amount above or by moving this slider
                     </p>
                     <p className="mb-4 text-sm text-gray-700">
-                        You are contributing <span className="font-semibold">₦{formData.amount.toLocaleString()}</span> ({percent}%)
+                        You are contributing <span className="font-semibold">₦{Number(formData.amount || 0).toLocaleString()}</span> ({percent}%)
                     </p>
                     {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
                 </div>

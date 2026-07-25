@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SearchIcon } from 'lucide-react';
-import { getProducts } from '../utils/api';
+import { getProducts, getRegistryItems, addRegistryItem } from '../utils/api';
 import { Dialog } from '@headlessui/react';
-import { getConfig } from '../config';
 import { useAuth } from '../context/AuthContext';
 
 interface Product {
@@ -56,9 +55,7 @@ const ProductCatalog = () => {
 
   const fetchRegistryItems = async (regId: string) => {
     try {
-      const response = await fetch(`${getConfig().apiUrl}/registries/${regId}/items`);
-      if (!response.ok) throw new Error('Failed to fetch registry items');
-      const items = await response.json();
+      const items = await getRegistryItems(regId);
       setAddedItems(new Set(items.map((item: any) => item.product_id)));
     } catch (err: any) {
       console.error('Error fetching registry items:', err);
@@ -85,12 +82,7 @@ const ProductCatalog = () => {
     setAddingToRegistry(selectedProduct.id);
     setError(null);
     try {
-      const response = await fetch(`${getConfig().apiUrl}/registries/${latestRegistryId}/items`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: selectedProduct.id, quantity }),
-      });
-      if (!response.ok) throw new Error('Failed to add item to registry');
+      await addRegistryItem(latestRegistryId, { product_id: selectedProduct.id, quantity });
       setSuccessMessage('Item added to registry successfully!');
       setAddedItems(prev => new Set([...prev, selectedProduct.id]));
       setTimeout(() => setSuccessMessage(null), 3000);
