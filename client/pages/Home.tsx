@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HeartIcon, ShareIcon } from 'lucide-react';
 import { getRegistries, getProducts } from '../utils/api';
 
-const BANNER_IMAGE =
-  'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds5.png'; // Couple image from Unsplash
+const BANNER_IMAGE = '/new-weds3.jpg';
 const Home = () => {
   const navigate = useNavigate();
   const handleStartRegistry = () => {
