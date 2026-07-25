@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HeartIcon, ShareIcon } from 'lucide-react';
-import { getRegistries } from '../utils/api';
+import { getRegistries, getProducts } from '../utils/api';
 
 const BANNER_IMAGE =
   'https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-misc-images//new-weds5.png'; // Couple image from Unsplash
@@ -99,50 +99,26 @@ const Home = () => {
     setTestimonialIdx((i) => (i + 1) % testimonials.length);
   };
 
-  // Featured Items Carousel Data
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Better Homes 16-Piece Dinner Set",
-      price: "₦40,000",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Better_Homes_16-Piece_Dinner_Set.jpg?",
-    },
-    {
-      id: 3,
-      name: "Solid Stoneware Dinner Plate Set 16pcs",
-      price: "₦58,900",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images//Solid_Stoneware_Dinner_Plate_Set_16pcs.jpg",
-    },
-    {
-      id: 6,
-      name: "SILVER CREST 2L Industrial 8500W Food Crusher Blender With 2 Jar",
-      price: "₦27,280",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/SILVER_CREST_2L_Industrial_8500W_Food_Crusher_Blender_With_2_Jar.jpg?",
-    },
-    {
-      id: 7,
-      name: "TINMO Airfryer 10L Volume, 8L Storage Capacity",
-      price: "₦58,356",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/TINMO_Airfryer_10L_Volume,_8L_Storage_Capacity,_Model_(OLM-KZB006)_1400W+_12_Months_Warranty.jpg?",
-    },
-    {
-      id: 12,
-      name: "Black White Center Table-Coffee Table Home Furniture",
-      price: "₦42,000",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Black_White_Center_Table-Coffee_Table_Home_Furniture.jpg?",
-    },
-    {
-      id: 15,
-      name: "Nexus 32 Inches FHD TV (H620B(SA) - Black + 2 Years Warranty",
-      price: "₦136,000",
-      image_url: "https://wmhidpsitmleveitrtju.supabase.co/storage/v1/object/public/wedding-registry-product-images/Nexus_32_Inches_FHD_TV_(H620B(SA)_-_Black_+_2_Years_Warranty.jpg?",
-    },
-  ];
+  // Featured Items Carousel Data (Loaded Dynamically)
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    getProducts()
+      .then(prods => {
+        // Pick up to 6 products for featured items
+        setFeaturedProducts(prods.slice(0, 6));
+      })
+      .catch(err => {
+        console.error('Failed to load featured products:', err);
+      });
+  }, []);
+
   const [featuredIdx, setFeaturedIdx] = useState(0);
   const featuredAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Featured carousel auto-advance
   useEffect(() => {
+    if (featuredProducts.length === 0) return;
     if (featuredAutoRef.current) clearInterval(featuredAutoRef.current);
     featuredAutoRef.current = setInterval(() => {
       setFeaturedIdx((i) => (i + 1) % featuredProducts.length);
@@ -154,8 +130,9 @@ const Home = () => {
 
   // Get 3 featured products in view
   const getVisibleFeatured = () => {
+    if (featuredProducts.length === 0) return [];
     let start = featuredIdx;
-    let end = start + 3;
+    let end = start + Math.min(3, featuredProducts.length);
     if (end <= featuredProducts.length) {
       return featuredProducts.slice(start, end);
     } else {
@@ -167,9 +144,11 @@ const Home = () => {
   };
   const visibleFeatured = getVisibleFeatured();
   const prevFeatured = () => {
+    if (featuredProducts.length === 0) return;
     setFeaturedIdx((i) => (i - 1 + featuredProducts.length) % featuredProducts.length);
   };
   const nextFeatured = () => {
+    if (featuredProducts.length === 0) return;
     setFeaturedIdx((i) => (i + 1) % featuredProducts.length);
   };
 
@@ -285,7 +264,11 @@ const Home = () => {
                     <img src={item.image_url} alt={item.name} className="w-full h-40 sm:h-48 object-cover" />
                     <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
                       <h3 className="font-semibold text-[#2C1810] text-base sm:text-lg mb-1">{item.name}</h3>
-                      <p className="text-gray-600 text-xs sm:text-sm mt-1">{item.price}</p>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1">
+                        {typeof item.price === 'number' || !isNaN(Number(item.price))
+                          ? `₦${Number(item.price).toLocaleString()}`
+                          : item.price}
+                      </p>
                     </div>
                   </div>
                 </div>
