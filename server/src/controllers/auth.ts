@@ -155,8 +155,8 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       `SELECT prt.*, u.id as user_id 
        FROM password_reset_tokens prt
        JOIN users u ON prt.user_id = u.id
-       WHERE u.email = $1 AND prt.token = $2 AND prt.expires_at > NOW()`,
-      [email, token]
+       WHERE u.email = $1 AND prt.token = $2 AND prt.expires_at > $3`,
+      [email, token, new Date()]
     );
 
     if (result.rows.length === 0) {

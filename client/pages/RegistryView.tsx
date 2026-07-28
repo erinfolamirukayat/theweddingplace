@@ -7,6 +7,8 @@ import {
   getRegistryPictures,
   updateRegistry as apiUpdateRegistry,
   getRegistryItems,
+  addRegistryPicture,
+  removeRegistryPicture,
 } from '../utils/api';
 import { Dialog, Transition } from '@headlessui/react';
 import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';

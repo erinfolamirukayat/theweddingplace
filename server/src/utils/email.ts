@@ -8,6 +8,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER || process.env.EMAIL_HOST_USER,
     pass: process.env.EMAIL_PASS || process.env.EMAIL_HOST_PASSWORD,
   },
+  connectionTimeout: 10000, // 10 seconds timeout
 });
 
 interface ContributionDetails {

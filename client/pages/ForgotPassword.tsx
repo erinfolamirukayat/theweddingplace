@@ -22,6 +22,11 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email }),
       });
 
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned a non-JSON response (${res.status}). This usually means the backend server is not running locally, or the new code hasn't finished deploying to Render yet.`);
+      }
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Something went wrong');
