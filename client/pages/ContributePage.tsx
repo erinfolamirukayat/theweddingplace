@@ -50,7 +50,8 @@ const ContributePage: React.FC = () => {
         );
     }
 
-    const remainingAmount = item.price - item.contributions_received;
+    const totalCost = item.price * item.quantity;
+    const remainingAmount = totalCost - item.contributions_received;
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -67,10 +68,11 @@ const ContributePage: React.FC = () => {
                         <div className="md:w-1/2 p-6">
                             <h1 className="text-2xl font-bold text-gray-800 mb-2">{item.name}</h1>
                             <p className="text-gray-600 mb-4">{item.description}</p>
-                            <div className="mb-4">
-                                <p className="text-sm text-gray-500">Price: ${item.price}</p>
-                                <p className="text-sm text-gray-500">Contributions Received: ${item.contributions_received}</p>
-                                <p className="text-sm text-gray-500">Remaining: ${remainingAmount}</p>
+                            <div className="mb-4 space-y-1">
+                                <p className="text-sm text-gray-600 font-medium">Price: ₦{Number(item.price).toLocaleString()} <span className="text-gray-400 font-normal">(Qty: {item.quantity})</span></p>
+                                <p className="text-sm text-gray-600 font-medium">Total Cost: ₦{Number(totalCost).toLocaleString()}</p>
+                                <p className="text-sm text-gray-600 font-medium">Contributions Received: ₦{Number(item.contributions_received).toLocaleString()}</p>
+                                <p className="text-sm text-[#B8860B] font-bold text-base">Remaining: ₦{Number(remainingAmount).toLocaleString()}</p>
                             </div>
                         </div>
                     </div>

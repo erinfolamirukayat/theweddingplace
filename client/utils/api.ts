@@ -92,9 +92,8 @@ export const addRegistryPicture = (registryId: string, imageUrl: string) => auth
   method: 'POST',
   body: JSON.stringify({ image_url: imageUrl }),
 });
-export const removeRegistryPicture = (registryId: string, imageUrl: string) => authFetch(`/registries/${registryId}/pictures`, {
+export const removeRegistryPicture = (registryId: string, imageUrl: string) => authFetch(`/registries/${registryId}/pictures/${encodeURIComponent(imageUrl)}`, {
   method: 'DELETE',
-  body: JSON.stringify({ image_url: imageUrl }),
 });
 
 // --- Image Uploads ---

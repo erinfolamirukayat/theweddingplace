@@ -52,7 +52,7 @@ const _processSuccessfulContribution = async (
             `UPDATE registry_items ri
             SET 
                 contributions_received = ri.contributions_received + $1,
-                is_fully_funded = (ri.contributions_received + $1) >= p.price
+                is_fully_funded = (ri.contributions_received + $1) >= (p.price * ri.quantity)
             FROM products p
             WHERE ri.id = $2 AND ri.product_id = p.id`,
             [amount, registry_item_id]
@@ -104,7 +104,7 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
             return;
         }
 
-        const remainingAmount = registryItem.price - registryItem.contributions_received;
+        const remainingAmount = (registryItem.price * registryItem.quantity) - registryItem.contributions_received;
 
         if (amount > remainingAmount) {
             res.status(400).json({ error: 'Amount exceeds remaining balance' });

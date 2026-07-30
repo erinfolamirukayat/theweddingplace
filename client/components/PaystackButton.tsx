@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { getConfig } from '../config';
+import { useNotification } from './Layout';
 
 interface PaystackButtonProps {
     email: string;
@@ -27,6 +28,7 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
     onSuccess,
     onClose
 }) => {
+    const { setMessage } = useNotification();
     const [scriptLoaded, setScriptLoaded] = React.useState(!!window.PaystackPop);
 
     useEffect(() => {
@@ -83,25 +85,25 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
 
         // Validate required parameters
         if (!email) {
-            alert('Please enter your email address');
+            setMessage('Please enter your email address', 'error');
             return;
         }
         if (!amount || amount <= 0) {
-            alert('Please enter a valid amount');
+            setMessage('Please enter a valid amount', 'error');
             return;
         }
         if (!metadata.name) {
-            alert('Please enter your name');
+            setMessage('Please enter your name', 'error');
             return;
         }
         if (!metadata.registry_item_id) {
-            alert('Invalid registry item');
+            setMessage('Invalid registry item', 'error');
             return;
         }
         if (!paystackKey) {
-            alert(
-                'Payment configuration error: Paystack public key not found.\n\n' +
-                'If you are seeing this in production, please contact support.'
+            setMessage(
+                'Payment configuration error: Paystack public key not found. Please contact support.',
+                'error'
             );
             return;
         }
@@ -137,7 +139,7 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
             handler.openIframe();
         } catch (error: any) {
             console.error('Payment initialization failed:', error);
-            alert('Failed to initialize payment. Please try again.');
+            setMessage('Failed to initialize payment. Please try again.', 'error');
         }
     };
 

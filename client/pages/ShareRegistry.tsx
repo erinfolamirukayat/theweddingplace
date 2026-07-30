@@ -134,46 +134,97 @@ const ShareRegistry = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 className="text-2xl font-bold text-[#2C1810] mb-2">{registry.couple_names}'s Registry</h1>
-        <p className="text-gray-600 mb-2">Wedding Date: {new Date(registry.wedding_date).toLocaleDateString()}</p>
-        {registry.story && <p className="text-gray-500 mb-4">{registry.story}</p>}
-      </div>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold text-[#2C1810] mb-2">Wedding Pictures</h2>
-        <div className="grid grid-cols-3 gap-4">
-          {pictures.slice(0, 3).map((url, index) => (
-            <img key={index} src={url} alt={`Wedding ${index + 1}`} className="w-full h-48 object-cover rounded" />
-          ))}
+      {/* Header Block */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[#2C1810] mb-1">{registry.couple_names}'s Registry</h1>
+          <p className="text-sm text-gray-500">Welcome to our wedding gift registry!</p>
         </div>
-        {pictures.length > 3 && (
-          <button
-            onClick={() => setShowPicturesModal(true)}
-            className="mt-2 px-4 py-2 bg-[#B8860B] text-white rounded"
-          >
-            View All Pictures
-          </button>
-        )}
+        <button
+          onClick={() => setShowPicturesModal(true)}
+          className="text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] border border-[#B8860B] px-4 py-2 rounded-md hover:bg-[#FFF8F3] transition-colors self-start sm:self-auto"
+        >
+          View Story & Wedding Details
+        </button>
       </div>
+
+      {/* Wedding Pictures Section */}
+      {pictures.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-[#2C1810]">Wedding Gallery</h2>
+            <button
+              onClick={() => setShowPicturesModal(true)}
+              className="text-sm text-[#B8860B] hover:underline font-medium"
+            >
+              View Full Gallery & Story &rarr;
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {pictures.slice(0, 2).map((url, index) => (
+              <img key={index} src={url} alt={`Wedding ${index + 1}`} className="w-full h-72 object-contain bg-gray-50 border border-gray-100 rounded-lg shadow-sm" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Details & Photos Modal */}
       <Dialog open={showPicturesModal} onClose={() => setShowPicturesModal(false)} className="fixed z-10 inset-0 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
-          <Dialog.Panel className="fixed inset-0 bg-black opacity-30" />
-          <div className="relative bg-white rounded-lg shadow-lg max-w-4xl w-full mx-auto p-6 z-20">
-            <Dialog.Title className="text-lg font-semibold mb-4">All Wedding Pictures</Dialog.Title>
-            <div className="grid grid-cols-3 gap-4">
-              {pictures.map((url, index) => (
-                <img key={index} src={url} alt={`Wedding ${index + 1}`} className="w-full h-48 object-cover rounded" />
-              ))}
+          <Dialog.Panel className="fixed inset-0 bg-black opacity-45" />
+          <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full mx-auto p-6 sm:p-8 z-20 max-h-[85vh] overflow-y-auto">
+            {/* Header Info */}
+            <div className="border-b border-gray-100 pb-4 mb-5">
+              <h2 className="text-2xl font-bold text-[#2C1810] mb-2">{registry.couple_names}</h2>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600 mt-2">
+                {registry.wedding_date && (
+                  <div>
+                    <span className="font-semibold text-gray-700">Wedding Date:</span>{' '}
+                    {new Date(registry.wedding_date).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                  </div>
+                )}
+                {registry.wedding_city && (
+                  <div>
+                    <span className="font-semibold text-gray-700">Venue / Location:</span>{' '}
+                    {registry.wedding_city}
+                  </div>
+                )}
+              </div>
             </div>
-            <button
-              onClick={() => setShowPicturesModal(false)}
-              className="mt-4 px-4 py-2 bg-gray-500 text-white rounded"
-            >
-              Close
-            </button>
+
+            {/* Love Story Section */}
+            {registry.story && (
+              <div className="mb-6 bg-[#FFF8F3] p-4 rounded-lg border border-[#FDF2E9]">
+                <h3 className="font-semibold text-[#B8860B] mb-1.5 text-sm uppercase tracking-wide">Our Love Story</h3>
+                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{registry.story}</p>
+              </div>
+            )}
+
+            {/* Full Photo Gallery */}
+            {pictures.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-[#2C1810] mb-3 text-sm uppercase tracking-wide">Wedding Photo Gallery</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {pictures.map((url, index) => (
+                    <img key={index} src={url} alt={`Wedding ${index + 1}`} className="w-full h-64 object-contain bg-gray-50 border border-gray-100 rounded-lg shadow-sm" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+              <button
+                onClick={() => setShowPicturesModal(false)}
+                className="px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors font-semibold text-sm"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </Dialog>
+
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold text-[#2C1810] mb-4">Registry Items (Open for Contribution)</h2>
         {openItems.length === 0 ? (

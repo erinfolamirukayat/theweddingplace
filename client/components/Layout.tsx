@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 
 interface NotificationState {
@@ -39,11 +39,22 @@ const Notification: React.FC = () => {
 
 const Layout = () => {
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const location = useLocation();
+  const isSharePage = location.pathname.startsWith('/share/');
+
   return (
     <NotificationContext.Provider value={{ notification, setNotification }}>
       <Notification />
       <div className="min-h-screen bg-[#FFF8F3]">
-        <Navbar />
+        {isSharePage ? (
+          <div className="bg-white border-b border-gray-200 py-4 text-center shadow-sm">
+            <Link to="/" className="text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors">
+              Visit TheWeddingPlace to set up a registry like this
+            </Link>
+          </div>
+        ) : (
+          <Navbar />
+        )}
         <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
           <Outlet />
         </main>

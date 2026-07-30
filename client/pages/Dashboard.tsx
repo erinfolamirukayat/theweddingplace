@@ -5,6 +5,7 @@ import {
   addRegistryPicture,
   removeRegistryPicture,
   uploadImageFile,
+  updateRegistry as apiUpdateRegistry,
 } from '../utils/api';
 import { Dialog, Transition } from '@headlessui/react';
 import { XIcon, UploadCloudIcon, TrashIcon } from 'lucide-react';
@@ -16,6 +17,38 @@ const MAX_PHOTOS = 10;
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<any>(null);
+  const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
+  const [detailsForm, setDetailsForm] = useState({
+    couple_names: '',
+    story: '',
+    wedding_date: ''
+  });
+
+  const handleOpenEditDetails = () => {
+    if (!details) return;
+    setDetailsForm({
+      couple_names: details.couple_names || '',
+      story: details.story || '',
+      wedding_date: details.wedding_date ? details.wedding_date.split('T')[0] : ''
+    });
+    setIsEditDetailsOpen(true);
+  };
+
+  const handleSaveDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registries[0]) return;
+    try {
+      await apiUpdateRegistry(registries[0].id, detailsForm);
+      setDetails((prev: any) => ({
+        ...prev,
+        ...detailsForm
+      }));
+      setIsEditDetailsOpen(false);
+      setMessage('Registry details updated successfully!');
+    } catch (error: any) {
+      setMessage(error.message || 'Failed to update registry details.', 'error');
+    }
+  };
 
   // Photo modal state
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
@@ -145,28 +178,28 @@ const Dashboard = () => {
                 <div className="font-semibold">Couple Names:</div>
                 <div>{details.couple_names}</div>
               </div>
-              <button className="text-[#B8860B] underline">Edit</button>
+              <button onClick={handleOpenEditDetails} className="text-[#B8860B] underline font-medium">Edit</button>
             </div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div>
                 <div className="font-semibold">Wedding Photos:</div>
                 <div className="flex gap-2 mt-1 flex-wrap">{details.photos?.length === 0 ? <span className="text-gray-400">No photos</span> : details.photos.map((url: string, i: number) => <img key={i} src={url} alt={`Wedding photo ${i + 1}`} className="w-16 h-16 object-cover rounded" />)}</div>
               </div>
-              <button onClick={() => setIsPhotoModalOpen(true)} className="text-[#B8860B] underline">Edit</button>
+              <button onClick={() => setIsPhotoModalOpen(true)} className="text-[#B8860B] underline font-medium">Edit</button>
             </div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div>
                 <div className="font-semibold">Love Story:</div>
-                <div>{details.story}</div>
+                <div className="text-gray-700 whitespace-pre-line text-sm max-w-xl">{details.story || <span className="text-gray-400 italic">No story provided yet.</span>}</div>
               </div>
-              <button className="text-[#B8860B] underline">Edit</button>
+              <button onClick={handleOpenEditDetails} className="text-[#B8860B] underline font-medium">Edit</button>
             </div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div>
                 <div className="font-semibold">Wedding Date:</div>
-                <div>{details.wedding_date}</div>
+                <div>{details.wedding_date ? new Date(details.wedding_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : <span className="text-gray-400 italic">Not set</span>}</div>
               </div>
-              <button className="text-[#B8860B] underline">Edit</button>
+              <button onClick={handleOpenEditDetails} className="text-[#B8860B] underline font-medium">Edit</button>
             </div>
           </section>
 
@@ -296,6 +329,102 @@ const Dashboard = () => {
                           Cancel
                         </button>
                       </div>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition.Root>
+
+          {/* Edit Registry Details Modal */}
+          <Transition.Root show={isEditDetailsOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-10" onClose={setIsEditDetailsOpen}>
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+              </Transition.Child>
+
+              <div className="fixed inset-0 z-10 overflow-y-auto">
+                <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                  >
+                    <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
+                      <form onSubmit={handleSaveDetails}>
+                        <div className="flex justify-between items-center mb-4">
+                          <Dialog.Title as="h3" className="text-lg font-bold text-gray-900">
+                            Edit Registry Details
+                          </Dialog.Title>
+                          <button
+                            type="button"
+                            className="rounded-md bg-white text-gray-400 hover:text-gray-500"
+                            onClick={() => setIsEditDetailsOpen(false)}
+                          >
+                            <XIcon className="h-6 w-6" aria-hidden="true" />
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Couple Names</label>
+                            <input
+                              type="text"
+                              required
+                              value={detailsForm.couple_names}
+                              onChange={e => setDetailsForm({ ...detailsForm, couple_names: e.target.value })}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Love Story</label>
+                            <textarea
+                              rows={4}
+                              value={detailsForm.story}
+                              onChange={e => setDetailsForm({ ...detailsForm, story: e.target.value })}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Wedding Date</label>
+                            <input
+                              type="date"
+                              required
+                              value={detailsForm.wedding_date}
+                              onChange={e => setDetailsForm({ ...detailsForm, wedding_date: e.target.value })}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                          <button
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            onClick={() => setIsEditDetailsOpen(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-[#B8860B] px-4 py-2 text-sm font-medium text-white hover:bg-[#8B6508]"
+                          >
+                            Save Details
+                          </button>
+                        </div>
+                      </form>
                     </Dialog.Panel>
                   </Transition.Child>
                 </div>
