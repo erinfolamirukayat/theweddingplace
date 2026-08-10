@@ -106,10 +106,7 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
 
         const remainingAmount = (registryItem.price * registryItem.quantity) - registryItem.contributions_received;
 
-        if (amount > remainingAmount) {
-            res.status(400).json({ error: 'Amount exceeds remaining balance' });
-            return;
-        }
+        // Allow contributions to exceed the remaining balance to accommodate system/payment gateway minimums.
 
         // Initialize Paystack transaction
         const paystackService = PaystackService.getInstance();

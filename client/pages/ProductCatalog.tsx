@@ -42,6 +42,14 @@ const ProductCatalog = () => {
     }
   }, [effectiveRegistryId]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   const fetchProducts = async () => {
     try {
       const data = await getProducts();
@@ -129,17 +137,31 @@ const ProductCatalog = () => {
         </div>
       </div>
 
-      {/* Success Message */}
+      {/* Success Message (Floating Toast) */}
       {successMessage && (
-        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md text-sm sm:text-base">
-          {successMessage}
+        <div className="fixed top-6 right-6 z-50 max-w-sm w-full bg-white border-l-4 border-green-500 shadow-2xl rounded-lg p-4 animate-bounce flex items-center gap-3">
+          <div className="flex-shrink-0 bg-green-100 rounded-full p-1">
+            <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{successMessage}</p>
+          </div>
         </div>
       )}
 
-      {/* Error Message */}
+      {/* Error Message (Floating Toast) */}
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
-          {error}
+        <div className="fixed top-6 right-6 z-50 max-w-sm w-full bg-white border-l-4 border-red-500 shadow-2xl rounded-lg p-4 flex items-center gap-3">
+          <div className="flex-shrink-0 bg-red-100 rounded-full p-1">
+            <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{error}</p>
+          </div>
         </div>
       )}
 

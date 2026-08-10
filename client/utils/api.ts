@@ -75,7 +75,7 @@ const publicFetch = async (endpoint: string, options: RequestInit = {}) => {
 // --- Registry ---
 export const getRegistries = () => publicFetch('/registries');
 export const getMyRegistries = () => authFetch('/registries/mine');
-export const getRegistryById = (id: string) => publicFetch(`/registries/${id}`);
+export const getRegistryById = (id: string) => authFetch(`/registries/${id}`);
 export const getRegistryByShareUrl = (shareUrl: string) => publicFetch(`/registries/share/${shareUrl}`);
 export const createRegistry = (data: { couple_names: string; wedding_date: string; story: string; phone: string; wedding_city: string; }) => authFetch('/registries', {
   method: 'POST',

@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setRegistries(data || []);
           if (data && data.length > 0) {
             localStorage.setItem('afriwed_registry_id', data[0].id);
+          } else {
+            localStorage.removeItem('afriwed_registry_id');
           }
         })
         .catch(() => setRegistries([]));
@@ -77,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     setRegistries([]);
+    localStorage.removeItem('afriwed_registry_id');
   };
 
   return (

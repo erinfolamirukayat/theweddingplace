@@ -55,12 +55,14 @@ const PaymentSuccess: React.FC = () => {
                             </svg>
                         </div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
-                        <p className="text-gray-600 mb-6">Thank you for your contribution. The couple will be notified of your gift.</p>
+                        <p className="text-gray-600 mb-6">
+                            Thank you for your contribution! The couple will be notified of your gift. If you would like to support them with other items, you can return to the registry below.
+                        </p>
                         <button
                             onClick={() => navigate(-2)} // Go back to registry view
-                            className="px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors"
+                            className="px-6 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] transition-colors font-semibold shadow-sm"
                         >
-                            Return to Registry
+                            Give More? 🎁
                         </button>
                     </>
                 ) : (

@@ -13,6 +13,7 @@ import {
 import { Dialog, Transition } from '@headlessui/react';
 import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useNotification } from '../components/Layout';
+import StoryBuilder from '../components/StoryBuilder';
 
 interface Product {
   id: number;
@@ -342,12 +343,13 @@ const RegistryView = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Story</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Story</label>
+                    <StoryBuilder onApply={(storyText) => setEditForm({ ...editForm, story: storyText })} />
                     <textarea
                       value={editForm.story || ''}
                       onChange={e => setEditForm({ ...editForm, story: e.target.value })}
-                      rows={3}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                      rows={5}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
                     />
                   </div>
                 </div>

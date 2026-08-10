@@ -8,6 +8,7 @@ import {
   uploadImageFromUrl,
 } from '../utils/api';
 import { useNotification } from '../components/Layout';
+import StoryBuilder from '../components/StoryBuilder';
 
 const MAX_IMAGES = 10;
 
@@ -281,10 +282,11 @@ const CreateRegistry = () => {
             </div>
           )}
           <div>
-            <label htmlFor="story" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="story" className="block text-sm font-medium text-gray-700 mb-2">
               Our Story (optional)
             </label>
-            <textarea name="story" id="story" value={formData.story} onChange={handleChange} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]" rows={3} placeholder="Share your love story..." />
+            <StoryBuilder onApply={(storyText) => setFormData(prev => ({ ...prev, story: storyText }))} />
+            <textarea name="story" id="story" value={formData.story} onChange={handleChange} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]" rows={5} placeholder="Share your love story... Or use the builder above!" />
           </div>
         </div>
         {apiError && <div className="mt-4 flex items-center text-red-600"><AlertCircleIcon className="h-5 w-5 mr-2" />{apiError}</div>}

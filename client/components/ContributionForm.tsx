@@ -21,7 +21,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        amount: remainingAmount.toString(),
+        amount: Math.max(MIN_CONTRIB, remainingAmount).toString(),
         message: ''
     });
     const [error, setError] = useState('');
@@ -74,10 +74,8 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         // Only show error, don't block editing
         if (isNaN(numValue)) {
             setError('');
-        } else if (numValue > remainingAmount) {
-            setError(`Amount cannot exceed ${remainingAmount}`);
         } else if (numValue < MIN_CONTRIB) {
-            setError(`Minimum contribution is ${MIN_CONTRIB}`);
+            setError(`Minimum contribution is ₦${MIN_CONTRIB.toLocaleString()}`);
         } else {
             setError('');
         }
@@ -100,8 +98,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
             formData.name.trim() !== '' &&
             formData.email.trim() !== '' &&
             !isNaN(amount) &&
-            amount >= MIN_CONTRIB &&
-            amount <= remainingAmount
+            amount >= MIN_CONTRIB
         );
     };
 
@@ -115,7 +112,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
     // Add function to prepare payment data
     const preparePaymentData = () => {
         const amount = Number(formData.amount);
-        if (isNaN(amount) || amount < MIN_CONTRIB || amount > remainingAmount) {
+        if (isNaN(amount) || amount < MIN_CONTRIB) {
             return null;
         }
 
@@ -132,6 +129,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
     };
 
     const paymentData = preparePaymentData();
+    const maxAllowedContrib = Math.max(MIN_CONTRIB, remainingAmount);
 
     return (
         <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -183,7 +181,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                             value={formData.amount}
                             onChange={(e) => handleAmountChange(e.target.value)}
                             min={MIN_CONTRIB}
-                            max={remainingAmount}
                             required
                             className="w-32 rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
                         />
@@ -192,13 +189,14 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                     <input
                         type="range"
                         min={MIN_CONTRIB}
-                        max={remainingAmount}
+                        max={maxAllowedContrib}
+                        step={100}
                         value={formData.amount === '' ? MIN_CONTRIB : Number(formData.amount)}
                         onChange={(e) => handleAmountChange(parseFloat(e.target.value), true)}
-                        className="w-full mb-2"
+                        className="w-full mb-2 accent-[#B8860B]"
                     />
                     <p className="mb-2 text-xs text-gray-500">
-                        You can change the amount to contribute by entering a new amount above or by moving this slider
+                        You can enter any amount above, or use the slider to choose a proportion of the remaining balance.
                     </p>
                     <p className="mb-4 text-sm text-gray-700">
                         You are contributing <span className="font-semibold">₦{Number(formData.amount || 0).toLocaleString()}</span> ({percent}%)
@@ -241,7 +239,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                     )}
                     {!isFormValid() && shouldShowValidation() && (
                         <p className="mt-2 text-sm text-red-600">
-                            Please fill in all required fields and ensure the amount is between ₦{MIN_CONTRIB.toLocaleString()} and ₦{remainingAmount.toLocaleString()}
+                            Please fill in all required fields and ensure the amount is at least ₦{MIN_CONTRIB.toLocaleString()}
                         </p>
                     )}
                 </div>
