@@ -38,7 +38,7 @@ const Dashboard = () => {
     e.preventDefault();
     if (!registries[0]) return;
     try {
-      await apiUpdateRegistry(registries[0].id, detailsForm);
+      await apiUpdateRegistry(registries[0].uuid, detailsForm);
       setDetails((prev: any) => ({
         ...prev,
         ...detailsForm
@@ -71,7 +71,8 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const mainRegistry = registries[0];
-        const pics = await getRegistryPictures(mainRegistry.id);
+        localStorage.setItem('afriwed_registry_id', mainRegistry.uuid);
+        const pics = await getRegistryPictures(mainRegistry.uuid);
         setDetails({
           ...mainRegistry,
           photos: pics.map((p: any) => p.image_url),
@@ -106,7 +107,7 @@ const Dashboard = () => {
   const handleDeleteExistingPhoto = async (photoUrl: string) => {
     if (!registries[0]) return;
     try {
-      await removeRegistryPicture(registries[0].id, photoUrl);
+      await removeRegistryPicture(registries[0].uuid, photoUrl);
       setDetails((d: any) => ({
         ...d,
         photos: d.photos.filter((p: string) => p !== photoUrl)
@@ -124,10 +125,10 @@ const Dashboard = () => {
     try {
       for (const file of photosToUpload) {
         const data = await uploadImageFile(file);
-        await addRegistryPicture(registries[0].id, data.url);
+        await addRegistryPicture(registries[0].uuid, data.url);
       }
 
-      const pics = await getRegistryPictures(registries[0].id);
+      const pics = await getRegistryPictures(registries[0].uuid);
       setDetails((d: any) => ({
         ...d,
         photos: pics.map((p: any) => p.image_url)
@@ -151,7 +152,7 @@ const Dashboard = () => {
           <div>Loading...</div>
         ) : registries.length > 0 ? (
           <Link
-            to={`/registry/${registries[0].id}`}
+            to={`/registry/${registries[0].uuid}`}
             className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]"
           >
             View Registry

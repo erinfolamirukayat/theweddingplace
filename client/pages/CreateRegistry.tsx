@@ -145,11 +145,11 @@ const CreateRegistry = () => {
       });
       // Add each picture to the registry
       for (const url of finalImageUrls) {
-        await addRegistryPicture(registry.id, url);
+        await addRegistryPicture(registry.uuid, url);
       }
-      localStorage.setItem('afriwed_registry_id', registry.id);
-      setMessage('Registry created successfully!');
-      navigate(`/registry/${registry.id}`);
+      localStorage.setItem('afriwed_registry_id', registry.uuid);
+      setMessage('Registry created successfully!', 'success');
+      navigate(`/registry/${registry.uuid}`);
     } catch (err: any) {
       setApiError(err.message || 'Failed to create registry');
     } finally {

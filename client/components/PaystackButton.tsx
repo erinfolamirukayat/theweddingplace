@@ -12,7 +12,7 @@ interface PaystackButtonProps {
         message?: string;
     };
     onSuccess: (response: { reference: string }) => void;
-    onClose: () => void;
+    onClose: (reference?: string) => void;
 }
 
 declare global {
@@ -109,12 +109,13 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
         }
 
         try {
+            const reference = (new Date()).getTime().toString();
             const handler = window.PaystackPop?.setup({
                 key: paystackKey,
                 email,
                 amount: Math.round(amount * 100), // Convert to kobo
                 currency: 'NGN',
-                ref: (new Date()).getTime().toString(),
+                ref: reference,
                 metadata: {
                     registry_item_id: metadata.registry_item_id,
                     name: metadata.name,
@@ -132,7 +133,7 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
                     onSuccess(response);
                 },
                 onClose: () => {
-                    onClose();
+                    onClose(reference);
                 }
             });
 

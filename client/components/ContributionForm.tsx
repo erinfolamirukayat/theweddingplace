@@ -85,8 +85,26 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         navigate(`/payment/verify?reference=${response.reference}`);
     };
 
-    const handlePaymentClose = () => {
-        console.log('Payment cancelled');
+    const handlePaymentClose = async (reference?: string) => {
+        if (reference) {
+            try {
+                // For transfers, the user might close the modal while the payment is still processing
+                // or after it succeeded but before Paystack called onSuccess.
+                // We verify with our backend just to be sure.
+                const { getConfig } = await import('../config');
+                const response = await fetch(`${getConfig().apiUrl}/payments/verify?reference=${reference}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Payment actually succeeded!
+                    navigate(`/payment/verify?reference=${reference}`);
+                    return;
+                }
+            } catch (err) {
+                console.error('Error verifying payment on close:', err);
+            }
+        }
+        console.log('Payment cancelled or unverified');
     };
 
     const percent = !formData.amount || isNaN(Number(formData.amount)) || price === 0 ? 0 : Math.round((Number(formData.amount) / price) * 100);

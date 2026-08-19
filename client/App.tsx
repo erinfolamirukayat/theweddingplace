@@ -30,7 +30,7 @@ export function App() {
           <Route index element={<Home />} />
           <Route element={<ProtectedRoute />}>
             <Route path="create-registry" element={<CreateRegistry />} />
-            <Route path="registry/:id" element={<RegistryView />} />
+            <Route path="registry/:uuid" element={<RegistryView />} />
             <Route path="profile" element={<Profile />} />
             <Route path="dashboard" element={<Dashboard />} />
           </Route>

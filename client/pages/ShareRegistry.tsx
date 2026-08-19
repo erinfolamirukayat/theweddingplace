@@ -47,10 +47,10 @@ const ShareRegistry = () => {
     try {
       const reg = await getRegistryByShareUrl(url);
       setRegistry(reg);
-      const pics = await getRegistryPictures(reg.id);
+      const pics = await getRegistryPictures(reg.uuid);
       setPictures(pics.map((pic: any) => pic.image_url));
       // Fetch registry items
-      const itemsRes = await fetch(`${getConfig().apiUrl}/registries/${reg.id}/items`);
+      const itemsRes = await fetch(`${getConfig().apiUrl}/registries/${reg.uuid}/items`);
       if (!itemsRes.ok) throw new Error('Failed to fetch items');
       const itemsData = await itemsRes.json();
       setItems(itemsData); // Store all items without filtering

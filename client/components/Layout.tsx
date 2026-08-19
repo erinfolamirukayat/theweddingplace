@@ -61,7 +61,7 @@ const Layout = () => {
         <footer className="bg-[#2C1810] text-white py-6 sm:py-8 mt-8 sm:mt-12">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-semibold mb-2">BlissGift Registry</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-2">BlissGifts Registry</h3>
               <p className="text-xs sm:text-sm opacity-75">
                 Celebrating African Unions with Meaningful Gifts
               </p>

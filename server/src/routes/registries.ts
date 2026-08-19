@@ -28,19 +28,19 @@ router.get('/share/:shareSlug/items/:itemId', getRegistryItemByShareUrl);
 // Registry CRUD operations
 router.get('/', getAllRegistries);
 router.get('/mine', authenticateJWT, getMyRegistries); // Specific route first
-router.get('/:id', authenticateJWT, getRegistryById);
+router.get('/:uuid', authenticateJWT, getRegistryById);
 router.post('/', authenticateJWT, createRegistry);
-router.put('/:id', authenticateJWT, updateRegistry);
-router.delete('/:id', authenticateJWT, deleteRegistry);
+router.put('/:uuid', authenticateJWT, updateRegistry);
+router.delete('/:uuid', authenticateJWT, deleteRegistry);
 
 // Registry items operations
-router.get('/:id/items', getRegistryItems);
-router.post('/:id/items', authenticateJWT, addRegistryItem);
-router.delete('/:id/items/:itemId', authenticateJWT, removeRegistryItem);
+router.get('/:uuid/items', getRegistryItems);
+router.post('/:uuid/items', authenticateJWT, addRegistryItem);
+router.delete('/:uuid/items/:itemId', authenticateJWT, removeRegistryItem);
 
 // Registry pictures operations
-router.get('/:id/pictures', getRegistryPictures);
-router.post('/:id/pictures', authenticateJWT, addRegistryPicture);
-router.delete('/:id/pictures/:pictureId', authenticateJWT, removeRegistryPicture);
+router.get('/:uuid/pictures', getRegistryPictures);
+router.post('/:uuid/pictures', authenticateJWT, addRegistryPicture);
+router.delete('/:uuid/pictures/:pictureId', authenticateJWT, removeRegistryPicture);
 
 export default router; 

@@ -39,8 +39,8 @@ export const getAllRegistries = async (req: Request, res: Response): Promise<voi
 // Get a single registry
 export const getRegistryById = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
-        const result = await pool.query('SELECT * FROM registries WHERE id = $1', [id]);
+        const { uuid } = req.params;
+        const result = await pool.query('SELECT * FROM registries WHERE uuid = $1', [uuid]);
         
         if (result.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
@@ -66,12 +66,16 @@ export const createRegistry = async (req: Request, res: Response): Promise<void>
     try {
         const { couple_names, ...rest } = req.body;
         let baseSlug = slugify(couple_names);
-        let slug = baseSlug + generateUniqueId(2);
-        // Ensure uniqueness
+        let slug = baseSlug;
+        
         let exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);
-        while (exists.rows.length > 0) {
-            slug = baseSlug + generateUniqueId(3);
+        if (exists.rows.length > 0) {
+            slug = baseSlug + '-' + generateUniqueId(2);
             exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);
+            while (exists.rows.length > 0) {
+                slug = baseSlug + '-' + generateUniqueId(3);
+                exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);
+            }
         }
         const user_id = (req as any).user?.userId; // from JWT
 
@@ -98,11 +102,11 @@ export const createRegistry = async (req: Request, res: Response): Promise<void>
 // Update a registry
 export const updateRegistry = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const { couple_names, wedding_date, story, phone, wedding_city } = req.body;
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT id, user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -113,8 +117,8 @@ export const updateRegistry = async (req: Request, res: Response): Promise<void>
         }
 
         const result = await pool.query(
-            'UPDATE registries SET couple_names = $1, wedding_date = $2, story = $3, phone = $4, wedding_city = $5 WHERE id = $6 RETURNING *',
-            [couple_names, wedding_date, story, phone, wedding_city, id]
+            'UPDATE registries SET couple_names = $1, wedding_date = $2, story = $3, phone = $4, wedding_city = $5 WHERE uuid = $6 RETURNING *',
+            [couple_names, wedding_date, story, phone, wedding_city, uuid]
         );
         if (result.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
@@ -130,10 +134,10 @@ export const updateRegistry = async (req: Request, res: Response): Promise<void>
 // Delete a registry
 export const deleteRegistry = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -143,7 +147,7 @@ export const deleteRegistry = async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        const result = await pool.query('DELETE FROM registries WHERE id = $1 RETURNING *', [id]);
+        const result = await pool.query('DELETE FROM registries WHERE uuid = $1 RETURNING *', [uuid]);
         
         if (result.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
@@ -160,13 +164,14 @@ export const deleteRegistry = async (req: Request, res: Response): Promise<void>
 // Get registry items
 export const getRegistryItems = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const result = await pool.query(
             `SELECT ri.*, p.name, p.description, p.price, p.image_url, p.suggested_amount 
              FROM registry_items ri 
              JOIN products p ON ri.product_id = p.id 
-             WHERE ri.registry_id = $1`,
-            [id]
+             JOIN registries r ON ri.registry_id = r.id
+             WHERE r.uuid = $1`,
+            [uuid]
         );
         res.json(result.rows);
     } catch (error) {
@@ -178,11 +183,11 @@ export const getRegistryItems = async (req: Request, res: Response): Promise<voi
 // Add item to registry
 export const addRegistryItem = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const { product_id, quantity } = req.body;
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT id, user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -192,9 +197,10 @@ export const addRegistryItem = async (req: Request, res: Response): Promise<void
             return;
         }
         
+        const internalId = regCheck.rows[0].id;
         const result = await pool.query(
             'INSERT INTO registry_items (registry_id, product_id, quantity) VALUES ($1, $2, $3) RETURNING *',
-            [id, product_id, quantity]
+            [internalId, product_id, quantity]
         );
         
         res.status(201).json(result.rows[0]);
@@ -207,10 +213,10 @@ export const addRegistryItem = async (req: Request, res: Response): Promise<void
 // Remove item from registry
 export const removeRegistryItem = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id, itemId } = req.params;
+        const { uuid, itemId } = req.params;
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT id, user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -220,9 +226,10 @@ export const removeRegistryItem = async (req: Request, res: Response): Promise<v
             return;
         }
 
+        const internalId = regCheck.rows[0].id;
         const result = await pool.query(
             'DELETE FROM registry_items WHERE id = $1 AND registry_id = $2 RETURNING *',
-            [itemId, id]
+            [itemId, internalId]
         );
         
         if (result.rows.length === 0) {
@@ -240,10 +247,12 @@ export const removeRegistryItem = async (req: Request, res: Response): Promise<v
 // Get registry pictures
 export const getRegistryPictures = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const result = await pool.query(
-            'SELECT * FROM registry_pictures WHERE registry_id = $1 ORDER BY created_at DESC',
-            [id]
+            `SELECT rp.* FROM registry_pictures rp 
+             JOIN registries r ON rp.registry_id = r.id 
+             WHERE r.uuid = $1 ORDER BY rp.created_at DESC`,
+            [uuid]
         );
         res.json(result.rows);
     } catch (error) {
@@ -255,11 +264,11 @@ export const getRegistryPictures = async (req: Request, res: Response): Promise<
 // Add picture to registry
 export const addRegistryPicture = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { uuid } = req.params;
         const { image_url } = req.body;
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT id, user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -269,9 +278,10 @@ export const addRegistryPicture = async (req: Request, res: Response): Promise<v
             return;
         }
         
+        const internalId = regCheck.rows[0].id;
         const result = await pool.query(
             'INSERT INTO registry_pictures (registry_id, image_url) VALUES ($1, $2) RETURNING *',
-            [id, image_url]
+            [internalId, image_url]
         );
         
         res.status(201).json(result.rows[0]);
@@ -284,11 +294,11 @@ export const addRegistryPicture = async (req: Request, res: Response): Promise<v
 // Remove picture from registry
 export const removeRegistryPicture = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id, pictureId } = req.params;
+        const { uuid, pictureId } = req.params;
         const imageUrl = decodeURIComponent(pictureId);
         const userId = (req as any).user?.userId;
 
-        const regCheck = await pool.query('SELECT user_id FROM registries WHERE id = $1', [id]);
+        const regCheck = await pool.query('SELECT id, user_id FROM registries WHERE uuid = $1', [uuid]);
         if (regCheck.rows.length === 0) {
             res.status(404).json({ error: 'Registry not found' });
             return;
@@ -298,9 +308,10 @@ export const removeRegistryPicture = async (req: Request, res: Response): Promis
             return;
         }
 
+        const internalId = regCheck.rows[0].id;
         const result = await pool.query(
             'DELETE FROM registry_pictures WHERE image_url = $1 AND registry_id = $2 RETURNING *',
-            [imageUrl, id]
+            [imageUrl, internalId]
         );
         
         if (result.rows.length === 0) {

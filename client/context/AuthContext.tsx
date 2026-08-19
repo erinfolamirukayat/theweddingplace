@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .then(data => {
           setRegistries(data || []);
           if (data && data.length > 0) {
-            localStorage.setItem('afriwed_registry_id', data[0].id);
+            localStorage.setItem('afriwed_registry_id', data[0].uuid);
           } else {
             localStorage.removeItem('afriwed_registry_id');
           }

@@ -13,6 +13,7 @@ CREATE TABLE products (
 -- Create registries table
 CREATE TABLE registries (
     id SERIAL PRIMARY KEY,
+    uuid UUID DEFAULT gen_random_uuid() UNIQUE,
     couple_names VARCHAR(255) NOT NULL,
     wedding_date DATE NOT NULL,
     story TEXT,

@@ -34,7 +34,7 @@ interface RegistryItem {
 }
 
 const RegistryView = () => {
-  const { id } = useParams<{ id: string }>();
+  const { uuid: id } = useParams<{ uuid: string }>();
   const [registry, setRegistry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +65,7 @@ const RegistryView = () => {
       apiGetRegistryById(id)
         .then(reg => {
           setRegistry(reg);
-          fetchItems(reg.id);
+          fetchItems(reg.uuid);
           fetchPictures();
         })
         .catch(err => setError(err.message || 'Failed to load registry'))
@@ -379,7 +379,7 @@ const RegistryView = () => {
             <h2 className="text-xl font-semibold text-[#2C1810]">Registry Items</h2>
             <button
               className="inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] text-sm"
-              onClick={() => navigate(`/catalog?registry=${registry.id}`)}
+              onClick={() => navigate(`/catalog?registry=${registry.uuid}`)}
             >
               <PlusIcon className="h-4 w-4 mr-1" /> Add Item
             </button>
@@ -398,7 +398,7 @@ const RegistryView = () => {
               <h3 className="text-lg font-medium text-gray-900">No items yet</h3>
               <p className="mt-1 text-gray-500">Start by adding items to your registry</p>
               <Link 
-                to={`/catalog?registry=${registry.id}`} 
+                to={`/catalog?registry=${registry.uuid}`} 
                 className="mt-4 inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]"
               >
                 Browse Products
