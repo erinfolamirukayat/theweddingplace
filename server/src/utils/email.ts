@@ -22,8 +22,8 @@ interface ContributionDetails {
 export const sendContributionNotification = async (details: ContributionDetails) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"The Wedding Place Support" <${emailUser}>`,
-    to: 'mafaefoods@gmail.com',
+    from: `"Celebron Support" <${emailUser}>`,
+    to: 'info@celebron.co',
     subject: `New Contribution Received for ${details.registryName}!`,
     html: `
       <h2>New Contribution Alert!</h2>
@@ -33,7 +33,7 @@ export const sendContributionNotification = async (details: ContributionDetails)
         <li><strong>Amount:</strong> ₦${details.amount.toLocaleString()}</li>
         <li><strong>Contributor:</strong> ${details.contributorName} (${details.contributorEmail})</li>
       </ul>
-      <p>This is an automated notification from the BlissGifts application.</p>
+      <p>This is an automated notification from the Celebron application.</p>
     `,
   };
 
@@ -44,12 +44,12 @@ export const sendContributionNotification = async (details: ContributionDetails)
 export const sendPasswordResetEmail = async (email: string, resetLink: string) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"The Wedding Place Support" <${emailUser}>`,
+    from: `"Celebron Support" <${emailUser}>`,
     to: email,
-    subject: "Reset Your Password - The Wedding Place",
+    subject: "Reset Your Password - Celebron",
     html: `
       <h2>Password Reset Request</h2>
-      <p>We received a request to reset the password for your account on The Wedding Place.</p>
+      <p>We received a request to reset the password for your account on Celebron.</p>
       <p>Click the button below to reset your password (valid for 15 minutes):</p>
       <div style="margin: 20px 0;">
         <a href="${resetLink}" style="padding: 12px 24px; background-color: #B8860B; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>

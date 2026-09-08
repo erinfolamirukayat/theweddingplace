@@ -18,11 +18,11 @@ const Home = () => {
   // Testimonial carousel data
   const testimonials = [
     {
-      quote: "I didn't even know wedding gift registries were a thing in Nigeria. Using Bliss and Gifts saved us from getting 4 kettles and 2 toasters. Every gift we received helped us build our first home together.",
+      quote: "I didn't even know wedding gift registries were a thing in Nigeria. Using Celebron saved us from getting 4 kettles and 2 toasters. Every gift we received helped us build our first home together.",
       author: 'Kemi & Dayo, Lagos',
     },
     {
-      quote: "Our guests actually thanked us for using Bliss and Gifts. They said it made buying gifts stress-free — no last-minute shopping or wrapping. Everyone was happy!",
+      quote: "Our guests actually thanked us for using Celebron. They said it made buying gifts stress-free — no last-minute shopping or wrapping. Everyone was happy!",
       author: 'Uche & Chiamaka, Owerri',
     },
     {
@@ -34,11 +34,11 @@ const Home = () => {
       author: 'Folu & Tosin, Ibadan',
     },
     {
-      quote: "After carrying 3 cartons of plates home from my sister's wedding last year, I knew I wanted a different experience. Bliss and Gifts made sure we only got what we asked for.",
+      quote: "After carrying 3 cartons of plates home from my sister's wedding last year, I knew I wanted a different experience. Celebron made sure we only got what we asked for.",
       author: 'Tola, Bride-to-be',
     },
     {
-      quote: "We used Bliss and Gifts for our small wedding and shared the registry link on WhatsApp. Our friends contributed to our honeymoon fund — best decision ever.",
+      quote: "We used Celebron for our small wedding and shared the registry link on WhatsApp. Our friends contributed to our honeymoon fund — best decision ever.",
       author: 'Timi & Nneka, Port Harcourt',
     },
     {
