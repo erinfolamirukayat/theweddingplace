@@ -7,7 +7,6 @@ import cors from "cors";
 import { Pool } from "pg";
 import routes from "./routes";
 import authRoutes from "./routes/auth";
-import uploadRoutes from "./routes/upload";
 import paymentsRouter from "./routes/payments";
 import multer from "multer";
 
@@ -42,7 +41,6 @@ export const pool = new Pool(dbConfig);
 // Use routes
 app.use("/api", routes);
 app.use("/api/auth", authRoutes); // Handles /login, /register, and now /registries/mine
-app.use("/api/upload", uploadRoutes);
 app.use('/api/payments', paymentsRouter);
 
 // Global error handler for multer errors. This should be placed after the routes.

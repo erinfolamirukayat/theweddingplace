@@ -10,6 +10,7 @@ import {
   addRegistryPicture,
   removeRegistryPicture,
 } from '../utils/api';
+import { uploadImageFileToCloudinary } from '../utils/cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
 import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useNotification } from '../components/Layout';
@@ -114,20 +115,10 @@ const RegistryView = () => {
       const file = e.target.files[0];
       setUploading(true);
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'user_photo_preset');
-
-        const res = await fetch(`https://api.cloudinary.com/v1_1/dex3v19sz/image/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!res.ok) throw new Error('Failed to upload image to Cloudinary');
-        const data = await res.json();
+        const data = await uploadImageFileToCloudinary(file);
         
         // Save image URL to backend
-        await addRegistryPicture(id!, data.secure_url);
+        await addRegistryPicture(id!, data.url);
         setMessage('Picture uploaded successfully!');
         
         // Refresh pictures

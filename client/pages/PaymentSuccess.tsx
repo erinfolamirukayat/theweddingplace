@@ -49,7 +49,7 @@ const PaymentSuccess: React.FC = () => {
             {/* Top Banner */}
             <div className="bg-white border-b border-gray-200 py-4 text-center shadow-sm w-full">
                 <Link to="/" className="text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors">
-                    Visit TheWeddingPlace to set up a registry like this
+                    Visit Celebron to set up a registry like this
                 </Link>
             </div>
 

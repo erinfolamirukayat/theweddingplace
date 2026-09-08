@@ -96,13 +96,16 @@ export const removeRegistryPicture = (registryId: string, imageUrl: string) => a
   method: 'DELETE',
 });
 
+import { uploadImageFileToCloudinary, uploadImageUrlToCloudinary } from './cloudinary';
+
 // --- Image Uploads ---
 export const uploadImageFile = (file: File) => {
-  const formData = new FormData();
-  formData.append('image', file);
-  return authFetch('/upload/image', { method: 'POST', body: formData });
+  return uploadImageFileToCloudinary(file);
 };
-export const uploadImageFromUrl = (url: string) => authFetch('/upload/image-from-url', { method: 'POST', body: JSON.stringify({ url }) });
+
+export const uploadImageFromUrl = (url: string) => {
+  return uploadImageUrlToCloudinary(url);
+};
 
 // --- Products & Items ---
 export const getProducts = () => publicFetch('/products');

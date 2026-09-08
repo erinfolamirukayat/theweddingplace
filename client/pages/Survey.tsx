@@ -133,7 +133,7 @@ const Survey = () => {
         return (
           <div className="space-y-6">
             <div className="bg-[#FFFBDE] border-l-4 border-[#129990] p-4 rounded mb-4">
-              <div className="font-bold text-[#129990] text-lg mb-1">BlissGifts is an online wedding gift registry designed specifically for Nigerian couples.</div>
+              <div className="font-bold text-[#129990] text-lg mb-1">Celebron is an online wedding gift registry designed specifically for Nigerian couples.</div>
               <div className="mb-2 text-[#2C1810] font-medium">Why is this important?</div>
               <div className="text-[#2C1810] mb-2">Because right now, most Nigerian couples receive random wedding gifts — sometimes duplicates, sometimes things they don't need — and then have to carry everything home from the venue. 😩</div>
               <ul className="list-none pl-0 text-[#2C1810] space-y-1">
@@ -379,7 +379,7 @@ const Survey = () => {
     <div className="min-h-screen bg-gray-50 px-2 sm:px-0">
       {/* Header */}
       <header className="text-center py-6 sm:py-8 bg-white shadow">
-        <h1 className="text-2xl sm:text-4xl font-bold text-[#B8860B] tracking-tight">BlissGifts</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-[#B8860B] tracking-tight">Celebron</h1>
       </header>
       {/* Banner */}
       <div
@@ -413,7 +413,7 @@ const Survey = () => {
         {submitted ? (
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-[#2C1810] mb-2">Thank you!</h3>
-            <p className="text-gray-700">Your feedback has been received. We'll keep you posted on how BlissGifts is evolving!</p>
+            <p className="text-gray-700">Your feedback has been received. We'll keep you posted on how Celebron is evolving!</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
