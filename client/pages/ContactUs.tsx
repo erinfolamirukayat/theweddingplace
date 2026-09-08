@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-const WHATSAPP_NUMBER = '2348012345678'; // Replace with your WhatsApp number
-const EMAIL_ADDRESS = 'support@blissgift.com'; // Replace with your support email
+const EMAIL_ADDRESS = 'info@celebron.co';
 
 const ContactUs = () => {
   const [form, setForm] = useState({ name: '', contact: '', message: '' });
@@ -49,17 +48,7 @@ const ContactUs = () => {
           </form>
         )}
       </div>
-      <div className="bg-white rounded shadow p-4 sm:p-6 mb-6 sm:mb-8">
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">2. Send us a message via WhatsApp</h2>
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold text-center"
-        >
-          Message us on WhatsApp
-        </a>
-      </div>
+
       <div className="bg-white rounded shadow p-4 sm:p-6">
         <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">3. Send us an email</h2>
         <a

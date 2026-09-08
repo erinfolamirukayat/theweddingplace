@@ -66,8 +66,7 @@ const Layout = () => {
                 Celebrating African Unions with Meaningful Gifts
               </p>
               <div className="mt-4 flex flex-col gap-1 items-center justify-center sm:space-y-1">
-                <div className="text-xs sm:text-sm">WhatsApp: <a href="https://wa.me/2348012345678" className="underline text-[#B8860B]" target="_blank" rel="noopener noreferrer">+234 801 234 5678</a></div>
-                <div className="text-xs sm:text-sm">Email: <a href="mailto:support@blissgift.com" className="underline text-[#B8860B]">support@blissgift.com</a></div>
+                <div className="text-xs sm:text-sm">Email: <a href="mailto:info@celebron.co" className="underline text-[#B8860B]">support@blissgift.com</a></div>
               </div>
             </div>
           </div>
