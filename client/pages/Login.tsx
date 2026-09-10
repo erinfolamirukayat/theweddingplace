@@ -12,7 +12,7 @@ const Login = () => {
   const location = useLocation();
 
   // If redirected, show a message
-  const from = (location.state as any)?.from || '/';
+  const from = (location.state as any)?.from || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
