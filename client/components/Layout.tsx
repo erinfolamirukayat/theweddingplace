@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import Navbar from './Navbar';
+import { useAuth } from '../context/AuthContext';
+import { resendVerificationEmail } from '../utils/api';
 
 interface NotificationState {
   message: string;
@@ -32,7 +34,7 @@ const Notification: React.FC = () => {
   return (
     <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded shadow z-50`}>
       {ctx.notification.message}
-      <button className="ml-4 text-white font-bold" onClick={() => ctx.setNotification(null)}>×</button>
+      <button className="ml-4 text-white font-bold" onClick={() => ctx.setNotification(null)}>✕</button>
     </div>
   );
 };
@@ -41,11 +43,37 @@ const Layout = () => {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const location = useLocation();
   const isSharePage = location.pathname.startsWith('/share/');
+  const auth = useAuth();
+
+  const [resending, setResending] = useState(false);
+
+  const handleResend = async () => {
+    if (resending) return;
+    setResending(true);
+    try {
+      await resendVerificationEmail();
+      setNotification({ message: 'Verification email resent!', type: 'success' });
+      setTimeout(() => setNotification(null), 5000);
+    } catch (err: any) {
+      setNotification({ message: err.message || 'Failed to resend email', type: 'error' });
+      setTimeout(() => setNotification(null), 5000);
+    } finally {
+      setResending(false);
+    }
+  };
 
   return (
     <NotificationContext.Provider value={{ notification, setNotification }}>
       <Notification />
       <div className="min-h-screen bg-[#FFF8F3]">
+        {auth?.user && auth.user.is_verified === false && !isSharePage && (
+          <div className="bg-yellow-100 border-b border-yellow-200 text-yellow-800 px-4 py-3 text-center sm:text-sm text-xs">
+            <span className="font-semibold mr-2">Please verify your email address.</span> 
+            <button onClick={handleResend} disabled={resending} className="underline text-yellow-900 hover:text-yellow-700">
+              {resending ? 'Sending...' : 'Click here to resend verification email'}
+            </button>
+          </div>
+        )}
         {isSharePage ? (
           <div className="bg-white border-b border-gray-200 py-4 text-center shadow-sm">
             <Link to="/" className="text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors">

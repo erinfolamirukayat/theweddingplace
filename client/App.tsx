@@ -20,6 +20,7 @@ import ContributePage from './pages/ContributePage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 export function App() {
   return <AuthProvider>
@@ -42,6 +43,7 @@ export function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/contact" element={<Contact />} />
         </Route>
         <Route path="/survey" element={<Survey />} />

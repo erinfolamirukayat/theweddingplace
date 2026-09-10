@@ -122,3 +122,19 @@ export const updateMe = (data: { first_name: string; last_name: string; how_hear
   method: 'PUT',
   body: JSON.stringify(data),
 });
+export const verifyEmail = async (email: string, token: string) => {
+  const response = await fetch(`${API_URL}/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to verify email');
+  }
+  return response.json();
+};
+
+export const resendVerificationEmail = async () => {
+  return authFetch('/auth/resend-verification', {
+    method: 'POST',
+  });
+};

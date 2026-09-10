@@ -61,3 +61,24 @@ export const sendPasswordResetEmail = async (email: string, resetLink: string) =
   await transporter.sendMail(mailOptions);
   console.log('Password reset email sent successfully.');
 };
+
+export const sendVerificationEmail = async (email: string, firstName: string, verificationLink: string) => {
+  const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
+  const mailOptions = {
+    from: `"Celebron Support" <${emailUser}>`,
+    to: email,
+    subject: "Verify Your Email Address - Celebron",
+    html: `
+      <h2>Welcome to Celebron, ${firstName}!</h2>
+      <p>We're thrilled to have you here. Please verify your email address to get the most out of your account.</p>
+      <div style="margin: 20px 0;">
+        <a href="${verificationLink}" style="padding: 12px 24px; background-color: #B8860B; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+      </div>
+      <p>If the button doesn't work, copy and paste this link into your browser:</p>
+      <p>${verificationLink}</p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log('Verification email sent successfully.');
+};

@@ -5,6 +5,9 @@ import { getMyRegistries } from '../utils/api';
 interface User {
   id: number;
   email: string;
+  is_verified?: boolean;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthContextType {
