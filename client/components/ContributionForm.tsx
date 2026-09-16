@@ -252,7 +252,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
 
                 <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                        Message to the couple (optional)
+                        Message to the couple
                     </label>
                     <textarea
                         id="message"
