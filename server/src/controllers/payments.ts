@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../index';
 import { PaystackService } from '../services/paystack';
-import { sendContributionNotification } from '../utils/email'; // Import the email utility
+import { sendContributionNotification, sendThankYouToContributor } from '../utils/email'; // Import the email utility
 import crypto from 'crypto';
 
 /**
@@ -17,15 +17,19 @@ const _processSuccessfulContribution = async (
     amountInKobo: number,
     metadata: { registry_item_id: string; name: string; email: string; message?: string }
 ) => {
-    const { registry_item_id, name, email, message } = metadata;
-    const amount = amountInKobo / 100; // Convert back to major currency unit (Naira)
+    const { registry_item_id, name, email, message, base_amount } = metadata as any;
+    // If base_amount exists, that's what was intended for the couple. 
+    // Otherwise fallback to the total paid.
+    const amount = base_amount || (amountInKobo / 100);
+    const handling_fee = (amountInKobo / 100) - amount; // Convert back to major currency unit (Naira)
 
     // Fetch item and registry details for email notification
     const itemDetailsResult = await pool.query(
-        `SELECT ri.id, p.name as item_name, r.couple_names as registry_name
+        `SELECT ri.id, p.name as item_name, r.couple_names as registry_name, u.email as couple_email, u.notification_preference
          FROM registry_items ri
          JOIN products p ON ri.product_id = p.id
          JOIN registries r ON ri.registry_id = r.id
+         JOIN users u ON r.user_id = u.id
          WHERE ri.id = $1`,
         [registry_item_id]
     );
@@ -38,11 +42,11 @@ const _processSuccessfulContribution = async (
 
     const result = await pool.query(
         `INSERT INTO contributors 
-        (registry_item_id, name, email, amount, message, payment_reference, status) 
-        VALUES ($1, $2, $3, $4, $5, $6, 'completed') 
+        (registry_item_id, name, email, amount, handling_fee, message, payment_reference, status) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed') 
         ON CONFLICT (payment_reference) DO NOTHING
         RETURNING *`,
-        [registry_item_id, name, email, amount, message, reference]
+        [registry_item_id, name, email, amount, handling_fee, message, reference]
     );
 
     // Only update the contributions if the insert was successful
@@ -63,15 +67,26 @@ const _processSuccessfulContribution = async (
     if (result.rows.length > 0 && itemDetails) {
         console.log('Attempting to send contribution notification email...');
         try {
-            await sendContributionNotification({
+            const emailDetails = {
                 itemName: itemDetails.item_name,
                 amount: amount,
                 contributorName: name,
                 contributorEmail: email,
                 registryName: itemDetails.registry_name,
-            });
+                coupleEmail: itemDetails.couple_email
+            };
+
+            // 1. Send Thank You to Contributor
+            if (email && email !== 'info@celebron.co') {
+                await sendThankYouToContributor(emailDetails);
+            }
+
+            // 2. Notify the Couple (if they want it for every contribution)
+            if (itemDetails.notification_preference === 'every_contribution') {
+                await sendContributionNotification(emailDetails);
+            }
         } catch (emailError) {
-            console.error("Failed to send contribution notification email:", emailError);
+            console.error("Failed to send emails:", emailError);
             console.error("Email send error details:", emailError); // More detailed error info
         }
     }

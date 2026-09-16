@@ -16,7 +16,10 @@ const CreateRegistry = () => {
   const navigate = useNavigate();
   const { setMessage } = useNotification();
   const [formData, setFormData] = useState({
-    couple_names: '',
+    bride_first_name: '',
+    bride_last_name: '',
+    groom_first_name: '',
+    groom_last_name: '',
     wedding_date: '',
     story: '',
   });
@@ -107,7 +110,10 @@ const CreateRegistry = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.couple_names.trim()) newErrors.couple_names = 'Couple names are required';
+    if (!formData.bride_first_name.trim()) newErrors.bride_first_name = 'Bride first name is required';
+      if (!formData.bride_last_name.trim()) newErrors.bride_last_name = 'Bride last name is required';
+      if (!formData.groom_first_name.trim()) newErrors.groom_first_name = 'Groom first name is required';
+      if (!formData.groom_last_name.trim()) newErrors.groom_last_name = 'Groom last name is required';
     if (!formData.wedding_date) newErrors.wedding_date = 'Wedding date is required';
     if (!userFields.phone.trim()) newErrors.phone = 'WhatsApp phone number is required';
     setErrors(newErrors);
@@ -137,7 +143,7 @@ const CreateRegistry = () => {
       }
       // Create the registry first (without pictures)
       const registry = await apiCreateRegistry({
-        couple_names: formData.couple_names,
+        couple_names: `${formData.bride_first_name.trim()} ${formData.bride_last_name.trim()} & ${formData.groom_first_name.trim()} ${formData.groom_last_name.trim()}`,
         wedding_date: formData.wedding_date,
         story: formData.story,
         phone: userFields.phone,
@@ -163,17 +169,27 @@ const CreateRegistry = () => {
     <div className="bg-white rounded-lg shadow p-6">
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="couple_names" className="block text-sm font-medium text-gray-700">
-              Couple Names
-            </label>
-            <div className="mt-1 relative rounded-md shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <HeartIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              <input type="text" name="couple_names" id="couple_names" value={formData.couple_names} onChange={handleChange} className={`block w-full pl-10 pr-3 py-2 border ${errors.couple_names ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B]`} placeholder="e.g. Ada & Chinedu" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="bride_first_name" className="block text-sm font-medium text-gray-700">Bride First Name</label>
+              <input type="text" name="bride_first_name" id="bride_first_name" value={formData.bride_first_name} onChange={handleChange} className={`mt-1 block w-full px-3 py-2 border ${errors.bride_first_name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B]`} placeholder="e.g. Ada" />
+              {errors.bride_first_name && <p className="mt-1 text-sm text-red-600">{errors.bride_first_name}</p>}
             </div>
-            {errors.couple_names && <p className="mt-1 text-sm text-red-600">{errors.couple_names}</p>}
+            <div>
+              <label htmlFor="bride_last_name" className="block text-sm font-medium text-gray-700">Bride Last Name</label>
+              <input type="text" name="bride_last_name" id="bride_last_name" value={formData.bride_last_name} onChange={handleChange} className={`mt-1 block w-full px-3 py-2 border ${errors.bride_last_name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B]`} placeholder="e.g. Okafor" />
+              {errors.bride_last_name && <p className="mt-1 text-sm text-red-600">{errors.bride_last_name}</p>}
+            </div>
+            <div>
+              <label htmlFor="groom_first_name" className="block text-sm font-medium text-gray-700">Groom First Name</label>
+              <input type="text" name="groom_first_name" id="groom_first_name" value={formData.groom_first_name} onChange={handleChange} className={`mt-1 block w-full px-3 py-2 border ${errors.groom_first_name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B]`} placeholder="e.g. Chinedu" />
+              {errors.groom_first_name && <p className="mt-1 text-sm text-red-600">{errors.groom_first_name}</p>}
+            </div>
+            <div>
+              <label htmlFor="groom_last_name" className="block text-sm font-medium text-gray-700">Groom Last Name</label>
+              <input type="text" name="groom_last_name" id="groom_last_name" value={formData.groom_last_name} onChange={handleChange} className={`mt-1 block w-full px-3 py-2 border ${errors.groom_last_name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B]`} placeholder="e.g. Eze" />
+              {errors.groom_last_name && <p className="mt-1 text-sm text-red-600">{errors.groom_last_name}</p>}
+            </div>
           </div>
           <div>
             <label htmlFor="wedding_date" className="block text-sm font-medium text-gray-700">

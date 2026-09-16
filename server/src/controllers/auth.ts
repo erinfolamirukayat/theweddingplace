@@ -135,11 +135,33 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   try {
-    const result = await pool.query("SELECT id, email, first_name, last_name, how_heard, is_verified FROM users WHERE id = $1", [userId]);
+    const result = await pool.query("SELECT id, email, first_name, last_name, how_heard, is_verified, notification_preference FROM users WHERE id = $1", [userId]);
     if (result.rows.length === 0) {
       res.status(404).json({ error: "User not found" });
       return;
     }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updatePreferences = async (req: Request, res: Response): Promise<void> => {
+  const userId = (req as any).user?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const { notification_preference } = req.body;
+  if (!notification_preference) {
+    res.status(400).json({ error: "notification_preference is required" });
+    return;
+  }
+  try {
+    const result = await pool.query(
+      "UPDATE users SET notification_preference = $1 WHERE id = $2 RETURNING id, email, first_name, last_name, notification_preference, is_verified",
+      [notification_preference, userId]
+    );
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });

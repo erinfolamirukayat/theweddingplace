@@ -26,7 +26,7 @@ const Register = () => {
     }
     try {
       await register(email, password, firstName, lastName, howHeard);
-      setMessage('Registration successful!');
+      setMessage('Registration successful! Please check your email to verify your account.', 'success');
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed');

@@ -3,13 +3,14 @@ import { getConfig } from '../config';
 import { useNotification } from './Layout';
 
 interface PaystackButtonProps {
-    email: string;
+    email?: string;
     amount: number;
     metadata: {
         registry_item_id: string;
         name: string;
-        email: string;
+        email?: string;
         message?: string;
+        base_amount?: number;
     };
     onSuccess: (response: { reference: string }) => void;
     onClose: (reference?: string) => void;
@@ -121,6 +122,7 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
                     name: metadata.name,
                     email: metadata.email,
                     message: metadata.message,
+                    base_amount: metadata.base_amount,
                     custom_fields: [
                         {
                             display_name: "Registry Item",

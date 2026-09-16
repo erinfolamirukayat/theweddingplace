@@ -65,7 +65,11 @@ export const getRegistryById = async (req: Request, res: Response): Promise<void
 export const createRegistry = async (req: Request, res: Response): Promise<void> => {
     try {
         const { couple_names, ...rest } = req.body;
-        let baseSlug = slugify(couple_names);
+        const coupleParts = couple_names.split(' & ');
+        const brideFirst = coupleParts[0] ? coupleParts[0].trim().split(' ')[0] : '';
+        const groomFirst = coupleParts[1] ? coupleParts[1].trim().split(' ')[0] : '';
+        const namesForSlug = (brideFirst && groomFirst) ? `${brideFirst} and ${groomFirst}` : couple_names;
+        let baseSlug = slugify(namesForSlug);
         let slug = baseSlug;
         
         let exists = await pool.query('SELECT 1 FROM registries WHERE share_slug = $1', [slug]);

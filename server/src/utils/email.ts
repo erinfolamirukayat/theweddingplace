@@ -17,13 +17,15 @@ interface ContributionDetails {
   contributorName: string;
   contributorEmail: string;
   registryName: string;
+  coupleEmail: string;
 }
 
 export const sendContributionNotification = async (details: ContributionDetails) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
     from: `"Celebron Support" <${emailUser}>`,
-    to: 'info@celebron.co',
+    to: details.coupleEmail,
+    cc: 'info@celebron.co',
     subject: `New Contribution Received for ${details.registryName}!`,
     html: `
       <h2>New Contribution Alert!</h2>
@@ -33,12 +35,52 @@ export const sendContributionNotification = async (details: ContributionDetails)
         <li><strong>Amount:</strong> ₦${details.amount.toLocaleString()}</li>
         <li><strong>Contributor:</strong> ${details.contributorName} (${details.contributorEmail})</li>
       </ul>
-      <p>This is an automated notification from the Celebron application.</p>
+      <p>Log in to your dashboard to view more details!</p>
+      <br>
+      <p>Best regards,<br>Celebron Team</p>
     `,
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log('Contribution notification email sent successfully.');
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Contribution notification email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending contribution notification email:', error);
+    throw error;
+  }
+};
+
+export const sendThankYouToContributor = async (details: ContributionDetails) => {
+  const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
+  const mailOptions = {
+    from: `"Celebron" <${emailUser}>`,
+    to: details.contributorEmail,
+    subject: `Thank you for your gift to ${details.registryName}!`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #B8860B;">Thank You, ${details.contributorName}!</h2>
+        <p>Your generous contribution of <strong>₦${details.amount.toLocaleString()}</strong> towards the <strong>${details.itemName}</strong> has been successfully received.</p>
+        <p>The couple (${details.registryName}) has been notified of your wonderful gift.</p>
+        <br>
+        <p>If you left a message, it has been saved to their registry guestbook.</p>
+        <br>
+        <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #777;">
+          This is an automated receipt from Celebron.co. If you have any questions, please reply to this email.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Thank you email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending thank you email:', error);
+    throw error;
+  }
 };
 
 export const sendPasswordResetEmail = async (email: string, resetLink: string) => {

@@ -18,16 +18,43 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<any>(null);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { user, setUser, loading: authLoading, registries } = useAuth();
+  const [preference, setPreference] = useState(user?.notification_preference || 'every_contribution');
+  
+  const { addNotification, setMessage } = useNotification();
+
+  const handleSaveSettings = async () => {
+    try {
+      const { updatePreferences } = await import('../utils/api');
+      const updatedUser = await updatePreferences({ notification_preference: preference });
+      setUser(updatedUser);
+      addNotification('success', 'Preferences updated successfully!');
+      setIsSettingsOpen(false);
+    } catch (err: any) {
+      addNotification('error', err.message || 'Failed to update preferences');
+    }
+  };
+
   const [detailsForm, setDetailsForm] = useState({
-    couple_names: '',
+    bride_first_name: '',
+    bride_last_name: '',
+    groom_first_name: '',
+    groom_last_name: '',
     story: '',
     wedding_date: ''
   });
 
   const handleOpenEditDetails = () => {
     if (!details) return;
-    setDetailsForm({
-      couple_names: details.couple_names || '',
+    const names = details.couple_names ? details.couple_names.split(' & ') : ['', ''];
+      const brideNames = names[0].split(' ');
+      const groomNames = names[1] ? names[1].split(' ') : [''];
+      setDetailsForm({
+        bride_first_name: brideNames[0] || '',
+        bride_last_name: brideNames.slice(1).join(' ') || '',
+        groom_first_name: groomNames[0] || '',
+        groom_last_name: groomNames.slice(1).join(' ') || '',
       story: details.story || '',
       wedding_date: details.wedding_date ? details.wedding_date.split('T')[0] : ''
     });
@@ -38,11 +65,14 @@ const Dashboard = () => {
     e.preventDefault();
     if (!registries[0]) return;
     try {
-      await apiUpdateRegistry(registries[0].uuid, detailsForm);
+      const mergedNames = `${detailsForm.bride_first_name.trim()} ${detailsForm.bride_last_name.trim()} & ${detailsForm.groom_first_name.trim()} ${detailsForm.groom_last_name.trim()}`;
+      const payload = { ...detailsForm, couple_names: mergedNames };
+      await apiUpdateRegistry(registries[0].uuid, payload);
       setDetails((prev: any) => ({
-        ...prev,
-        ...detailsForm
-      }));
+          ...prev,
+          ...detailsForm,
+          couple_names: mergedNames
+        }));
       setIsEditDetailsOpen(false);
       setMessage('Registry details updated successfully!');
     } catch (error: any) {
@@ -54,8 +84,6 @@ const Dashboard = () => {
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [photosToUpload, setPhotosToUpload] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const { setMessage } = useNotification();
-  const { user, loading: authLoading, registries } = useAuth();
 
   useEffect(() => {
     // Don't fetch data until authentication is resolved and we have a user.
@@ -147,26 +175,42 @@ const Dashboard = () => {
   return (
     <div className="max-w-4xl mx-auto py-6 sm:py-8 px-2 sm:px-4">
       {/* Section 2: Quick Links */}
-      <section className="bg-white rounded shadow p-4 sm:p-6 flex flex-col gap-3 items-center justify-center mb-6 sm:mb-8">
-        {loading ? (
-          <div>Loading...</div>
-        ) : registries.length > 0 ? (
-          <Link
-            to={`/registry/${registries[0].uuid}`}
-            className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]"
-          >
-            View Registry
+      <section className="bg-white rounded shadow p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {loading ? (
+            <div className="col-span-full text-center text-gray-500">Loading...</div>
+          ) : registries.length > 0 ? (
+            <>
+              <Link
+                to={`/registry/${registries[0].uuid}`}
+                className="w-full flex items-center justify-center px-4 py-3 bg-[#B8860B] text-white rounded shadow-sm hover:bg-[#8B6508] transition-colors"
+              >
+                View Registry
+              </Link>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="w-full flex items-center justify-center px-4 py-3 bg-[#B8860B] text-white rounded shadow-sm hover:bg-[#8B6508] transition-colors"
+              >
+                Email Settings
+              </button>
+            </>
+          ) : (
+            <div className="col-span-1 sm:col-span-2">
+              <Link
+                to="/create-registry"
+                className="w-full flex items-center justify-center px-4 py-3 bg-[#B8860B] text-white rounded shadow-sm hover:bg-[#8B6508] transition-colors"
+              >
+                Create Registry
+              </Link>
+            </div>
+          )}
+          <Link to="/catalog" className="w-full flex items-center justify-center px-4 py-3 bg-[#B8860B] text-white rounded shadow-sm hover:bg-[#8B6508] transition-colors">
+            Browse Products
           </Link>
-        ) : (
-          <Link
-            to="/create-registry"
-            className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]"
-          >
-            Create Registry
+          <Link to="/profile" className="w-full flex items-center justify-center px-4 py-3 bg-[#B8860B] text-white rounded shadow-sm hover:bg-[#8B6508] transition-colors">
+            My Profile
           </Link>
-        )}
-        <Link to="/catalog" className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]">Browse Products</Link>
-        <Link to="/profile" className="w-full text-center px-4 py-2 bg-[#B8860B] text-white rounded hover:bg-[#8B6508]">My Profile</Link>
+        </div>
       </section>
 
       {/* Section 3: Registry Details */}
@@ -426,6 +470,108 @@ const Dashboard = () => {
                           </button>
                         </div>
                       </form>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition.Root>
+
+          {/* Settings Modal */}
+          <Transition.Root show={isSettingsOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-10" onClose={setIsSettingsOpen}>
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+              </Transition.Child>
+
+              <div className="fixed inset-0 z-10 overflow-y-auto">
+                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                  >
+                    <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                      <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                        <button
+                          type="button"
+                          className="rounded-md bg-white text-gray-400 hover:text-gray-500"
+                          onClick={() => setIsSettingsOpen(false)}
+                        >
+                          <XIcon className="h-6 w-6" aria-hidden="true" />
+                        </button>
+                      </div>
+                      <div className="sm:flex sm:items-start">
+                        <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                          <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                            Email Notifications
+                          </Dialog.Title>
+                          <div className="mt-4">
+                            <form>
+                              <div className="space-y-4">
+                                <label className="flex items-center">
+                                  <input 
+                                    type="radio" 
+                                    value="every_contribution" 
+                                    checked={preference === 'every_contribution'} 
+                                    onChange={(e) => setPreference(e.target.value)}
+                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                  />
+                                  <span className="ml-3 block text-sm font-medium leading-6 text-gray-900">Email me for every contribution</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input 
+                                    type="radio" 
+                                    value="daily_summary" 
+                                    checked={preference === 'daily_summary'} 
+                                    onChange={(e) => setPreference(e.target.value)}
+                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                  />
+                                  <span className="ml-3 block text-sm font-medium leading-6 text-gray-900">Send me a daily summary of contributions</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input 
+                                    type="radio" 
+                                    value="none" 
+                                    checked={preference === 'none'} 
+                                    onChange={(e) => setPreference(e.target.value)}
+                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                  />
+                                  <span className="ml-3 block text-sm font-medium leading-6 text-gray-900">Do not email me (I'll check the dashboard)</span>
+                                </label>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                        <button
+                          type="button"
+                          className="inline-flex w-full justify-center rounded-md bg-[#B8860B] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#8B6508] sm:ml-3 sm:w-auto"
+                          onClick={handleSaveSettings}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                          onClick={() => setIsSettingsOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </Dialog.Panel>
                   </Transition.Child>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PaystackButton from './PaystackButton';
+import { Info } from 'lucide-react';
 
 interface ContributionFormProps {
     registryItemId: string;
@@ -114,7 +115,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         const amount = Number(formData.amount);
         return (
             formData.name.trim() !== '' &&
-            formData.email.trim() !== '' &&
+            
             !isNaN(amount) &&
             amount >= MIN_CONTRIB
         );
@@ -129,19 +130,22 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
 
     // Add function to prepare payment data
     const preparePaymentData = () => {
-        const amount = Number(formData.amount);
-        if (isNaN(amount) || amount < MIN_CONTRIB) {
+        const baseAmount = Number(formData.amount);
+        if (isNaN(baseAmount) || baseAmount < MIN_CONTRIB) {
             return null;
         }
 
+        const totalAmount = baseAmount * 1.03;
+
         return {
-            email: formData.email.trim(),
-            amount: amount,
+            email: formData.email.trim() || 'info@celebron.co',
+            amount: totalAmount,
             metadata: {
                 registry_item_id: registryItemId,
                 name: formData.name.trim(),
-                email: formData.email.trim(),
-                message: formData.message.trim()
+                email: formData.email.trim() || 'info@celebron.co',
+                message: formData.message.trim(),
+                base_amount: baseAmount
             }
         };
     };
@@ -156,7 +160,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                        Your Name <span className="text-red-600">*</span>
+                        Your Name
                     </label>
                     <input
                         type="text"
@@ -165,13 +169,13 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                        className="mt-1 block w-full px-3 py-2 border rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-[#B8860B] focus:ring-[#B8860B]"
                     />
                 </div>
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email Address <span className="text-red-600">*</span>
+                        Email Address
                     </label>
                     <input
                         type="email"
@@ -179,8 +183,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                        className="mt-1 block w-full px-3 py-2 border rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-[#B8860B] focus:ring-[#B8860B]"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                         This helps the couple know who contributed to their registry.
@@ -189,7 +192,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
 
                 <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                        Contribution Amount <span className="text-red-600">*</span>
+                        Contribution Amount
                     </label>
                     <div className="flex items-center gap-2 mb-2">
                         <input
@@ -200,7 +203,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                             onChange={(e) => handleAmountChange(e.target.value)}
                             min={MIN_CONTRIB}
                             required
-                            className="w-32 rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                            className="w-32 px-3 py-2 border rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-[#B8860B] focus:ring-[#B8860B]"
                         />
                         <span className="text-gray-600">₦</span>
                     </div>
@@ -217,8 +220,33 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                         You can enter any amount above, or use the slider to choose a proportion of the remaining balance.
                     </p>
                     <p className="mb-4 text-sm text-gray-700">
-                        You are contributing <span className="font-semibold">₦{Number(formData.amount || 0).toLocaleString()}</span> ({percent}%)
+                        You are gifting <span className="font-semibold">₦{Number(formData.amount || 0).toLocaleString()}</span> ({percent}%)
                     </p>
+
+                    {Number(formData.amount) >= MIN_CONTRIB && (
+                        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm text-gray-600">Gift Amount:</span>
+                                <span className="text-sm font-medium text-gray-800">₦{Number(formData.amount).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center mb-3 group relative">
+                                <span className="text-sm text-gray-600 flex items-center cursor-help">
+                                    Handling Fee (3%)
+                                    <Info className="w-4 h-4 ml-1 text-gray-400" />
+                                    
+                                    {/* Tooltip */}
+                                    <div className="absolute left-0 bottom-6 hidden group-hover:block w-64 p-3 bg-gray-800 text-white text-xs rounded shadow-lg z-10 font-normal leading-relaxed">
+                                        This 3% fee covers the payment processing fee and helps support our registry and delivery services for the couple.
+                                    </div>
+                                </span>
+                                <span className="text-sm font-medium text-gray-800">₦{Math.round(Number(formData.amount) * 0.03).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                                <span className="text-base font-bold text-gray-900">Total to Pay:</span>
+                                <span className="text-base font-bold text-[#B8860B]">₦{Math.round(Number(formData.amount) * 1.03).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    )}
                     {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
                 </div>
 
@@ -232,7 +260,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
                         value={formData.message}
                         onChange={handleInputChange}
                         rows={3}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
+                        className="mt-1 block w-full px-3 py-2 border rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-[#B8860B] focus:ring-[#B8860B]"
                         placeholder="Write a message to the couple..."
                     />
                 </div>

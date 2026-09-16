@@ -58,7 +58,7 @@ const ContributePage: React.FC = () => {
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-4xl mx-auto px-4">
                 <button
-                    onClick={() => navigate(`/share/${shareUrl}`)}
+                    onClick={() => navigate(`/${shareUrl}`)}
                     className="mb-4 inline-flex items-center text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors"
                 >
                     <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

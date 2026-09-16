@@ -101,7 +101,7 @@ const RegistryView = () => {
 
   const handleShare = () => {
     if (registry?.share_slug) {
-      const shareLink = `${window.location.origin}/share/${registry.share_slug}`;
+      const shareLink = `${window.location.origin}/${registry.share_slug}`;
       navigator.clipboard.writeText(shareLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -179,10 +179,10 @@ const RegistryView = () => {
             <span className="font-semibold">{item.quantity}</span>
           </div>
           <div className="mt-2">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Progress</span>
-              <span>₦{item.contributions_received.toLocaleString()} of ₦{total.toLocaleString()}</span>
-            </div>
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Progress</span>
+                <span>₦{Number(item.contributions_received).toLocaleString()} of ₦{total.toLocaleString()}</span>
+              </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className={`rounded-full h-2 ${isFullyFunded ? 'bg-green-500' : 'bg-[#B8860B]'}`}

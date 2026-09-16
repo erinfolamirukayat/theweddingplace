@@ -42,10 +42,12 @@ const Notification: React.FC = () => {
 const Layout = () => {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const location = useLocation();
-  const isSharePage = location.pathname.startsWith('/share/');
+  const knownRoutes = ['/', '/login', '/register', '/dashboard', '/profile', '/how-it-works', '/contact', '/forgot-password', '/reset-password', '/create-registry', '/verify-email', '/survey', '/payment/verify'];
+  const isSharePage = !knownRoutes.includes(location.pathname) && !location.pathname.startsWith('/catalog') && !location.pathname.startsWith('/registry');
   const auth = useAuth();
 
   const [resending, setResending] = useState(false);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
   const handleResend = async () => {
     if (resending) return;
@@ -66,14 +68,21 @@ const Layout = () => {
     <NotificationContext.Provider value={{ notification, setNotification }}>
       <Notification />
       <div className="min-h-screen bg-[#FFF8F3]">
-        {auth?.user && auth.user.is_verified === false && !isSharePage && (
-          <div className="bg-yellow-100 border-b border-yellow-200 text-yellow-800 px-4 py-3 text-center sm:text-sm text-xs">
-            <span className="font-semibold mr-2">Please verify your email address.</span> 
-            <button onClick={handleResend} disabled={resending} className="underline text-yellow-900 hover:text-yellow-700">
-              {resending ? 'Sending...' : 'Click here to resend verification email'}
-            </button>
-          </div>
-        )}
+        {auth?.user && auth.user.is_verified === false && !isSharePage && !isBannerDismissed && (
+            <div className="relative bg-yellow-100 border-b border-yellow-200 text-yellow-800 px-4 py-3 text-center sm:text-sm text-xs pr-10">
+              <span className="font-semibold mr-2">Please click the link sent to your email to verify your account.</span> 
+              <button onClick={handleResend} disabled={resending} className="underline text-yellow-900 hover:text-yellow-700">
+                {resending ? 'Sending...' : 'Click here to resend verification email'}
+              </button>
+              <button 
+                onClick={() => setIsBannerDismissed(true)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-800 hover:text-yellow-900 font-bold text-lg"
+                aria-label="Dismiss"
+              >
+                &times;
+              </button>
+            </div>
+          )}
         {isSharePage ? (
           <div className="bg-white border-b border-gray-200 py-4 text-center shadow-sm">
             <Link to="/" className="text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors">

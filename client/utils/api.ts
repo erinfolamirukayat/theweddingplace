@@ -138,3 +138,6 @@ export const resendVerificationEmail = async () => {
     method: 'POST',
   });
 };
+
+// --- User Profile ---
+export const updatePreferences = (data: { notification_preference: string }) => authFetch('/users/me/preferences', { method: 'PUT', body: JSON.stringify(data) });

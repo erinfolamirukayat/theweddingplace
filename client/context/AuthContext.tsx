@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { login as apiLogin, register as apiRegister, saveToken, getToken, clearToken } from '../utils/authApi';
-import { getMyRegistries } from '../utils/api';
+import { getMyRegistries, getMe } from '../utils/api';
 
 interface User {
   id: number;
@@ -8,6 +8,7 @@ interface User {
   is_verified?: boolean;
   first_name?: string;
   last_name?: string;
+  notification_preference?: 'every_contribution' | 'daily_summary' | 'none';
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, first_name: string, last_name: string, how_heard: string) => Promise<void>;
   logout: () => void;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,20 +31,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ id: payload.userId, email: payload.email });
-      } catch {
-        setUser(null);
-        setRegistries([]);
-        clearToken();
+    let isMounted = true;
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const userData = await getMe();
+          if (isMounted) {
+            setUser(userData);
+          }
+        } catch {
+          if (isMounted) {
+            setUser(null);
+            setRegistries([]);
+            clearToken();
+            setToken(null);
+          }
+        }
+      } else {
+        if (isMounted) {
+          setUser(null);
+          setRegistries([]);
+        }
       }
-    } else {
-      setUser(null);
-      setRegistries([]);
-    }
-    setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+    return () => { isMounted = false; };
   }, [token]);
 
   // Fetch registries when the user logs in
@@ -86,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, registries }}>
+    <AuthContext.Provider value={{ user, token, registries, loading, login, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

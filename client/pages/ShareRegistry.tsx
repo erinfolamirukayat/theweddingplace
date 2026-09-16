@@ -66,7 +66,7 @@ const ShareRegistry = () => {
   };
 
   const handleContributeClick = (item: RegistryItem, product: Product) => {
-    navigate(`/share/${shareUrl}/contribute/${item.id}`);
+    navigate(`/${shareUrl}/contribute/${item.id}`);
   };
 
   // Separate items into two categories
@@ -93,7 +93,7 @@ const ShareRegistry = () => {
           <div className="mt-2">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>Progress</span>
-              <span>₦{item.contributions_received.toLocaleString()} of ₦{total.toLocaleString()}</span>
+              <span>₦{Number(item.contributions_received).toLocaleString()} of ₦{total.toLocaleString()}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 

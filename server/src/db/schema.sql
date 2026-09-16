@@ -43,6 +43,7 @@ CREATE TABLE contributors (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL, 
     amount DECIMAL(10,2) NOT NULL,
+    handling_fee DECIMAL(10,2) DEFAULT 0,
     message TEXT,
     payment_reference VARCHAR(255) UNIQUE,
     status VARCHAR(20),
@@ -65,7 +66,8 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    how_heard VARCHAR(255)
+    how_heard VARCHAR(255),
+    notification_preference VARCHAR(50) DEFAULT 'every_contribution'
 );
 
 -- Create survey_responses table

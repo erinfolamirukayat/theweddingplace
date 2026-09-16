@@ -37,8 +37,8 @@ export function App() {
           </Route>
           <Route path="catalog" element={<ProductCatalog />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/share/:shareUrl" element={<ShareRegistry />} />
-          <Route path="/share/:shareUrl/contribute/:itemId" element={<ContributePage />} />
+          <Route path="/:shareUrl" element={<ShareRegistry />} />
+          <Route path="/:shareUrl/contribute/:itemId" element={<ContributePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

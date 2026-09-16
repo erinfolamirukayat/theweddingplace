@@ -5,6 +5,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { Pool } from "pg";
+import { startDailySummaryCron } from "./cron/dailySummary";
 import routes from "./routes";
 import authRoutes from "./routes/auth";
 import paymentsRouter from "./routes/payments";
@@ -68,6 +69,9 @@ const startServer = async () => {
     const client = await pool.connect();
     console.log("Successfully connected to the database.");
     client.release();
+
+    // Start cron jobs
+    startDailySummaryCron();
 
     // Start the server only after a successful database connection
     app.listen(port, () => {
