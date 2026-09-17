@@ -116,6 +116,7 @@ const PaystackButton: React.FC<PaystackButtonProps> = ({
                 email,
                 amount: Math.round(amount * 100), // Convert to kobo
                 currency: 'NGN',
+                channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
                 ref: reference,
                 metadata: {
                     registry_item_id: metadata.registry_item_id,
