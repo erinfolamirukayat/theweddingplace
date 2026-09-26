@@ -48,3 +48,5 @@ server/.env.local
 
 # Misc
 coverage/
+scripts/
+*.pdf
