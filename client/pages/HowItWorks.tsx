@@ -16,8 +16,9 @@ const HowItWorks = () => (
             Create Your Registry
           </h2>
           <p className="mt-1">
-            Start by exploring our catalog and adding the items you'd love to
-            receive for your new home.
+            Sign up for an account if you don't already have one, then start by
+            exploring our catalog and adding the items you'd love to receive for
+            your new home.
           </p>
           <div className="mt-3 text-sm text-gray-700 bg-[#FFF8F3] p-4 rounded-md border border-[#E8DCC4]">
             <strong>Good to know:</strong> The prices shown in the catalog are
