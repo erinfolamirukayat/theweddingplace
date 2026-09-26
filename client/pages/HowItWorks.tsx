@@ -1,50 +1,144 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const HowItWorks = () => (
   <div className="max-w-3xl mx-auto py-10 px-4">
-    <h1 className="text-3xl font-bold mb-6 text-[#2C1810]">How It Works</h1>
-    <ol className="list-decimal ml-6 space-y-6 text-lg">
-      <li>
-        <span className="font-semibold">Create your registry &amp; add items:</span> <br />
-        Start by creating your wedding registry and adding the items you'd love to receive.
-      </li>
-      <li>
-        <span className="font-semibold">Share your registry link with loved ones:</span> <br />
-        Send your unique registry link to friends and family so they can contribute to your dream home.
-      </li>
-      <li>
-        <span className="font-semibold">Redeem your gifts:</span>
-        <div className="mt-2 ml-2">
-          <p>There are <span className="font-semibold">three main ways</span> to redeem your gifts:</p>
-          <ol className="list-decimal ml-6 mt-2 space-y-2">
-            <li>
-              <span className="font-semibold">Get every contribution into your account as cash (immediately):</span> <br />
-              As contributions come in, they are sent directly to your account. <br />
-              <span className="text-sm text-gray-600">Note: While this is convenient, you may not be able to make account for all the money, and you might not maximize the purpose of the registry, which is to help you set up a beautiful home with your spouse.</span>
-            </li>
-            <li>
-              <span className="font-semibold">Get all contributions as cash after your wedding day:</span> <br />
-              You can choose to receive all contributions at once, on or after your wedding day. You'll set a date and provide your account information upfront or when the date is approaching. <br />
-              <span className="text-sm text-gray-600">This maximizes the registry's purpose, but you may not end up spending all the cash for setting up your home as you envisioned when creating the registry.</span>
-            </li>
-            <li>
-              <span className="font-semibold">Physical gifts delivered:</span> <br />
-              We deliver the items in your registry that have been paid for, on the date you select. <br />
-              <span className="text-sm text-gray-600">This is very flexible: if you no longer need an item that has been paid for, you can swap it for a different item. The items in your registry are not set in stone—we can work with you to update, remove, or add items. Just contact us; we are very responsive. This maximizes the power of a registry, you set up your home just as you envisioned from the start.</span>
-            </li>
-          </ol>
+    <h1 className="text-3xl font-bold mb-8 text-[#2C1810]">How It Works</h1>
+
+    <div className="space-y-8 text-lg text-gray-800">
+      {/* Step 1 */}
+      <div className="flex gap-4">
+        <div className="flex-shrink-0 w-8 h-8 bg-[#B8860B] text-white rounded-full flex items-center justify-center font-bold">
+          1
         </div>
-        <div className="mt-4">
-          <span className="font-semibold">Flexibility:</span> <br />
-          You can choose to get some items delivered and receive the remaining contributions as cash. Flexibility is our watchword!
+        <div>
+          <h2 className="text-xl font-semibold text-[#2C1810]">
+            Create Your Registry
+          </h2>
+          <p className="mt-1">
+            Start by exploring our catalog and adding the items you'd love to
+            receive for your new home.
+          </p>
+          <div className="mt-3 text-sm text-gray-700 bg-[#FFF8F3] p-4 rounded-md border border-[#E8DCC4]">
+            <strong>Good to know:</strong> The prices shown in the catalog are
+            estimates to guide your guests. Don't worry if market prices
+            fluctuate before your wedding—you are never locked in, and you
+            retain ultimate control over how your funds are spent!
+          </div>
         </div>
-      </li>
-    </ol>
-    <div className="mt-8 text-center">
-      <Link to="/create-registry" className="inline-block px-6 py-3 bg-[#B8860B] text-white rounded hover:bg-[#8B6508] font-semibold">Start Your Registry</Link>
+      </div>
+
+      {/* Step 2 */}
+      <div className="flex gap-4">
+        <div className="flex-shrink-0 w-8 h-8 bg-[#B8860B] text-white rounded-full flex items-center justify-center font-bold">
+          2
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-[#2C1810]">
+            Share With Loved Ones
+          </h2>
+          <p className="mt-1">
+            Send your unique registry link to friends and family so they can
+            easily contribute to your dream home from anywhere in the world.
+          </p>
+        </div>
+      </div>
+
+      {/* Step 3 */}
+      <div className="flex gap-4">
+        <div className="flex-shrink-0 w-8 h-8 bg-[#B8860B] text-white rounded-full flex items-center justify-center font-bold">
+          3
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-[#2C1810]">
+            Watch Your Funds Grow
+          </h2>
+          <p className="mt-1">
+            As your loved ones contribute, all money is safely pooled into your
+            overall registry balance.
+          </p>
+          <p className="mt-2 text-base text-gray-600">
+            It is completely okay if some items are only partially funded. Think
+            of your registry as a flexible savings fund. You will never lose
+            partial contributions.
+          </p>
+        </div>
+      </div>
+
+      {/* Step 4 */}
+      <div className="flex gap-4">
+        <div className="flex-shrink-0 w-8 h-8 bg-[#B8860B] text-white rounded-full flex items-center justify-center font-bold">
+          4
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-[#2C1810]">
+            Redeem Your Way
+          </h2>
+          <p className="mt-1 mb-4">
+            When you are ready, you have complete flexibility in how you use
+            your pooled funds. You can mix and match any of these three options:
+          </p>
+
+          <ul className="space-y-4">
+            <li className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+              <span className="font-semibold text-[#8B6508] block mb-2">
+                🎁 Physical Gifts Delivered (Recommended)
+              </span>
+              <p className="text-base text-gray-700">
+                Choose the items you want most, and we will deliver them on your
+                selected date. You can easily combine partial contributions from
+                different items to fully fund a specific gift, or swap out items
+                entirely. A dedicated person from Celebron will work with you to
+                discuss and finalize this list. This maximizes the power of a
+                registry, ensuring you set up your home exactly as you
+                envisioned.
+              </p>
+            </li>
+
+            <li className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+              <span className="font-semibold text-[#8B6508] block mb-2">
+                💰 Lump Sum Cash After Your Wedding
+              </span>
+              <p className="text-base text-gray-700">
+                Set a date and provide your account information to withdraw your
+                entire balance as a single cash payout.
+              </p>
+              <p className="text-sm text-gray-500 mt-2 italic">
+                Note: While this gives you ultimate freedom, you may end up
+                spending the cash on everyday expenses rather than the beautiful
+                home setup you originally planned.
+              </p>
+            </li>
+
+            <li className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+              <span className="font-semibold text-[#8B6508] block mb-2">
+                ⚡ Instant Cash Transfers
+              </span>
+              <p className="text-base text-gray-700">
+                Have individual contributions sent directly to your bank account
+                as soon as they are made by your guests.
+              </p>
+              <p className="text-sm text-gray-500 mt-2 italic">
+                Note: While this is highly convenient, it can be difficult to
+                account for all the individual deposits, making it harder to
+                stay focused on your original goal of setting up your dream
+                home.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-12 text-center">
+      <Link
+        to="/create-registry"
+        className="inline-block px-8 py-4 bg-[#B8860B] text-white rounded-lg hover:bg-[#8B6508] font-semibold text-lg transition-colors shadow-sm"
+      >
+        Start Your Registry
+      </Link>
     </div>
   </div>
 );
 
-export default HowItWorks; 
+export default HowItWorks;
