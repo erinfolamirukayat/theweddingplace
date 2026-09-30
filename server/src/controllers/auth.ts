@@ -9,7 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://celebron.netlify.app";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { email, password, first_name, last_name, how_heard } = req.body;
+  let { email, password, first_name, last_name, how_heard } = req.body;
+  if (email) email = email.toLowerCase().trim();
   if (!email || !password || !first_name || !last_name || !how_heard) {
     res.status(400).json({ error: "All fields are required" });
     return;
@@ -43,7 +44,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-  const { email, token } = req.query;
+  let { email, token } = req.query;
+  if (email && typeof email === "string") email = email.toLowerCase().trim();
   if (!email || !token) {
     res.status(400).json({ error: "Email and token are required" });
     return;
@@ -104,7 +106,8 @@ export const resendVerification = async (req: Request, res: Response): Promise<v
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  if (email) email = email.toLowerCase().trim();
   if (!email || !password) {
     res.status(400).json({ error: "Email and password are required" });
     return;
@@ -195,7 +198,8 @@ export const updateMe = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
-  const { email } = req.body;
+  let { email } = req.body;
+  if (email) email = email.toLowerCase().trim();
   if (!email) {
     res.status(400).json({ error: "Email is required" });
     return;
@@ -230,7 +234,8 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 };
 
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
-  const { email, token, password } = req.body;
+  let { email, token, password } = req.body;
+  if (email) email = email.toLowerCase().trim();
   if (!email || !token || !password) {
     res.status(400).json({ error: "All fields are required" });
     return;
