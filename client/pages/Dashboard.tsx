@@ -32,7 +32,7 @@ const Dashboard = () => {
   const [details, setDetails] = useState<any>(null);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { user, setUser, loading: authLoading, registries } = useAuth();
+  const { user, setUser, loading: authLoading, registries, registriesLoading } = useAuth();
   const [preference, setPreference] = useState(
     user?.notification_preference || "every_contribution",
   );
@@ -111,8 +111,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Don't fetch data until authentication is resolved and we have a user.
-    if (authLoading || !user || registries.length === 0) {
-      if (!authLoading) {
+    if (authLoading || registriesLoading || !user || registries.length === 0) {
+      if (!authLoading && !registriesLoading) {
         setLoading(false);
         setDetails(null); // Clear details if no registries
       }
@@ -135,7 +135,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [user, authLoading, registries]);
+  }, [user, authLoading, registries, registriesLoading]);
 
   const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -916,3 +916,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

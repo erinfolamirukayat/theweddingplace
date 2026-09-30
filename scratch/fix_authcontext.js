@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+const fs = require('fs');
+const path = require('path');
+
+const filePath = path.join(__dirname, '../client/context/AuthContext.tsx');
+let content = fs.readFileSync(filePath, 'utf-8');
+
+// I will overwrite it entirely to ensure it's completely correct.
+content = `import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { login as apiLogin, register as apiRegister, saveToken, getToken, clearToken } from '../utils/authApi';
 import { getMyRegistries, getMe } from '../utils/api';
 
@@ -118,3 +125,6 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+`;
+
+fs.writeFileSync(filePath, content);
