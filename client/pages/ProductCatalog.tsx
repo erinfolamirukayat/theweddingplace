@@ -219,7 +219,7 @@ const ProductCatalog = () => {
                     </p>
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                       <span className="text-xl font-black text-[#2C1810]">
-                        ₦{Number(product.price).toLocaleString()}
+                        <span className="text-xl font-black text-[#2C1810]">₦{Number(product.price).toLocaleString()}</span>
                       </span>
                       <button
                         onClick={() => handleAddToRegistry(product)}

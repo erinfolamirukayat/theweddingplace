@@ -24,8 +24,6 @@ import { uploadImageFileToCloudinary } from "../utils/cloudinary";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   XIcon,
-  PlusIcon,
-  TrashIcon,
   PencilIcon,
   ImageIcon,
 } from "lucide-react";
@@ -201,13 +199,7 @@ const RegistryView = () => {
         <div className="flex-grow w-full">
           <div className="flex justify-between items-start mb-1">
             <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
-            <button
-              onClick={() => confirmDelete(item.id)}
-              className="text-gray-300 hover:text-red-500 transition-colors p-1"
-              title="Remove from registry"
-            >
-              <TrashIcon className="w-5 h-5" />
-            </button>
+            
           </div>
 
           <p className="text-sm text-gray-500 mb-3 line-clamp-1">
@@ -220,8 +212,7 @@ const RegistryView = () => {
               <span
                 className={isFullyFunded ? "text-green-600" : "text-[#B8860B]"}
               >
-                â‚¦{Number(item.contributions_received).toLocaleString()} / â‚¦
-                {total.toLocaleString()}
+                ₦{Number(item.contributions_received).toLocaleString()} / ₦{total.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
