@@ -67,7 +67,7 @@ const Layout = () => {
   return (
     <NotificationContext.Provider value={{ notification, setNotification }}>
       <Notification />
-      <div className="min-h-screen bg-[#FFF8F3]">
+      <div className="min-h-screen bg-[#ECDFD7]">
         {auth?.user && auth.user.is_verified === false && !isSharePage && !isBannerDismissed && (
             <div className="relative bg-yellow-100 border-b border-yellow-200 text-yellow-800 px-4 py-3 text-center sm:text-sm text-xs pr-10">
               <span className="font-semibold mr-2">Please click the link sent to your email to verify your account.</span> 

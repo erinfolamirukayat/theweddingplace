@@ -1,4 +1,7 @@
-import React from "react";
+const fs = require('fs');
+const path = require('path');
+
+const content = `import React from "react";
 import { Link } from "react-router-dom";
 import { GiftIcon, ShareIcon, TrendingUpIcon, CheckCircle2Icon, TruckIcon, BanknoteIcon, CreditCardIcon } from "lucide-react";
 
@@ -153,3 +156,7 @@ const HowItWorks = () => (
 );
 
 export default HowItWorks;
+`;
+
+fs.writeFileSync(path.join(__dirname, '../client/pages/HowItWorks.tsx'), content);
+console.log('HowItWorks.tsx updated!');

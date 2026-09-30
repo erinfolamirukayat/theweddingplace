@@ -1,79 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../components/Layout";
-import {
-  UserIcon,
-  SaveIcon,
-  ArrowLeftIcon,
-  AlertCircleIcon,
-  MessageSquareIcon,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { getMe, updateMe } from "../utils/api";
+const fs = require('fs');
+const path = require('path');
 
-const Profile = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { setMessage } = useNotification();
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    how_heard: "",
-  });
-  const [loading, setLoading] = useState(true); // Start with loading true
-  const [error, setError] = useState<string | null>(null);
+const filePath = path.join(__dirname, '../client/pages/Profile.tsx');
+let content = fs.readFileSync(filePath, 'utf-8');
 
-  useEffect(() => {
-    // Don't fetch data until authentication is resolved and we have a user.
-    if (authLoading || !user) {
-      if (!authLoading) setLoading(false); // Stop loading if auth is done but no user
-      return;
-    }
+if (!content.includes('from "lucide-react"') && !content.includes("from 'lucide-react'")) {
+    content = content.replace('import { useNotification } from \'../components/Layout\';', 'import { useNotification } from \'../components/Layout\';\nimport { UserIcon, SaveIcon, ArrowLeftIcon, AlertCircleIcon, MessageSquareIcon } from "lucide-react";\nimport { Link } from "react-router-dom";');
+} else {
+    content = content.replace(/import \{[^}]*\}\s+from\s+["']lucide-react["'];/, 'import { UserIcon, SaveIcon, ArrowLeftIcon, AlertCircleIcon, MessageSquareIcon } from "lucide-react";\nimport { Link } from "react-router-dom";');
+}
 
-    setError(null);
-    getMe()
-      .then((data: any) => {
-        setForm({
-          first_name: data.first_name || "",
-          last_name: data.last_name || "",
-          email: data.email || "",
-          how_heard: data.how_heard || "",
-        });
-      })
-      .catch((err) => {
-        setError(err.message || "Failed to load profile data.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [user, authLoading]);
+const returnIndex = content.lastIndexOf('  return (');
+if (returnIndex === -1) {
+    console.error('Could not find return statement');
+    process.exit(1);
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+const prefix = content.substring(0, returnIndex);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      await updateMe({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        how_heard: form.how_heard,
-      });
-      setMessage("Profile updated successfully!");
-    } catch (err: any) {
-      setError(err.message || "Update failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
+const newRender = `  return (
     <div className="min-h-screen bg-[#FDFBF7] py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         <div className="mb-8">
           <Link
             to="/dashboard"
@@ -85,7 +33,7 @@ const Profile = () => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-[#ECDFD7] px-6 py-8 sm:px-10 flex flex-col items-center border-b border-[#E8DCC4]/50">
+          <div className="bg-[#FFF8F3] px-6 py-8 sm:px-10 flex flex-col items-center border-b border-[#E8DCC4]/50">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-[#E8DCC4]">
               <UserIcon className="w-10 h-10 text-[#B8860B]" />
             </div>
@@ -98,6 +46,7 @@ const Profile = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -191,3 +140,7 @@ const Profile = () => {
 };
 
 export default Profile;
+`;
+
+fs.writeFileSync(filePath, prefix + newRender, 'utf-8');
+console.log('Profile updated.');

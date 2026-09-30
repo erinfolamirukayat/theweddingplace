@@ -1,6 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CalendarIcon, GiftIcon, HeartIcon, ShareIcon, PencilIcon } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  HeartIcon,
+  ShareIcon,
+  CalendarIcon,
+  PlusIcon,
+  ExternalLinkIcon,
+  SettingsIcon,
+  GiftIcon,
+  TrashIcon,
+  ArrowLeftIcon,
+} from "lucide-react";
 import {
   getRegistryById as apiGetRegistryById,
   getProducts,
@@ -9,12 +19,18 @@ import {
   getRegistryItems,
   addRegistryPicture,
   removeRegistryPicture,
-} from '../utils/api';
-import { uploadImageFileToCloudinary } from '../utils/cloudinary';
-import { Dialog, Transition } from '@headlessui/react';
-import { XIcon, PlusIcon, TrashIcon } from 'lucide-react';
-import { useNotification } from '../components/Layout';
-import StoryBuilder from '../components/StoryBuilder';
+} from "../utils/api";
+import { uploadImageFileToCloudinary } from "../utils/cloudinary";
+import { Dialog, Transition } from "@headlessui/react";
+import {
+  XIcon,
+  PlusIcon,
+  TrashIcon,
+  PencilIcon,
+  ImageIcon,
+} from "lucide-react";
+import { useNotification } from "../components/Layout";
+import StoryBuilder from "../components/StoryBuilder";
 
 interface Product {
   id: number;
@@ -44,14 +60,8 @@ const RegistryView = () => {
   const [itemsLoading, setItemsLoading] = useState(false);
   const [itemsError, setItemsError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(1);
-  const [addLoading, setAddLoading] = useState(false);
-  const [addError, setAddError] = useState<string | null>(null);
   const [pictures, setPictures] = useState<string[]>([]);
   const [showPicturesModal, setShowPicturesModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -64,12 +74,12 @@ const RegistryView = () => {
       setLoading(true);
       setError(null);
       apiGetRegistryById(id)
-        .then(reg => {
+        .then((reg) => {
           setRegistry(reg);
           fetchItems(reg.uuid);
           fetchPictures();
         })
-        .catch(err => setError(err.message || 'Failed to load registry'))
+        .catch((err) => setError(err.message || "Failed to load registry"))
         .finally(() => setLoading(false));
     }
   }, [id]);
@@ -84,7 +94,7 @@ const RegistryView = () => {
       const prods = await getProducts();
       setProducts(prods);
     } catch (err: any) {
-      setItemsError(err.message || 'Failed to load items');
+      setItemsError(err.message || "Failed to load items");
     } finally {
       setItemsLoading(false);
     }
@@ -92,10 +102,10 @@ const RegistryView = () => {
 
   const fetchPictures = async () => {
     try {
-      const data = await getRegistryPictures(id || '');
-      setPictures(data.map((pic: any) => pic.image_url || ''));
+      const data = await getRegistryPictures(id || "");
+      setPictures(data.map((pic: any) => pic.image_url || ""));
     } catch (err: any) {
-      console.error('Failed to load pictures:', err);
+      console.error("Failed to load pictures:", err);
     }
   };
 
@@ -116,15 +126,15 @@ const RegistryView = () => {
       setUploading(true);
       try {
         const data = await uploadImageFileToCloudinary(file);
-        
+
         // Save image URL to backend
         await addRegistryPicture(id!, data.url);
-        setMessage('Picture uploaded successfully!');
-        
+        setMessage("Picture uploaded successfully!");
+
         // Refresh pictures
         fetchPictures();
       } catch (err: any) {
-        setMessage(err.message || 'Failed to upload picture');
+        setMessage(err.message || "Failed to upload picture");
       } finally {
         setUploading(false);
       }
@@ -135,10 +145,10 @@ const RegistryView = () => {
     if (!pictureToDelete) return;
     try {
       await removeRegistryPicture(id!, pictureToDelete);
-      setMessage('Picture deleted successfully!');
+      setMessage("Picture deleted successfully!");
       fetchPictures();
     } catch (err: any) {
-      setMessage(err.message || 'Failed to delete picture');
+      setMessage(err.message || "Failed to delete picture");
     } finally {
       setDeleteConfirmOpen(false);
       setPictureToDelete(null);
@@ -151,49 +161,77 @@ const RegistryView = () => {
       await apiUpdateRegistry(id!, editForm);
       setRegistry({ ...registry, ...editForm });
       setEditOpen(false);
-      setMessage('Registry updated successfully');
+      setMessage("Registry updated successfully");
     } catch (err: any) {
-      setMessage(err.message || 'Failed to update registry');
+      setMessage(err.message || "Failed to update registry");
     }
   };
 
   // Separate items into two categories
-  const openItems = items.filter(item => !item.is_fully_funded);
-  const fullyFundedItems = items.filter(item => item.is_fully_funded);
+  const openItems = items.filter((item) => !item.is_fully_funded);
+  const fullyFundedItems = items.filter((item) => item.is_fully_funded);
 
-  const renderItem = (item: RegistryItem, isFullyFunded: boolean) => {
-    const product = products.find(p => p.id === item.product_id);
+  const renderItem = (item: any, isFullyFunded: boolean) => {
+    const product = products.find((p) => p.id === item.product_id);
     if (!product) return null;
     const total = product.price * item.quantity;
     const remaining = Math.max(total - item.contributions_received, 0);
     const progress = (item.contributions_received / total) * 100;
 
     return (
-      <div key={item.id} className="border border-gray-200 rounded-lg p-4 flex items-center space-x-4">
-        <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
-        <div className="flex-grow">
-          <h3 className="font-semibold text-[#2C1810]">{product.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-          <div className="mt-2 text-sm">
-            <span className="font-semibold">Quantity:</span>{' '}
-            <span className="font-semibold">{item.quantity}</span>
-          </div>
-          <div className="mt-2">
-              <div className="flex justify-between text-sm text-gray-600 mb-1">
-                <span>Progress</span>
-                <span>₦{Number(item.contributions_received).toLocaleString()} of ₦{total.toLocaleString()}</span>
+      <div
+        key={item.id}
+        className="group bg-white border border-gray-100 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-all hover:border-[#E8DCC4] relative overflow-hidden"
+      >
+        <div className="w-full sm:w-28 h-40 sm:h-28 flex-shrink-0 bg-gray-50 rounded-xl overflow-hidden relative">
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {isFullyFunded && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[2px]">
+              <div className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                Funded
               </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`rounded-full h-2 ${isFullyFunded ? 'bg-green-500' : 'bg-[#B8860B]'}`}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-grow w-full">
+          <div className="flex justify-between items-start mb-1">
+            <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
+            <button
+              onClick={() => confirmDelete(item.id)}
+              className="text-gray-300 hover:text-red-500 transition-colors p-1"
+              title="Remove from registry"
+            >
+              <TrashIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-500 mb-3 line-clamp-1">
+            {product.description}
+          </p>
+
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex justify-between text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
+              <span>Qty: {item.quantity}</span>
+              <span
+                className={isFullyFunded ? "text-green-600" : "text-[#B8860B]"}
+              >
+                â‚¦{Number(item.contributions_received).toLocaleString()} / â‚¦
+                {total.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-1000 ease-out ${
+                  isFullyFunded ? "bg-green-500" : "bg-[#B8860B]"
+                }`}
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
-          </div>
-          <div className="mt-3 flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              ₦{remaining.toLocaleString()} remaining
-            </span>
           </div>
         </div>
       </div>
@@ -202,101 +240,342 @@ const RegistryView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B8860B] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading registry details...</p>
-        </div>
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B8860B]"></div>
       </div>
     );
   }
 
   if (error || !registry) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
-          <p className="text-gray-600">{error || 'Registry not found'}</p>
-        </div>
+      <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-4">
+        <HeartIcon className="w-16 h-16 text-gray-300 mb-4" />
+        <div className="text-xl font-bold text-gray-900 mb-2">Error</div>
+        <div className="text-gray-500">{error || "Registry not found"}</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-6 bg-[#FFF8F3]">
-          <div className="text-center">
-            <HeartIcon className="h-12 w-12 text-[#B8860B] mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-[#2C1810] mb-2">
+    <div className="min-h-screen bg-[#FDFBF7] pb-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center text-sm font-semibold text-[#B8860B] hover:text-[#8B6508] transition-colors group"
+        >
+          <ArrowLeftIcon className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+          Back to Dashboard
+        </Link>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Registry Management Header */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-[#ECDFD7] px-6 py-10 sm:p-12 text-center border-b border-[#E8DCC4]/50 relative">
+            <HeartIcon className="h-10 w-10 text-[#B8860B] mx-auto mb-4 opacity-50" />
+          <div className="flex items-center justify-center mb-3">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C1810] mr-4">
               {registry.couple_names}
             </h1>
-            <div className="flex items-center justify-center text-gray-600">
-              <CalendarIcon className="h-5 w-5 mr-2" />
-              <p>
-                Wedding Date:{' '}
-                {new Date(registry.wedding_date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+            <button
+              onClick={() => {
+                setEditForm(registry);
+                setEditOpen(true);
+              }}
+              className="p-2 bg-white rounded-full text-[#B8860B] hover:bg-[#FDFBF7] shadow-sm border border-[#E8DCC4] transition-colors"
+              title="Edit Registry"
+            >
+              <PencilIcon className="w-5 h-5" />
+            </button>
+          </div>
+            <div className="flex items-center justify-center text-[#B8860B] font-medium mb-8">
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              {registry.wedding_date ? (
+                <span>
+                  {new Date(registry.wedding_date).toLocaleDateString(
+                    undefined,
+                    { dateStyle: "long" },
+                  )}
+                </span>
+              ) : (
+                <span className="italic opacity-70">Date not set</span>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => setShowPicturesModal(true)}
+                className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white border-2 border-[#E8DCC4] text-[#B8860B] font-semibold rounded-xl hover:bg-[#FDFBF7] transition-colors shadow-sm"
+              >
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Manage Pictures
+              </button>
+              <button
+                onClick={handleShare}
+                className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white border-2 border-[#E8DCC4] text-[#B8860B] font-semibold rounded-xl hover:bg-[#FDFBF7] transition-colors shadow-sm"
+              >
+                <ShareIcon className="h-4 w-4 mr-2" />
+                {copied ? "Copied!" : "Copy Public Link"}
+              </button>
+
+              <Link
+                to={`/${registry.share_slug}`}
+                target="_blank"
+                className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-[#B8860B] text-white font-semibold rounded-xl hover:bg-[#8B6508] transition-colors shadow-sm"
+              >
+                <ExternalLinkIcon className="h-4 w-4 mr-2" />
+                View Public Registry
+              </Link>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 bg-white flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">
+                Build Your Wishlist
+              </h2>
+              <p className="text-sm text-gray-500">
+                Browse our catalog and add gifts you'd love to receive.
               </p>
             </div>
-            <div className="flex items-center justify-center mt-6">
-              {registry.story && <p className="text-gray-600 max-w-2xl mx-auto">{registry.story}</p>}
-              <button className="ml-2 text-[#B8860B] hover:text-[#8B6508]" onClick={() => { setEditForm(registry); setEditOpen(true); }}>
-                <PencilIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <button onClick={handleShare} className="mt-6 inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]">
-              <ShareIcon className="h-4 w-4 mr-2" />
-              {copied ? 'Copied!' : 'Share Registry'}
-            </button>
+            <Link
+              to="/catalog"
+              className="w-full sm:w-auto flex items-center justify-center px-8 py-3 bg-[#2C1810] text-white font-semibold rounded-xl hover:bg-black transition-colors shadow-sm"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Add Items
+            </Link>
           </div>
         </div>
 
-        {/* Wedding Pictures Gallery & Upload */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-[#2C1810]">Wedding Pictures</h2>
-            <div>
-              <label className={`inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] text-sm cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <PlusIcon className="h-4 w-4 mr-1" /> Upload Photo
-                  </>
-                )}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  disabled={uploading} 
-                  className="hidden" 
-                />
-              </label>
-            </div>
+        {/* Wishlist Items List */}
+        <div className="space-y-12">
+          {/* Open Items */}
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              Active Items
+              <span className="ml-3 inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
+                {openItems.length}
+              </span>
+            </h2>
+
+            {openItems.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <GiftIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Your registry is empty
+                </h3>
+                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                  Start building your dream home by adding gifts to your
+                  registry.
+                </p>
+                <Link
+                  to="/catalog"
+                  className="inline-flex items-center px-6 py-3 bg-[#B8860B] text-white font-semibold rounded-xl shadow-sm hover:bg-[#8B6508] transition-colors"
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  Browse Catalog
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {openItems.map((item) => renderItem(item, false))}
+              </div>
+            )}
           </div>
-          
-          {pictures.length === 0 ? (
-            <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-md">
-              <p className="text-gray-500">No wedding pictures uploaded yet.</p>
-              <p className="text-xs text-gray-400 mt-1">Upload photos to personalize your registry.</p>
+
+          {/* Fully Funded Items Section */}
+          {fullyFundedItems.length > 0 && (
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                Fully Funded
+                <span className="ml-3 inline-flex items-center justify-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold">
+                  {fullyFundedItems.length}
+                </span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80 grayscale-[0.3]">
+                {fullyFundedItems.map((item) => renderItem(item, true))}
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {pictures.map((url, index) => (
-                <div key={index} className="relative group rounded-md overflow-hidden border border-gray-200 h-48">
-                  <img src={url} alt={`Wedding ${index + 1}`} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          )}
+        </div>
+
+        {/* Note about how it works */}
+        <div className="bg-[#ECDFD7] border border-[#E8DCC4] rounded-3xl p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#B8860B] mr-4">
+              <SettingsIcon className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-bold text-[#2C1810]">
+              How Your Registry Works
+            </h3>
+          </div>
+          <ul className="text-sm text-gray-700 space-y-3 list-disc pl-14">
+            <li>
+              <strong>Flexible Contributions:</strong> Guests can fully fund or
+              partially contribute to any item. Prices shown are estimates.
+            </li>
+            <li>
+              <strong>Physical Delivery:</strong> You can choose to have fully
+              or partially funded items delivered to your home on your selected
+              date. A Celebron rep will work with you to finalize the list.
+            </li>
+            <li>
+              <strong>Cash Options:</strong> Prefer cash? You can easily
+              withdraw from your available registry balance at any time.
+            </li>
+          </ul>
+          <div className="mt-6 pl-14">
+            <Link
+              to="/how-it-works"
+              className="inline-flex items-center text-sm font-bold text-[#B8860B] hover:text-[#8B6508] group"
+            >
+              Read more about how it works
+              <ArrowLeftIcon className="w-4 h-4 ml-1 rotate-180 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Registry Modal */}
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        className="fixed z-50 inset-0 overflow-y-auto"
+      >
+        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+
+          <div className="relative bg-white rounded-3xl shadow-xl max-w-md w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+            <Dialog.Title
+              as="h3"
+              className="text-xl font-bold text-gray-900 mb-6"
+            >
+              Edit Registry Details
+            </Dialog.Title>
+            <form onSubmit={handleUpdateRegistry} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Couple Names
+                </label>
+                <input
+                  type="text"
+                  value={editForm.couple_names || ""}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      couple_names: e.target.value,
+                    })
+                  }
+                  className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Wedding Date
+                </label>
+                <input
+                  type="date"
+                  value={editForm.wedding_date?.split("T")[0] || ""}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      wedding_date: e.target.value,
+                    })
+                  }
+                  className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Story
+                </label>
+                <StoryBuilder
+                  onApply={(storyText) =>
+                    setEditForm({ ...editForm, story: storyText })
+                  }
+                />
+                <textarea
+                  value={editForm.story || ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, story: e.target.value })
+                  }
+                  rows={4}
+                  className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B] mt-2"
+                />
+              </div>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(false)}
+                  className="w-full sm:w-auto px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-6 py-3 bg-[#B8860B] text-white font-semibold rounded-xl shadow-sm hover:bg-[#8B6508] transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Manage Pictures Modal */}
+      <Dialog
+        open={showPicturesModal}
+        onClose={() => setShowPicturesModal(false)}
+        className="fixed z-50 inset-0 overflow-y-auto"
+      >
+        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+
+          <div className="relative bg-white rounded-3xl shadow-xl max-w-2xl w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+              <Dialog.Title as="h3" className="text-xl font-bold text-gray-900">
+                Manage Wedding Pictures
+              </Dialog.Title>
+              <button onClick={() => setShowPicturesModal(false)}>
+                <XIcon className="h-6 w-6 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <div className="mb-8">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Add New Picture
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:font-semibold file:bg-[#B8860B]/10 file:text-[#B8860B] hover:file:bg-[#B8860B]/20 transition-colors border border-gray-200 rounded-xl disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {pictures.map((picUrl, idx) => (
+                <div
+                  key={idx}
+                  className="relative aspect-square rounded-xl overflow-hidden group"
+                >
+                  <img
+                    src={picUrl}
+                    alt="Wedding"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
-                      onClick={() => { setPictureToDelete(url); setDeleteConfirmOpen(true); }}
-                      className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-md transition-colors"
-                      title="Delete picture"
+                      onClick={() => {
+                        setPictureToDelete(picUrl);
+                        setDeleteConfirmOpen(true);
+                      }}
+                      className="p-2 bg-white rounded-full text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -304,146 +583,49 @@ const RegistryView = () => {
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Edit Registry Modal */}
-        <Dialog open={editOpen} onClose={() => setEditOpen(false)} className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-black opacity-30" />
-            <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-auto p-6">
-              <Dialog.Title className="text-lg font-semibold mb-4">Edit Registry Details</Dialog.Title>
-              <form onSubmit={handleUpdateRegistry}>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Couple Names</label>
-                    <input
-                      type="text"
-                      value={editForm.couple_names || ''}
-                      onChange={e => setEditForm({ ...editForm, couple_names: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Wedding Date</label>
-                    <input
-                      type="date"
-                      value={editForm.wedding_date?.split('T')[0] || ''}
-                      onChange={e => setEditForm({ ...editForm, wedding_date: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Story</label>
-                    <StoryBuilder onApply={(storyText) => setEditForm({ ...editForm, story: storyText })} />
-                    <textarea
-                      value={editForm.story || ''}
-                      onChange={e => setEditForm({ ...editForm, story: e.target.value })}
-                      rows={5}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                    />
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setEditOpen(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
           </div>
-        </Dialog>
+        </div>
+      </Dialog>
 
-        {/* Registry Items Sections */}
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-[#2C1810]">Registry Items</h2>
-            <button
-              className="inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508] text-sm"
-              onClick={() => navigate(`/catalog?registry=${registry.uuid}`)}
+      {/* Delete Picture Confirmation Modal */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        className="fixed z-50 inset-0 overflow-y-auto"
+      >
+        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+
+          <div className="relative bg-white rounded-3xl shadow-xl max-w-sm w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-6">
+              <TrashIcon className="w-6 h-6 text-red-600" />
+            </div>
+
+            <Dialog.Title
+              as="h3"
+              className="text-xl font-bold text-gray-900 mb-2"
             >
-              <PlusIcon className="h-4 w-4 mr-1" /> Add Item
-            </button>
-          </div>
-
-          {itemsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B8860B] mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading items...</p>
+              Remove Picture?
+            </Dialog.Title>
+            <div className="text-sm text-gray-500 mb-8 leading-relaxed">
+              Are you sure you want to remove this picture from your registry?
+              This action cannot be undone.
             </div>
-          ) : itemsError ? (
-            <div className="text-center text-red-600 py-8">{itemsError}</div>
-          ) : items.length === 0 ? (
-            <div className="text-center py-8">
-              <GiftIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900">No items yet</h3>
-              <p className="mt-1 text-gray-500">Start by adding items to your registry</p>
-              <Link 
-                to={`/catalog?registry=${registry.uuid}`} 
-                className="mt-4 inline-flex items-center px-4 py-2 bg-[#B8860B] text-white rounded-md hover:bg-[#8B6508]"
-              >
-                Browse Products
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {/* Open Items Section */}
-              <div className="bg-white rounded-lg">
-                <h3 className="text-lg font-semibold text-[#2C1810] mb-4">Items Open for Contribution</h3>
-                {openItems.length === 0 ? (
-                  <div className="text-center text-gray-500 py-4">All items have been fully funded!</div>
-                ) : (
-                  <div className="grid gap-6">
-                    {openItems.map(item => renderItem(item, false))}
-                  </div>
-                )}
-              </div>
 
-              {/* Fully Funded Items Section */}
-              {fullyFundedItems.length > 0 && (
-                <div className="bg-white rounded-lg">
-                  <h3 className="text-lg font-semibold text-[#2C1810] mb-4">Fully Funded Items</h3>
-                  <div className="grid gap-6">
-                    {fullyFundedItems.map(item => renderItem(item, true))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Custom Confirmation Modal for Image Deletion */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)} className="fixed z-10 inset-0 overflow-y-auto">
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="fixed inset-0 bg-black opacity-30" />
-          <div className="relative bg-white rounded-lg shadow-lg max-w-sm w-full mx-auto p-6 text-center">
-            <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">Delete Photo?</Dialog.Title>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this wedding picture? This action cannot be undone.
-            </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
+                type="button"
+                className="w-full sm:w-auto px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
                 onClick={() => setDeleteConfirmOpen(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm"
               >
                 Cancel
               </button>
               <button
+                type="button"
+                className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-sm"
                 onClick={confirmDeletePicture}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-semibold"
               >
-                Yes, Delete
+                Yes, Remove Picture
               </button>
             </div>
           </div>
@@ -454,3 +636,5 @@ const RegistryView = () => {
 };
 
 export default RegistryView;
+
+

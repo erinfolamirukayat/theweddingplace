@@ -1,0 +1,391 @@
+import React, { useEffect, useState } from "react";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { SearchIcon, ArrowLeft } from "lucide-react";
+import { getProducts, getRegistryItems, addRegistryItem } from "../utils/api";
+import { Dialog } from "@headlessui/react";
+import { useAuth } from "../context/AuthContext";
+
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  image_url: string;
+  suggested_amount: number;
+}
+
+const ProductCatalog = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const queryRegistryId = searchParams.get("registry");
+  const localRegistryId = localStorage.getItem("afriwed_registry_id");
+  const effectiveRegistryId = queryRegistryId || localRegistryId;
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [addingToRegistry, setAddingToRegistry] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [addedItems, setAddedItems] = useState<Set<number>>(new Set());
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const { user } = useAuth();
+  const PRODUCTS_PER_PAGE = 30;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchProducts();
+    if (effectiveRegistryId) {
+      fetchRegistryItems(effectiveRegistryId);
+    }
+  }, [effectiveRegistryId]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
+  const fetchProducts = async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRegistryItems = async (regId: string) => {
+    try {
+      const items = await getRegistryItems(regId);
+      setAddedItems(new Set(items.map((item: any) => item.product_id)));
+    } catch (err: any) {
+      console.error("Error fetching registry items:", err);
+    }
+  };
+
+  const handleAddToRegistry = (product: Product) => {
+    if (!user) {
+      navigate("/login", { state: { from: "/catalog" } });
+      return;
+    }
+    setSelectedProduct(product);
+    setQuantity(1);
+    setShowQuantityModal(true);
+  };
+
+  const confirmAddToRegistry = async () => {
+    if (!selectedProduct) return;
+    const latestRegistryId = effectiveRegistryId;
+    if (!latestRegistryId) {
+      navigate("/create-registry");
+      return;
+    }
+    setAddingToRegistry(selectedProduct.id);
+    setError(null);
+    try {
+      await addRegistryItem(latestRegistryId, {
+        product_id: selectedProduct.id,
+        quantity,
+      });
+      setSuccessMessage("Item added to registry successfully!");
+      setAddedItems((prev) => new Set([...prev, selectedProduct.id]));
+      setTimeout(() => setSuccessMessage(null), 3000);
+      setShowQuantityModal(false);
+      setSelectedProduct(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to add item to registry");
+    } finally {
+      setAddingToRegistry(null);
+    }
+  };
+
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE,
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">Loading...</div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+      {/* Back Button */}
+      <div className="mb-4">
+        <button
+          onClick={() =>
+            navigate(
+              effectiveRegistryId
+                ? `/registry/${effectiveRegistryId}`
+                : "/dashboard",
+            )
+          }
+          className="flex items-center text-[#B8860B] hover:text-[#8B6508] transition-colors font-medium"
+        >
+          <ArrowLeft className="h-5 w-5 mr-1" />
+          Back to Registry
+        </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6 sm:mb-8">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <SearchIcon className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#B8860B] focus:border-[#B8860B] text-sm sm:text-base"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Success Message (Floating Toast) */}
+      {successMessage && (
+        <div className="fixed top-6 right-6 z-50 max-w-sm w-full bg-white border-l-4 border-green-500 shadow-2xl rounded-lg p-4 animate-bounce flex items-center gap-3">
+          <div className="flex-shrink-0 bg-green-100 rounded-full p-1">
+            <svg
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">
+              {successMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message (Floating Toast) */}
+      {error && (
+        <div className="fixed top-6 right-6 z-50 max-w-sm w-full bg-white border-l-4 border-red-500 shadow-2xl rounded-lg p-4 flex items-center gap-3">
+          <div className="flex-shrink-0 bg-red-100 rounded-full p-1">
+            <svg
+              className="h-5 w-5 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+        {paginatedProducts.map((product) => (
+          <div
+            key={product.id}
+            className="group bg-white rounded-lg shadow p-3 sm:p-4 flex flex-col"
+          >
+            <div className="relative w-full h-44 sm:h-64">
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+              />
+            </div>
+            <div className="mt-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+              <div>
+                <h3 className="text-base sm:text-sm text-gray-700 font-semibold">
+                  {product.name}
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                  {product.category}
+                </p>
+              </div>
+              <p className="text-base sm:text-sm font-medium text-gray-900">
+                ₦
+                {Number(product.price).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 line-clamp-2">
+              {product.description}
+            </p>
+            <button
+              onClick={() => handleAddToRegistry(product)}
+              disabled={
+                addingToRegistry === product.id || addedItems.has(product.id)
+              }
+              className={`mt-4 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-base sm:text-sm font-medium rounded-md shadow-sm text-white 
+                ${
+                  addingToRegistry === product.id || addedItems.has(product.id)
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#B8860B] hover:bg-[#8B6508]"
+                }`}
+            >
+              {addingToRegistry === product.id
+                ? "Adding..."
+                : addedItems.has(product.id)
+                  ? "Added to Registry"
+                  : "Add to Registry"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* No Results */}
+      {filteredProducts.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">
+            No products found matching your search.
+          </p>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col xs:flex-row justify-center items-center mt-8 space-y-2 xs:space-y-0 xs:space-x-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 w-full xs:w-auto"
+          >
+            Previous
+          </button>
+          <span className="text-sm sm:text-base">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 w-full xs:w-auto"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Note about how it works */}
+      <div className="mt-12 bg-[#FFF8F3] border border-[#E8DCC4] rounded-lg p-6 max-w-4xl mx-auto">
+        <h3 className="text-lg font-semibold text-[#2C1810] mb-3">
+          How Your Registry Works
+        </h3>
+        <ul className="text-sm text-gray-700 space-y-2 list-disc pl-5">
+          <li>
+            <strong>Flexible Contributions:</strong> Guests can fully fund or
+            partially contribute to any item. Prices shown are estimates.
+          </li>
+          <li>
+            <strong>Physical Delivery:</strong> You can choose to have fully or
+            partially funded items delivered to your home on your selected date.
+            A Celebron rep will work with you to finalize the list.
+          </li>
+          <li>
+            <strong>Cash Options:</strong> Prefer cash? You can easily withdraw
+            from your available registry balance at any time.
+          </li>
+        </ul>
+        <div className="mt-4">
+          <Link
+            to="/how-it-works"
+            className="text-sm font-medium text-[#B8860B] hover:text-[#8B6508] underline"
+          >
+            Read more about how it works &rarr;
+          </Link>
+        </div>
+      </div>
+
+      {/* Quantity Modal */}
+      <Dialog
+        open={showQuantityModal}
+        onClose={() => setShowQuantityModal(false)}
+        className="fixed z-10 inset-0 overflow-y-auto"
+      >
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <div className="fixed inset-0 bg-black opacity-30" />
+          <Dialog.Panel className="relative bg-white rounded-lg shadow-lg max-w-sm w-full mx-auto p-6 z-20">
+            <Dialog.Title className="text-lg font-semibold mb-4">
+              Add to Registry
+            </Dialog.Title>
+            {selectedProduct && (
+              <div>
+                <div className="mb-4">
+                  <div className="font-medium text-gray-900">
+                    {selectedProduct.name}
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    {selectedProduct.category}
+                  </div>
+                </div>
+                <label className="block mb-2 text-sm font-medium">
+                  Quantity
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, Number(e.target.value)))
+                  }
+                  className="w-full border rounded px-3 py-2 mb-4"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowQuantityModal(false)}
+                    className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmAddToRegistry}
+                    className="px-4 py-2 rounded bg-[#B8860B] text-white hover:bg-[#8B6508]"
+                    disabled={addingToRegistry === selectedProduct.id}
+                  >
+                    {addingToRegistry === selectedProduct.id
+                      ? "Adding..."
+                      : "Add"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+    </div>
+  );
+};
+
+export default ProductCatalog;

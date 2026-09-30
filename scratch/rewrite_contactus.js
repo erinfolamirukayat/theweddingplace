@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+const fs = require('fs');
+const path = require('path');
+
+const content = `import React, { useState } from 'react';
 import { MailIcon, MessageSquareIcon, SendIcon, CheckCircle2Icon } from 'lucide-react';
 
 const EMAIL_ADDRESS = 'info@celebron.co';
@@ -120,7 +123,7 @@ const ContactUs = () => {
                 Prefer to send an email directly? We typically respond within 24 hours.
               </p>
               <a
-                href={`mailto:${EMAIL_ADDRESS}`}
+                href={\`mailto:\${EMAIL_ADDRESS}\`}
                 className="inline-flex w-full items-center justify-center px-6 py-3 bg-[#FDFBF7] border-2 border-[#E8DCC4] text-[#8B6508] font-bold rounded-xl hover:bg-[#ECDFD7] transition-colors"
               >
                 {EMAIL_ADDRESS}
@@ -145,3 +148,7 @@ const ContactUs = () => {
 };
 
 export default ContactUs;
+`;
+
+fs.writeFileSync(path.join(__dirname, '../client/pages/ContactUs.tsx'), content);
+console.log('ContactUs.tsx updated!');
