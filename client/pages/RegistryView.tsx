@@ -21,7 +21,7 @@ import {
   removeRegistryPicture,
 } from "../utils/api";
 import { uploadImageFileToCloudinary } from "../utils/cloudinary";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle , Transition } from "@headlessui/react";
 import {
   XIcon,
   PencilIcon,
@@ -435,15 +435,15 @@ const RegistryView = () => {
         className="fixed z-50 inset-0 overflow-y-auto"
       >
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
 
-          <div className="relative bg-white rounded-3xl shadow-xl max-w-md w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
-            <Dialog.Title
+          <DialogPanel className="relative bg-white rounded-3xl shadow-xl max-w-md w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+            <DialogTitle
               as="h3"
               className="text-xl font-bold text-gray-900 mb-6"
             >
               Edit Registry Details
-            </Dialog.Title>
+            </DialogTitle>
             <form onSubmit={handleUpdateRegistry} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -511,7 +511,7 @@ const RegistryView = () => {
                 </button>
               </div>
             </form>
-          </div>
+          </DialogPanel>
         </div>
       </Dialog>
 
@@ -522,13 +522,13 @@ const RegistryView = () => {
         className="fixed z-50 inset-0 overflow-y-auto"
       >
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
 
-          <div className="relative bg-white rounded-3xl shadow-xl max-w-2xl w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+          <DialogPanel className="relative bg-white rounded-3xl shadow-xl max-w-2xl w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
             <div className="flex justify-between items-center mb-6">
-              <Dialog.Title as="h3" className="text-xl font-bold text-gray-900">
+              <DialogTitle as="h3" className="text-xl font-bold text-gray-900">
                 Manage Wedding Pictures
-              </Dialog.Title>
+              </DialogTitle>
               <button onClick={() => setShowPicturesModal(false)}>
                 <XIcon className="h-6 w-6 text-gray-400 hover:text-gray-600" />
               </button>
@@ -574,7 +574,7 @@ const RegistryView = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </DialogPanel>
         </div>
       </Dialog>
 
@@ -585,19 +585,19 @@ const RegistryView = () => {
         className="fixed z-50 inset-0 overflow-y-auto"
       >
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
 
-          <div className="relative bg-white rounded-3xl shadow-xl max-w-sm w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+          <DialogPanel className="relative bg-white rounded-3xl shadow-xl max-w-sm w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-6">
               <TrashIcon className="w-6 h-6 text-red-600" />
             </div>
 
-            <Dialog.Title
+            <DialogTitle
               as="h3"
               className="text-xl font-bold text-gray-900 mb-2"
             >
               Remove Picture?
-            </Dialog.Title>
+            </DialogTitle>
             <div className="text-sm text-gray-500 mb-8 leading-relaxed">
               Are you sure you want to remove this picture from your registry?
               This action cannot be undone.
@@ -619,7 +619,7 @@ const RegistryView = () => {
                 Yes, Remove Picture
               </button>
             </div>
-          </div>
+          </DialogPanel>
         </div>
       </Dialog>
     </div>
