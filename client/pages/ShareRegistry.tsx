@@ -122,7 +122,6 @@ const ShareRegistry = () => {
                 className={isFullyFunded ? "text-green-600" : "text-[#B8860B]"}
               >
                 ₦{Number(item.contributions_received).toLocaleString()} / ₦{total.toLocaleString()}
-                {total.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
