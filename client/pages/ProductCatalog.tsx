@@ -322,9 +322,9 @@ const ProductCatalog = () => {
         className="fixed z-50 inset-0 overflow-y-auto"
       >
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-          <Dialog.Panel className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
 
-          <div className="relative bg-white rounded-3xl shadow-xl max-w-sm w-full mx-auto p-8 z-20 overflow-hidden text-left">
+          <Dialog.Panel className="relative bg-white rounded-3xl shadow-xl max-w-sm w-full mx-auto p-8 z-20 overflow-hidden text-left">
             <Dialog.Title
               as="h3"
               className="text-2xl font-bold text-gray-900 mb-2"
@@ -364,7 +364,7 @@ const ProductCatalog = () => {
                 Add Item
               </button>
             </div>
-          </div>
+          </Dialog.Panel>
         </div>
       </Dialog>
     </div>
@@ -372,3 +372,6 @@ const ProductCatalog = () => {
 };
 
 export default ProductCatalog;
+
+
+

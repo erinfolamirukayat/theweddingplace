@@ -50,3 +50,6 @@ server/.env.local
 coverage/
 scripts/
 *.pdf
+
+# Temporary scratch scripts
+scratch/
