@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useNotification } from "../components/Layout";
 import {
   HeartIcon,
@@ -189,12 +189,11 @@ const Register = () => {
 
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Already have an account? </span>
-            <a
-              href="/login"
+            <Link to="/login"
               className="font-bold text-[#B8860B] hover:text-[#8B6508] transition-colors"
             >
               Sign in
-            </a>
+            </Link>
           </div>
         </div>
       </div>
