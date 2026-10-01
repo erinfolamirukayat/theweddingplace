@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../utils/email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://celebron.netlify.app";
+const FRONTEND_URL = (process.env.FRONTEND_URL || "https://celebron.netlify.app").split(',')[0].trim();
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   let { email, password, first_name, last_name, how_heard } = req.body;
