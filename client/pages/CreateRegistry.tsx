@@ -490,7 +490,7 @@ const CreateRegistry = () => {
             {/* Fulfillment Preferences */}
             <div className="pt-10 border-t border-gray-100">
               <h2 className="text-2xl font-bold text-[#2C1810] mb-2">Gift Fulfillment Preference</h2>
-              <p className="text-gray-500 mb-6">How would you like to receive your gifts from the registry?</p>
+              <p className="text-gray-500 mb-6">How would you like to receive your gifts from the registry? You can update this anytime</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {[
