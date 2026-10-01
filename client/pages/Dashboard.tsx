@@ -20,7 +20,7 @@ import {
   UserIcon,
   ExternalLinkIcon,
   ClockIcon,
-  LayoutDashboardIcon,
+  LayoutDashboardIcon, CreditCardIcon,
 } from "lucide-react";
 import { useNotification } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<any>(null);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
+  const [isFulfillmentModalOpen, setIsFulfillmentModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { user, setUser, loading: authLoading, registries, registriesLoading } = useAuth();
   const [preference, setPreference] = useState(
@@ -62,7 +63,7 @@ const Dashboard = () => {
     wedding_date: "",
   });
 
-  const handleOpenEditDetails = () => {
+  const populateForm = () => {
     if (!details) return;
     const names = details.couple_names
       ? details.couple_names.split(" & ")
@@ -78,8 +79,47 @@ const Dashboard = () => {
       wedding_date: details.wedding_date
         ? details.wedding_date.split("T")[0]
         : "",
-    });
+      fulfillment_preference: details.fulfillment_preference || "cash_immediate",
+      post_wedding_date: details.post_wedding_date
+        ? new Date(details.post_wedding_date).toISOString().split("T")[0]
+        : "",
+      bank_name: details.bank_name || "",
+      account_name: details.account_name || "",
+      account_number: details.account_number || "",
+    } as any);
+  };
+
+  const handleOpenEditDetails = () => {
+    populateForm();
     setIsEditDetailsOpen(true);
+  };
+
+  const handleOpenFulfillment = () => {
+    populateForm();
+    setIsFulfillmentModalOpen(true);
+  };
+
+  
+  
+
+  const handleSaveFulfillment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registries[0]) return;
+    try {
+      await apiUpdateRegistry(registries[0].uuid, detailsForm);
+      setDetails((prev: any) => ({
+        ...prev,
+        fulfillment_preference: detailsForm.fulfillment_preference,
+        post_wedding_date: detailsForm.post_wedding_date,
+        bank_name: detailsForm.bank_name,
+        account_name: detailsForm.account_name,
+        account_number: detailsForm.account_number
+      }));
+      setIsFulfillmentModalOpen(false);
+      setMessage("Fulfillment preferences updated successfully!");
+    } catch (error: any) {
+      setMessage(error.message || "Failed to update fulfillment preferences.", "error");
+    }
   };
 
   const handleSaveDetails = async (e: React.FormEvent) => {
@@ -284,7 +324,7 @@ const Dashboard = () => {
                 <LayoutDashboardIcon className="w-5 h-5 mr-2 text-[#B8860B]" />
                 Quick Actions
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <Link
                   to={`/registry/${registries[0].uuid}`}
                   className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-[#E8DCC4] flex flex-col items-center text-center"
@@ -330,10 +370,23 @@ const Dashboard = () => {
                   </p>
                 </button>
 
-                <Link
-                  to="/profile"
-                  className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-[#E8DCC4] flex flex-col items-center text-center"
-                >
+                
+                  <button
+                    onClick={handleOpenFulfillment}
+                    className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-[#E8DCC4] flex flex-col items-center text-center w-full"
+                  >
+                    <div className="w-12 h-12 bg-[#ECDFD7] text-[#B8860B] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <CreditCardIcon className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900">
+                      Fulfillment & Payouts
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Manage how you receive your registry gifts.
+                    </p>
+                  </button>
+
+                  <Link to="/profile" className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-[#E8DCC4] flex flex-col items-center text-center">
                   <div className="w-12 h-12 bg-[#ECDFD7] text-[#B8860B] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <UserIcon className="w-6 h-6" />
                   </div>
@@ -901,6 +954,122 @@ const Dashboard = () => {
                           >
                             Cancel
                           </button>
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </div>
+              </Dialog>
+            </Transition.Root>
+
+            {/* Fulfillment Preferences Modal */}
+            <Transition.Root show={isFulfillmentModalOpen} as={Fragment}>
+              <Dialog as="div" className="relative z-50" onClose={setIsFulfillmentModalOpen}>
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 z-10 overflow-y-auto">
+                  <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                      enterTo="opacity-100 translate-y-0 sm:scale-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                      leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    >
+                      <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
+                        <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+                          <button
+                            type="button"
+                            className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:ring-offset-2"
+                            onClick={() => setIsFulfillmentModalOpen(false)}
+                          >
+                            <span className="sr-only">Close</span>
+                            <XIcon className="h-6 w-6" aria-hidden="true" />
+                          </button>
+                        </div>
+                        <div className="sm:flex sm:items-start">
+                          <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <Dialog.Title
+                              as="h3"
+                              className="text-lg font-semibold leading-6 text-gray-900 mb-6"
+                            >
+                              Gift Fulfillment & Payouts
+                            </Dialog.Title>
+
+                            <form onSubmit={handleSaveFulfillment}>
+                              <div className="space-y-6">
+                                
+                                <div className="space-y-3 mb-4">
+                                  {[
+                                    { id: 'cash_immediate', title: 'Immediate Cash Payout' },
+                                    { id: 'cash_post_wedding', title: 'Cash Payout After Wedding' },
+                                    { id: 'delivery', title: 'Physical Delivery' },
+                                    { id: 'both', title: 'Both' }
+                                  ].map(opt => (
+                                    <label key={opt.id} className={`relative flex cursor-pointer rounded-xl border p-3 shadow-sm focus:outline-none ${detailsForm.fulfillment_preference === opt.id ? 'border-[#B8860B] bg-[#B8860B]/5 ring-1 ring-[#B8860B]' : 'border-gray-200 bg-white'}`}>
+                                      <input type="radio" name="fulfillment_preference" value={opt.id} checked={detailsForm.fulfillment_preference === opt.id} onChange={(e) => setDetailsForm({...detailsForm, fulfillment_preference: e.target.value})} className="sr-only" />
+                                      <span className="flex flex-1">
+                                        <span className="flex flex-col">
+                                          <span className="block text-sm font-bold text-gray-900">{opt.title}</span>
+                                        </span>
+                                      </span>
+                                    </label>
+                                  ))}
+                                </div>
+
+                                {detailsForm.fulfillment_preference === 'cash_post_wedding' && (
+                                  <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Select Payout Date</label>
+                                    <input type="date" value={detailsForm.post_wedding_date || ''} onChange={(e) => setDetailsForm({...detailsForm, post_wedding_date: e.target.value})} min={new Date().toISOString().split('T')[0]} className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B]" />
+                                  </div>
+                                )}
+
+                                {(detailsForm.fulfillment_preference === 'cash_immediate' || detailsForm.fulfillment_preference === 'cash_post_wedding' || detailsForm.fulfillment_preference === 'both') && (
+                                  <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                                    <h5 className="font-bold text-gray-900 border-b border-gray-200 pb-2 text-sm">Bank Details (Optional)</h5>
+                                    <div>
+                                      <input type="text" placeholder="Bank Name" value={detailsForm.bank_name || ''} onChange={(e) => setDetailsForm({...detailsForm, bank_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                    </div>
+                                    <div>
+                                      <input type="text" placeholder="Account Name" value={detailsForm.account_name || ''} onChange={(e) => setDetailsForm({...detailsForm, account_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                    </div>
+                                    <div>
+                                      <input type="text" placeholder="Account Number" value={detailsForm.account_number || ''} onChange={(e) => setDetailsForm({...detailsForm, account_number: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                    </div>
+                                    <p className="text-xs text-gray-500 italic mt-2">You can provide this information at any time. We will send you a reminder when your selected payout date approaches.</p>
+                                  </div>
+                                )}
+
+                              </div>
+                              <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                                <button
+                                  type="submit"
+                                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-[#B8860B] px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-[#8B6508] focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:ring-offset-2 sm:col-start-2 sm:text-sm"
+                                >
+                                  Save Preferences
+                                </button>
+                                <button
+                                  type="button"
+                                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm"
+                                  onClick={() => setIsFulfillmentModalOpen(false)}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </form>
+                          </div>
                         </div>
                       </Dialog.Panel>
                     </Transition.Child>

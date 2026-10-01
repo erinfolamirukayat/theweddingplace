@@ -88,7 +88,7 @@ const _processSuccessfulContribution = async (
       };
 
       // 1. Send Thank You to Contributor
-      if (email && email !== "info@celebron.co") {
+      if (email && email !== "info@celebrive.com") {
         await sendThankYouToContributor(emailDetails);
       }
 

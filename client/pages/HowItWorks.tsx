@@ -99,7 +99,7 @@ const HowItWorks = () => (
                   Physical Gifts Delivered (Recommended)
                 </h3>
                 <p className="text-gray-700 leading-relaxed relative z-10">
-                  Choose the items you want most, and we will deliver them on your selected date. You can easily combine partial contributions from different items to fully fund a specific gift, or swap out items entirely. A dedicated person from Celebron will work with you to discuss and finalize this list. This maximizes the power of a registry, ensuring you set up your home exactly as you envisioned.
+                  Choose the items you want most, and we will deliver them on your selected date. You can easily combine partial contributions from different items to fully fund a specific gift, or swap out items entirely. A dedicated person from Celebrive will work with you to discuss and finalize this list. This maximizes the power of a registry, ensuring you set up your home exactly as you envisioned.
                 </p>
               </div>
 

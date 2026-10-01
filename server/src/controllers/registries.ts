@@ -114,7 +114,7 @@ export const createRegistry = async (
     const user_id = (req as any).user?.userId; // from JWT
 
     const result = await pool.query(
-      "INSERT INTO registries (couple_names, wedding_date, story, share_slug, user_id, phone, wedding_city) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      "INSERT INTO registries (couple_names, wedding_date, story, share_slug, user_id, phone, wedding_city, fulfillment_preference, post_wedding_date, bank_name, account_name, account_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
       [
         couple_names,
         rest.wedding_date,
@@ -123,6 +123,11 @@ export const createRegistry = async (
         user_id,
         rest.phone,
         rest.wedding_city,
+        rest.fulfillment_preference,
+        rest.post_wedding_date || null,
+        rest.bank_name || null,
+        rest.account_name || null,
+        rest.account_number || null,
       ],
     );
     const registry = result.rows[0];
@@ -148,7 +153,7 @@ export const updateRegistry = async (
 ): Promise<void> => {
   try {
     const { uuid } = req.params;
-    const { couple_names, wedding_date, story, phone, wedding_city } = req.body;
+    const { couple_names, wedding_date, story, phone, wedding_city, fulfillment_preference, post_wedding_date, bank_name, account_name, account_number } = req.body;
     const userId = (req as any).user?.userId;
 
     const regCheck = await pool.query(
@@ -165,8 +170,8 @@ export const updateRegistry = async (
     }
 
     const result = await pool.query(
-      "UPDATE registries SET couple_names = $1, wedding_date = $2, story = $3, phone = $4, wedding_city = $5 WHERE uuid = $6 RETURNING *",
-      [couple_names, wedding_date, story, phone, wedding_city, uuid],
+      "UPDATE registries SET couple_names = $1, wedding_date = $2, story = $3, phone = $4, wedding_city = $5, fulfillment_preference = $6, post_wedding_date = $7, bank_name = $8, account_name = $9, account_number = $10 WHERE uuid = $11 RETURNING *",
+      [couple_names, wedding_date, story, phone, wedding_city, fulfillment_preference, post_wedding_date || null, bank_name || null, account_name || null, account_number || null, uuid],
     );
     if (result.rows.length === 0) {
       res.status(404).json({ error: "Registry not found" });

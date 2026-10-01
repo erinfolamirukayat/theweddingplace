@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MailIcon, MessageSquareIcon, SendIcon, CheckCircle2Icon } from 'lucide-react';
 
-const EMAIL_ADDRESS = 'info@celebron.co';
+const EMAIL_ADDRESS = 'info@celebrive.com';
 
 const ContactUs = () => {
   const [form, setForm] = useState({ name: '', contact: '', message: '' });

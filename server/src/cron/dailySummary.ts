@@ -40,9 +40,9 @@ export const startDailySummaryCron = () => {
 
       for (const row of result.rows) {
         const mailOptions = {
-          from: `"Celebron Support" <${emailUser}>`,
+          from: `"Celebrive Support" <${emailUser}>`,
           to: row.couple_email,
-          cc: 'info@celebron.co',
+          cc: 'info@celebrive.com',
           subject: `Daily Gift Summary for ${row.couple_names}!`,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -53,7 +53,7 @@ export const startDailySummaryCron = () => {
               <br>
               <p>Log in to your dashboard to view the details and read any messages from your guests.</p>
               <br>
-              <p>Best regards,<br>Celebron Team</p>
+              <p>Best regards,<br>Celebrive Team</p>
             </div>
           `,
         };

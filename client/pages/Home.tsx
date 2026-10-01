@@ -8,9 +8,11 @@ import {
   ArrowRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  SettingsIcon,
 } from "lucide-react";
 import { getRegistries, getProducts } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { Button } from "@headlessui/react";
 
 const BANNER_IMAGE = "/new-weds3.jpg";
 const Home = () => {
@@ -33,12 +35,12 @@ const Home = () => {
   const testimonials = [
     {
       quote:
-        "I didn't even know wedding gift registries were a thing in Nigeria. Using Celebron saved us from getting 4 kettles and 2 toasters. Every gift we received helped us build our first home together.",
+        "I didn't even know wedding gift registries were a thing in Nigeria. Using Celebrive saved us from getting 4 kettles and 2 toasters. Every gift we received helped us build our first home together.",
       author: "Kemi & Dayo, Lagos",
     },
     {
       quote:
-        "Our guests actually thanked us for using Celebron. They said it made buying gifts stress-free — no last-minute shopping or wrapping. Everyone was happy!",
+        "Our guests actually thanked us for using Celebrive. They said it made buying gifts stress-free — no last-minute shopping or wrapping. Everyone was happy!",
       author: "Uche & Chiamaka, Owerri",
     },
     {
@@ -53,12 +55,12 @@ const Home = () => {
     },
     {
       quote:
-        "After carrying 3 cartons of plates home from my sister's wedding last year, I knew I wanted a different experience. Celebron made sure we only got what we asked for.",
+        "After carrying 3 cartons of plates home from my sister's wedding last year, I knew I wanted a different experience. Celebrive made sure we only got what we asked for.",
       author: "Tola, Bride-to-be",
     },
     {
       quote:
-        "We used Celebron for our small wedding and shared the registry link on WhatsApp. Our friends contributed to our honeymoon fund — best decision ever.",
+        "We used Celebrive for our small wedding and shared the registry link on WhatsApp. Our friends contributed to our honeymoon fund — best decision ever.",
       author: "Timi & Nneka, Port Harcourt",
     },
     {
@@ -233,6 +235,45 @@ const Home = () => {
             >
               See How It Works
             </Link>
+          </div>
+        </div>
+      </section>
+
+      
+      {/* What is a Wedding Registry */}
+      <section className="py-20 bg-[#FDFBF7] border-y border-[#E8DCC4]/50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <HeartIcon className="w-12 h-12 text-[#B8860B]/20 mx-auto mb-6" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2C1810] mb-6">
+            What is a Wedding Registry?
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto mb-8">
+            A wedding registry is a curated wish list created by engaged couples to gently guide their guests toward gifts they truly need. 
+            It takes the guesswork out of gift-giving, ensuring your loved ones can celebrate your big day by contributing to your new life together—whether that means funding your dream honeymoon, or gifting essential household items.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mt-12">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DCC4]/30">
+              <div className="w-10 h-10 bg-[#ECDFD7] rounded-full flex items-center justify-center mb-4 text-[#B8860B]">
+                <GiftIcon className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">No More Guesswork</h3>
+              <p className="text-sm text-gray-500">Guests know exactly what you want, eliminating duplicate or unwanted gifts.</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DCC4]/30">
+              <div className="w-10 h-10 bg-[#ECDFD7] rounded-full flex items-center justify-center mb-4 text-[#B8860B]">
+                <HeartIcon className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">Easy for Guests</h3>
+              <p className="text-sm text-gray-500">A seamless online experience lets guests contribute from anywhere in the world.</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DCC4]/30">
+              <div className="w-10 h-10 bg-[#ECDFD7] rounded-full flex items-center justify-center mb-4 text-[#B8860B]">
+                <SettingsIcon className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">Total Flexibility</h3>
+              <p className="text-sm text-gray-500">Choose between physical gift delivery or having funds sent straight to your bank account.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -444,13 +485,13 @@ const Home = () => {
             Join the modern way of receiving wedding gifts. It's free to create
             your registry.
           </p>
-          <Link
-            to="/register"
+          <Button
+            onClick={handleStartRegistry}
             className="inline-flex items-center px-8 py-4 bg-white text-[#B8860B] font-bold rounded-xl text-lg shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all"
           >
-            Create My Registry
+            Create Your Registry
             <ArrowRightIcon className="w-5 h-5 ml-2" />
-          </Link>
+          </Button>
         </div>
       </section>
     </div>

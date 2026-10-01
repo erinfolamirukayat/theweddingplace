@@ -138,12 +138,12 @@ const ContributionForm: React.FC<ContributionFormProps> = ({
         const totalAmount = baseAmount * 1.03;
 
         return {
-            email: formData.email.trim() || 'info@celebron.co',
+            email: formData.email.trim() || 'info@celebrive.com',
             amount: totalAmount,
             metadata: {
                 registry_item_id: registryItemId,
                 name: formData.name.trim(),
-                email: formData.email.trim() || 'info@celebron.co',
+                email: formData.email.trim() || 'info@celebrive.com',
                 message: formData.message.trim(),
                 base_amount: baseAmount
             }

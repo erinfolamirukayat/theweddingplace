@@ -23,9 +23,9 @@ interface ContributionDetails {
 export const sendContributionNotification = async (details: ContributionDetails) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"Celebron Support" <${emailUser}>`,
+    from: `"Celebrive Support" <${emailUser}>`,
     to: details.coupleEmail,
-    cc: 'info@celebron.co',
+    cc: 'info@celebrive.com',
     subject: `New Contribution Received for ${details.registryName}!`,
     html: `
       <h2>New Contribution Alert!</h2>
@@ -37,7 +37,7 @@ export const sendContributionNotification = async (details: ContributionDetails)
       </ul>
       <p>Log in to your dashboard to view more details!</p>
       <br>
-      <p>Best regards,<br>Celebron Team</p>
+      <p>Best regards,<br>Celebrive Team</p>
     `,
   };
 
@@ -54,7 +54,7 @@ export const sendContributionNotification = async (details: ContributionDetails)
 export const sendThankYouToContributor = async (details: ContributionDetails) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"Celebron" <${emailUser}>`,
+    from: `"Celebrive" <${emailUser}>`,
     to: details.contributorEmail,
     subject: `Thank you for your gift to ${details.registryName}!`,
     html: `
@@ -67,7 +67,7 @@ export const sendThankYouToContributor = async (details: ContributionDetails) =>
         <br>
         <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
         <p style="font-size: 12px; color: #777;">
-          This is an automated receipt from Celebron.co. If you have any questions, please reply to this email.
+          This is an automated receipt from Celebrive.co. If you have any questions, please reply to this email.
         </p>
       </div>
     `,
@@ -86,12 +86,12 @@ export const sendThankYouToContributor = async (details: ContributionDetails) =>
 export const sendPasswordResetEmail = async (email: string, resetLink: string) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"Celebron Support" <${emailUser}>`,
+    from: `"Celebrive Support" <${emailUser}>`,
     to: email,
-    subject: "Reset Your Password - Celebron",
+    subject: "Reset Your Password - Celebrive",
     html: `
       <h2>Password Reset Request</h2>
-      <p>We received a request to reset the password for your account on Celebron.</p>
+      <p>We received a request to reset the password for your account on Celebrive.</p>
       <p>Click the button below to reset your password (valid for 15 minutes):</p>
       <div style="margin: 20px 0;">
         <a href="${resetLink}" style="padding: 12px 24px; background-color: #B8860B; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>
@@ -107,11 +107,11 @@ export const sendPasswordResetEmail = async (email: string, resetLink: string) =
 export const sendVerificationEmail = async (email: string, firstName: string, verificationLink: string) => {
   const emailUser = process.env.EMAIL_USER || process.env.EMAIL_HOST_USER;
   const mailOptions = {
-    from: `"Celebron Support" <${emailUser}>`,
+    from: `"Celebrive Support" <${emailUser}>`,
     to: email,
-    subject: "Verify Your Email Address - Celebron",
+    subject: "Verify Your Email Address - Celebrive",
     html: `
-      <h2>Welcome to Celebron, ${firstName}!</h2>
+      <h2>Welcome to Celebrive, ${firstName}!</h2>
       <p>We're thrilled to have you here. Please verify your email address to get the most out of your account.</p>
       <div style="margin: 20px 0;">
         <a href="${verificationLink}" style="padding: 12px 24px; background-color: #B8860B; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verify Email Address</a>

@@ -409,7 +409,7 @@ const RegistryView = () => {
             <li>
               <strong>Physical Delivery:</strong> You can choose to have fully
               or partially funded items delivered to your home on your selected
-              date. A Celebron rep will work with you to finalize the list.
+              date. A Celebrive rep will work with you to finalize the list.
             </li>
             <li>
               <strong>Cash Options:</strong> Prefer cash? You can easily
@@ -437,7 +437,7 @@ const RegistryView = () => {
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
 
-          <DialogPanel className="relative bg-white rounded-3xl shadow-xl max-w-md w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
+          <DialogPanel className="relative bg-white rounded-3xl shadow-xl max-w-2xl w-full mx-auto p-6 sm:p-8 z-20 text-left overflow-hidden">
             <DialogTitle
               as="h3"
               className="text-xl font-bold text-gray-900 mb-6"
@@ -495,7 +495,8 @@ const RegistryView = () => {
                   className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B] mt-2"
                 />
               </div>
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+              
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setEditOpen(false)}
