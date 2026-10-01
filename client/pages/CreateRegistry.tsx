@@ -16,6 +16,7 @@ import {
   uploadImageFromUrl,
 } from "../utils/api";
 import { useNotification } from "../components/Layout";
+import { useAuth } from "../context/AuthContext";
 import StoryBuilder from "../components/StoryBuilder";
 
 const MAX_IMAGES = 10;
@@ -23,6 +24,7 @@ const MAX_IMAGES = 10;
 const CreateRegistry = () => {
   const navigate = useNavigate();
   const { setMessage } = useNotification();
+  const { refreshRegistries } = useAuth();
   const [formData, setFormData] = useState({
     bride_first_name: "",
     bride_last_name: "",

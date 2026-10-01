@@ -21,6 +21,7 @@ interface AuthContextType {
   register: (email: string, password: string, first_name: string, last_name: string, how_heard: string) => Promise<void>;
   logout: () => void;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  refreshRegistries: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,6 +85,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setRegistriesLoading(false);
     }
   }, [user, token]);
+  const refreshRegistries = async () => {
+    if (!user || !token) return;
+    try {
+      const data = await getMyRegistries();
+      setRegistries(data || []);
+      if (data && data.length > 0) {
+        localStorage.setItem('afriwed_registry_id', data[0].uuid);
+      } else {
+        localStorage.removeItem('afriwed_registry_id');
+      }
+    } catch (err) {
+      setRegistries([]);
+    }
+  };
+
 
   const login = async (email: string, password: string) => {
     const res = await apiLogin(email, password);
@@ -107,7 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, registries, registriesLoading, loading, login, register, logout, setUser }}>
+    <AuthContext.Provider value={{ user, token, registries, registriesLoading, loading, login, register, logout, setUser, refreshRegistries }}>
       {children}
     </AuthContext.Provider>
   );
