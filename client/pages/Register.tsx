@@ -26,13 +26,13 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    if (!firstName.trim() || !lastName.trim() || !howHeard.trim()) {
+    if (!firstName.trim() || !lastName.trim()) {
       setError("Please fill in all required fields.");
       setLoading(false);
       return;
     }
     try {
-      await register(email, password, firstName, lastName, howHeard);
+      await register(email, password, firstName, lastName, "");
       setMessage(
         "Registration successful! Please check your email to verify your account.",
         "success",
@@ -138,24 +138,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                How did you hear about us?
-              </label>
-              <div className="mt-2 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MessageSquareIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#B8860B] focus:border-[#B8860B] sm:text-sm transition-colors"
-                  placeholder="Friend, Google, Instagram..."
-                  value={howHeard}
-                  onChange={(e) => setHowHeard(e.target.value)}
-                />
-              </div>
-            </div>
+            
 
             {error && (
               <div className="rounded-xl bg-red-50 p-4 border border-red-100">

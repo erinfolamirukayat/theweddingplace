@@ -61,6 +61,11 @@ const Dashboard = () => {
     groom_last_name: "",
     story: "",
     wedding_date: "",
+    fulfillment_preference: "cash_immediate",
+    post_wedding_date: "",
+    bank_name: "",
+    account_name: "",
+    account_number: "",
   });
 
   const populateForm = () => {
