@@ -11,7 +11,7 @@ const FRONTEND_URL = (process.env.FRONTEND_URL || "https://celebrive.netlify.app
 export const register = async (req: Request, res: Response): Promise<void> => {
   let { email, password, first_name, last_name, how_heard } = req.body;
   if (email) email = email.toLowerCase().trim();
-  if (!email || !password || !first_name || !last_name || !how_heard) {
+  if (!email || !password || !first_name || !last_name) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
