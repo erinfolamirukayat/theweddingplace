@@ -1034,6 +1034,17 @@ const Dashboard = () => {
                                   ))}
                                 </div>
 
+                                {(detailsForm.fulfillment_preference === 'delivery' || detailsForm.fulfillment_preference === 'both') && (
+                                  <div className="mb-4 bg-[#ECDFD7]/30 text-[#8B6508] p-4 rounded-xl border border-[#B8860B]/20">
+                                    <span className="font-medium block space-y-2 text-sm">
+                                      <p>You have selected a physical delivery option! A dedicated Celebrive representative will contact you to coordinate the delivery of your gifts.</p>
+                                      <p className="text-xs bg-white/50 p-3 rounded-lg border border-[#B8860B]/10">
+                                        <strong>Note on Physical Gifts:</strong> The product images in our catalog are for illustrative purposes. Because market availability fluctuates, our team will source the highest-quality brand and model that fits within the funded amount. The exact brand delivered may differ from the picture.
+                                      </p>
+                                    </span>
+                                  </div>
+                                )}
+                                
                                 {detailsForm.fulfillment_preference === 'cash_post_wedding' && (
                                   <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Select Payout Date</label>
