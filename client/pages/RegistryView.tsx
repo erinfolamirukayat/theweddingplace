@@ -496,12 +496,7 @@ const RegistryView = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    WhatsApp Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editForm.phone || ""}
+                    WhatsApp Phone Number (Optional)</label><input type="text" value={editForm.phone || ""}
                     onChange={(e) =>
                       setEditForm({
                         ...editForm,
@@ -662,5 +657,6 @@ const RegistryView = () => {
 };
 
 export default RegistryView;
+
 
 

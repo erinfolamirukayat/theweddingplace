@@ -695,10 +695,7 @@ const Dashboard = () => {
               isOpen={isEditDetailsOpen}
               onClose={() => setIsEditDetailsOpen(false)}
               registry={details}
-              onSave={async (payload) => {
-                await apiUpdateRegistry(registries[0].uuid, payload);
-                setDetails((prev: any) => ({ ...prev, ...payload }));
-              }}
+              onSave={async (payload) => { await apiUpdateRegistry(registries[0].uuid, payload); setDetails((prev: any) => ({ ...prev, ...payload })); setMessage("Registry details updated successfully!"); }}
             />
 
             {/* Settings Modal */}
@@ -958,4 +955,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 

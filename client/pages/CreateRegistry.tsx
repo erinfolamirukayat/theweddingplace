@@ -357,8 +357,7 @@ const CreateRegistry = () => {
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-bold text-gray-700 mb-2">
-                      WhatsApp Phone Number
-                    </label>
+                      WhatsApp Phone Number (Optional)</label>
                     <input
                       type="tel"
                       name="phone"
@@ -603,5 +602,7 @@ const CreateRegistry = () => {
 };
 
 export default CreateRegistry;
+
+
 
 
