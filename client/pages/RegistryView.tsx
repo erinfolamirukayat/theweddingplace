@@ -477,7 +477,41 @@ const RegistryView = () => {
                   className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B]"
                 />
               </div>
-              <div>
+              
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    City of Ceremony (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.wedding_city || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        wedding_city: e.target.value,
+                      })
+                    }
+                    className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    WhatsApp Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.phone || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        phone: e.target.value,
+                      })
+                    }
+                    className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B]"
+                  />
+                </div>
+                <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
                   Story
                 </label>

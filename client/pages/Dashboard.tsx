@@ -6,7 +6,10 @@ import {
   removeRegistryPicture,
   uploadImageFile,
   updateRegistry as apiUpdateRegistry,
+  getFulfillment as apiGetFulfillment,
+  updateFulfillment as apiUpdateFulfillment,
 } from "../utils/api";
+import EditRegistryModal from "../components/EditRegistryModal";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   XIcon,
@@ -54,6 +57,13 @@ const Dashboard = () => {
     }
   };
 
+  const [fulfillmentDetails, setFulfillmentDetails] = useState<any>({
+    fulfillment_preference: 'cash_immediate',
+    post_wedding_date: '',
+    bank_name: '',
+    account_name: '',
+    account_number: ''
+  });
   const [detailsForm, setDetailsForm] = useState({
     bride_first_name: "",
     bride_last_name: "",
@@ -109,17 +119,16 @@ const Dashboard = () => {
 
   const handleSaveFulfillment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registries[0]) return;
+    if (!registries[0] || !fulfillmentDetails) return;
     try {
-      await apiUpdateRegistry(registries[0].uuid, detailsForm);
-      setDetails((prev: any) => ({
-        ...prev,
-        fulfillment_preference: detailsForm.fulfillment_preference,
-        post_wedding_date: detailsForm.post_wedding_date,
-        bank_name: detailsForm.bank_name,
-        account_name: detailsForm.account_name,
-        account_number: detailsForm.account_number
-      }));
+      const payload = {
+        fulfillment_preference: fulfillmentDetails.fulfillment_preference,
+        post_wedding_date: fulfillmentDetails.post_wedding_date,
+        bank_name: fulfillmentDetails.bank_name,
+        account_name: fulfillmentDetails.account_name,
+        account_number: fulfillmentDetails.account_number
+      };
+      await apiUpdateFulfillment(registries[0].uuid, payload);
       setIsFulfillmentModalOpen(false);
       setMessage("Fulfillment preferences updated successfully!");
     } catch (error: any) {
@@ -169,7 +178,22 @@ const Dashboard = () => {
         setLoading(true);
         const mainRegistry = registries[0];
         localStorage.setItem("afriwed_registry_id", mainRegistry.uuid);
-        const pics = await getRegistryPictures(mainRegistry.uuid);
+        const [pics, fulfillment] = await Promise.all([
+          getRegistryPictures(mainRegistry.uuid),
+          apiGetFulfillment(mainRegistry.uuid).catch(err => { console.error("apiGetFulfillment failed", err); return {}; })
+          ]);
+          console.log("Fulfillment fetched:", fulfillment);
+          
+        setFulfillmentDetails(Object.keys(fulfillment).length > 0 ? {
+          ...fulfillment,
+          post_wedding_date: fulfillment.post_wedding_date ? fulfillment.post_wedding_date.split('T')[0] : ''
+        } : {
+          fulfillment_preference: 'cash_immediate',
+          post_wedding_date: '',
+          bank_name: '',
+          account_name: '',
+          account_number: ''
+        });
         setDetails({
           ...mainRegistry,
           photos: pics.map((p: any) => p.image_url),
@@ -667,182 +691,15 @@ const Dashboard = () => {
             </Transition.Root>
 
             {/* Edit Details Modal */}
-            <Transition.Root show={isEditDetailsOpen} as={Fragment}>
-              <Dialog
-                as="div"
-                className="relative z-10"
-                onClose={setIsEditDetailsOpen}
-              >
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0"
-                  enterTo="opacity-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-                </Transition.Child>
-
-                <div className="fixed inset-0 z-10 overflow-y-auto">
-                  <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <Transition.Child
-                      as={Fragment}
-                      enter="ease-out duration-300"
-                      enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                      enterTo="opacity-100 translate-y-0 sm:scale-100"
-                      leave="ease-in duration-200"
-                      leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                      leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    >
-                      <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
-                        <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                          <button
-                            type="button"
-                            className="rounded-md bg-white text-gray-400 hover:text-gray-500"
-                            onClick={() => setIsEditDetailsOpen(false)}
-                          >
-                            <XIcon className="h-6 w-6" aria-hidden="true" />
-                          </button>
-                        </div>
-                        <Dialog.Title
-                          as="h3"
-                          className="text-lg font-semibold leading-6 text-gray-900 mb-6"
-                        >
-                          Edit Registry Details
-                        </Dialog.Title>
-
-                        <form onSubmit={handleSaveDetails}>
-                          <div className="space-y-6">
-                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Bride First Name
-                                </label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={detailsForm.bride_first_name}
-                                  onChange={(e) =>
-                                    setDetailsForm({
-                                      ...detailsForm,
-                                      bride_first_name: e.target.value,
-                                    })
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Bride Last Name
-                                </label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={detailsForm.bride_last_name}
-                                  onChange={(e) =>
-                                    setDetailsForm({
-                                      ...detailsForm,
-                                      bride_last_name: e.target.value,
-                                    })
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Groom First Name
-                                </label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={detailsForm.groom_first_name}
-                                  onChange={(e) =>
-                                    setDetailsForm({
-                                      ...detailsForm,
-                                      groom_first_name: e.target.value,
-                                    })
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Groom Last Name
-                                </label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={detailsForm.groom_last_name}
-                                  onChange={(e) =>
-                                    setDetailsForm({
-                                      ...detailsForm,
-                                      groom_last_name: e.target.value,
-                                    })
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">
-                                Love Story
-                              </label>
-                              <textarea
-                                rows={4}
-                                value={detailsForm.story}
-                                onChange={(e) =>
-                                  setDetailsForm({
-                                    ...detailsForm,
-                                    story: e.target.value,
-                                  })
-                                }
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">
-                                Wedding Date
-                              </label>
-                              <input
-                                type="date"
-                                required
-                                value={detailsForm.wedding_date}
-                                onChange={(e) =>
-                                  setDetailsForm({
-                                    ...detailsForm,
-                                    wedding_date: e.target.value,
-                                  })
-                                }
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#B8860B] focus:ring-[#B8860B]"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="mt-6 flex justify-end gap-3">
-                            <button
-                              type="button"
-                              className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                              onClick={() => setIsEditDetailsOpen(false)}
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="submit"
-                              className="inline-flex justify-center rounded-md border border-transparent bg-[#B8860B] px-4 py-2 text-sm font-medium text-white hover:bg-[#8B6508]"
-                            >
-                              Save Details
-                            </button>
-                          </div>
-                        </form>
-                      </Dialog.Panel>
-                    </Transition.Child>
-                  </div>
-                </div>
-              </Dialog>
-            </Transition.Root>
+            <EditRegistryModal
+              isOpen={isEditDetailsOpen}
+              onClose={() => setIsEditDetailsOpen(false)}
+              registry={details}
+              onSave={async (payload) => {
+                await apiUpdateRegistry(registries[0].uuid, payload);
+                setDetails((prev: any) => ({ ...prev, ...payload }));
+              }}
+            />
 
             {/* Settings Modal */}
             <Transition.Root show={isSettingsOpen} as={Fragment}>
@@ -1023,8 +880,8 @@ const Dashboard = () => {
                                     { id: 'delivery', title: 'Physical Delivery' },
                                     { id: 'both', title: 'Both' }
                                   ].map(opt => (
-                                    <label key={opt.id} className={`relative flex cursor-pointer rounded-xl border p-3 shadow-sm focus:outline-none ${detailsForm.fulfillment_preference === opt.id ? 'border-[#B8860B] bg-[#B8860B]/5 ring-1 ring-[#B8860B]' : 'border-gray-200 bg-white'}`}>
-                                      <input type="radio" name="fulfillment_preference" value={opt.id} checked={detailsForm.fulfillment_preference === opt.id} onChange={(e) => setDetailsForm({...detailsForm, fulfillment_preference: e.target.value})} className="sr-only" />
+                                    <label key={opt.id} className={`relative flex cursor-pointer rounded-xl border p-3 shadow-sm focus:outline-none ${fulfillmentDetails.fulfillment_preference === opt.id ? 'border-[#B8860B] bg-[#B8860B]/5 ring-1 ring-[#B8860B]' : 'border-gray-200 bg-white'}`}>
+                                      <input type="radio" name="fulfillment_preference" value={opt.id} checked={fulfillmentDetails.fulfillment_preference === opt.id} onChange={(e) => setFulfillmentDetails({...fulfillmentDetails, fulfillment_preference: e.target.value})} className="sr-only" />
                                       <span className="flex flex-1">
                                         <span className="flex flex-col">
                                           <span className="block text-sm font-bold text-gray-900">{opt.title}</span>
@@ -1034,7 +891,7 @@ const Dashboard = () => {
                                   ))}
                                 </div>
 
-                                {(detailsForm.fulfillment_preference === 'delivery' || detailsForm.fulfillment_preference === 'both') && (
+                                {(fulfillmentDetails.fulfillment_preference === 'delivery' || fulfillmentDetails.fulfillment_preference === 'both') && (
                                   <div className="mb-4 bg-[#ECDFD7]/30 text-[#8B6508] p-4 rounded-xl border border-[#B8860B]/20">
                                     <span className="font-medium block space-y-2 text-sm">
                                       <p>You have selected a physical delivery option! A dedicated Celebrive representative will contact you to coordinate the delivery of your gifts.</p>
@@ -1045,24 +902,24 @@ const Dashboard = () => {
                                   </div>
                                 )}
                                 
-                                {detailsForm.fulfillment_preference === 'cash_post_wedding' && (
+                                {fulfillmentDetails.fulfillment_preference === 'cash_post_wedding' && (
                                   <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Select Payout Date</label>
-                                    <input type="date" value={detailsForm.post_wedding_date || ''} onChange={(e) => setDetailsForm({...detailsForm, post_wedding_date: e.target.value})} min={new Date().toISOString().split('T')[0]} className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B]" />
+                                    <input type="date" value={fulfillmentDetails.post_wedding_date || ''} onChange={(e) => setFulfillmentDetails({...fulfillmentDetails, post_wedding_date: e.target.value})} min={new Date().toISOString().split('T')[0]} className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B]" />
                                   </div>
                                 )}
 
-                                {(detailsForm.fulfillment_preference === 'cash_immediate' || detailsForm.fulfillment_preference === 'cash_post_wedding' || detailsForm.fulfillment_preference === 'both') && (
+                                {(fulfillmentDetails.fulfillment_preference === 'cash_immediate' || fulfillmentDetails.fulfillment_preference === 'cash_post_wedding' || fulfillmentDetails.fulfillment_preference === 'both') && (
                                   <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
                                     <h5 className="font-bold text-gray-900 border-b border-gray-200 pb-2 text-sm">Bank Details (Optional)</h5>
                                     <div>
-                                      <input type="text" placeholder="Bank Name" value={detailsForm.bank_name || ''} onChange={(e) => setDetailsForm({...detailsForm, bank_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                      <input type="text" placeholder="Bank Name" value={fulfillmentDetails.bank_name || ''} onChange={(e) => setFulfillmentDetails({...fulfillmentDetails, bank_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
                                     </div>
                                     <div>
-                                      <input type="text" placeholder="Account Name" value={detailsForm.account_name || ''} onChange={(e) => setDetailsForm({...detailsForm, account_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                      <input type="text" placeholder="Account Name" value={fulfillmentDetails.account_name || ''} onChange={(e) => setFulfillmentDetails({...fulfillmentDetails, account_name: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
                                     </div>
                                     <div>
-                                      <input type="text" placeholder="Account Number" value={detailsForm.account_number || ''} onChange={(e) => setDetailsForm({...detailsForm, account_number: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
+                                      <input type="text" placeholder="Account Number" value={fulfillmentDetails.account_number || ''} onChange={(e) => setFulfillmentDetails({...fulfillmentDetails, account_number: e.target.value})} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#B8860B] focus:border-[#B8860B] text-sm" />
                                     </div>
                                     <p className="text-xs text-gray-500 italic mt-2">You can provide this information at any time. We will send you a reminder when your selected payout date approaches.</p>
                                   </div>

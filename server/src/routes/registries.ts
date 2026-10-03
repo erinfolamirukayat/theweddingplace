@@ -1,4 +1,5 @@
 import express from 'express';
+import { getFulfillment, updateFulfillment } from '../controllers/fulfillments';
 import {
     getAllRegistries,
     getRegistryById,
@@ -43,4 +44,8 @@ router.get('/:uuid/pictures', getRegistryPictures);
 router.post('/:uuid/pictures', authenticateJWT, addRegistryPicture);
 router.delete('/:uuid/pictures/:pictureId', authenticateJWT, removeRegistryPicture);
 
-export default router; 
+// Registry fulfillment operations
+router.get('/:uuid/fulfillment', authenticateJWT, getFulfillment);
+router.put('/:uuid/fulfillment', authenticateJWT, updateFulfillment);
+
+export default router;

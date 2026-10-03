@@ -1,4 +1,4 @@
-﻿import { getConfig } from '../config';
+import { getConfig } from '../config';
 
 const API_URL = getConfig().apiUrl;
 
@@ -86,6 +86,13 @@ export const updateRegistry = (id: string, data: any) => authFetch(`/registries/
   body: JSON.stringify(data),
 });
 
+
+// --- Registry Fulfillments ---
+export const getFulfillment = (uuid: string) => authFetch(`/registries/${uuid}/fulfillment?t=${new Date().getTime()}`);
+export const updateFulfillment = (uuid: string, data: any) => authFetch(`/registries/${uuid}/fulfillment`, {
+  method: 'PUT',
+  body: JSON.stringify(data),
+});
 // --- Registry Pictures ---
 export const getRegistryPictures = (registryId: string) => publicFetch(`/registries/${registryId}/pictures`);
 export const addRegistryPicture = (registryId: string, imageUrl: string) => authFetch(`/registries/${registryId}/pictures`, {
@@ -111,7 +118,8 @@ export const uploadImageFromUrl = (url: string) => {
 export const getProducts = () => publicFetch('/products');
 export const getRegistryItems = (registryId: string) => publicFetch(`/registries/${registryId}/items`);
 export const getRegistryItemByShareUrl = (shareUrl: string, itemId: string) => publicFetch(`/registries/share/${shareUrl}/items/${itemId}`);
-export const addRegistryItem = (registryId: string, data: { product_id: number; quantity: number }) => authFetch(`/registries/${registryId}/items`, {
+export const addRegistryItem = (registryId: string, data: { product_id: number; quantity: number }) => authFetch(`/registries/${registryId}/items`, {
+
   method: 'POST',
   body: JSON.stringify(data),
 });
@@ -141,5 +149,6 @@ export const resendVerificationEmail = async () => {
 
 // --- User Profile ---
 export const updatePreferences = (data: { notification_preference: string }) => authFetch('/users/me/preferences', { method: 'PUT', body: JSON.stringify(data) });
+
 
 
